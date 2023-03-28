@@ -1,3 +1,4 @@
+# Define URL "http://companiasysven.com/"
 Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	fecha				= ""
 	fechat				= .F.
@@ -54,10 +55,10 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	tpeso               =0
 	mensajerptasunat    =""
 	ubigeocliente       =""
-	urlenvio            ="http://companiasysven.com/app88/envioguia.php"
-	urlenviod           ="http://companiasysven.com/app88/envioguiadesktop.php"
-	urlconsultacdr      ="http://companiasysven.com/app88/envioticketguia.php"
-	urlconsultacdrservidor="http://companiasysven.com/app88/envioticketnube.php"
+	urlenvio            = URL+"app88/envioguia.php"
+	urlenviod           = URL+"app88/envioguiadesktop.php"
+	urlconsultacdr      = URL+"app88/envioticketguia.php"
+	urlconsultacdrservidor=URL+"app88/envioticketnube.php"
 	ticket              =""
 	recibido            =""
 	idprov              =0
@@ -467,7 +468,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	Else
 		cencontrado='N'
 	Endif
-	IF this.proyecto<>'psysr' 
+	If This.proyecto<>'psysr'
 		If  Verificacantidadantesvtas(This.Calias)=0
 			This.Cmensaje="Ingrese Cantidad es Obligatorio"
 			Return 0
@@ -901,7 +902,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	Set DataSession To This.idsesion
 	Create Cursor (Calias)(coda c(15),Descri c(80),unid c(6),cant N(10,2),Prec N(10,2),uno N(10,2),Dos N(10,2),lote c(15),;
 		peso N(10,2),alma N(10,2),ndoc c(12),nreg N(10),codc c(5),tref c(2),Refe c(12),fecr d,fechafactura d,;
-		calma c(3),Valida c,nitem N(3),saldo N(10,2),idin N(8),nidkar N(10),coda1 c(15),fech d,fect d,ptop c(150),ptoll c(120),archivo c(120),codigo c(15),;
+		calma c(3),Valida c,nitem N(3),saldo N(10,2),idin N(8),nidkar N(10),coda1 c(15),fech d,fect d,ptop c(150),ptoll c(120),archivo c(120),Codigo c(15),;
 		razon c(120),nruc c(11),ndni c(8),conductor c(120),marca c(100),placa c(20),placa1 c(20),constancia c(20),brevete c(20),razont c(120),ructr c(11),Motivo c(1),detalle c(100))
 	Select (Calias)
 	Index On Descri Tag Descri

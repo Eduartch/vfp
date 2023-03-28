@@ -1,4 +1,8 @@
 Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\guiasremision'
+	Function grabarx3()
+	If This.validar()<1 Then
+		Return  0
+	Endif
 	If This.iniciaTransaccion()<1 Then
 		Return 0
 	Endif
@@ -10,7 +14,7 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 		Return 0
 	Endif
 	nidg=IngresaGuiasConsignacionx3(This.Fecha,This.ptop,This.ptoll,nauto,This.Fechat,;
-		goapp.nidusua,This.Detallecreditos ,idtr1,This.ndoc,'C')
+		goapp.nidusua,This.Detallecreditos,idtr1,This.ndoc,'N',this.ubigeo,this.codt)
 	If nidg<1 Then
 		This.DeshacerCambios()
 		Return 0
@@ -44,16 +48,43 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 	Enddo
 	If sws=0 Then
 		This.DeshacerCambios()
-		This.cmensaje="El Item:"+Alltrim(ltmpvg.Desc)+" - " +"Unidad:"+ltmpvg.unid+" NO TIENE STOCK DISPONIBLE",16,'Sisven')
+		This.cmensaje="El Item:"+Alltrim(ltmpvg.Desc)+" - " +"Unidad:"+ltmpvg.unid+" NO TIENE STOCK DISPONIBLE"
 		Return 0
 	Endif
-
 	If 	This.generacorrelativo()<1 Then
 		This.DeshacerCambios()
 		Return 0
 	Endif
 	If This.GrabarCambios()<1 Then
 		Return 0
-	Endif
+	ENDIF
+	select * FROM (this.calias) INTo CURSOR tmpvg
+	this.imprimir()
 	Return 1
+	Endfunc
+	Function IngresaGuiasConsignacionx3(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11, np12)
+	Local lc, lp
+	lc			  = "FUNINGRESAGUIASCons"
+	cur			  = "yy"
+	goapp.npara1  = np1
+	goapp.npara2  = np2
+	goapp.npara3  = np3
+	goapp.npara4  = np4
+	goapp.npara5  = np5
+	goapp.npara6  = np6
+	goapp.npara7  = np7
+	goapp.npara8  = np8
+	goapp.npara9  = np9
+	goapp.npara10 = np10
+	goapp.npara11 = np11
+	goapp.npara12 = np12
+	TEXT To lp Noshow
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12)
+	ENDTEXT
+	nidguia=This.EJECUTARF(lc, lp, cur)
+	If nidguia<1 Then
+		Return 0
+	Endif
+	Return nidguia
+	Endfunc
 Enddefine
