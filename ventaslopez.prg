@@ -182,7 +182,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	Endif
 	Endfunc
 	Function mostrarventasparacanjes(f1,f2,nm,ccursor)
-	SET DATASESSION TO this.idsesion
+	Set DataSession To This.idsesion
 	dfi=cfechas(f1)
 	dff=cfechas(f2)
 	nmargen=(nm/100)+1
@@ -318,7 +318,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	Endfunc
 	Function generacanjes()
 	sw=1
-	SET DATASESSION TO this.idsesion
+	Set DataSession To This.idsesion
 *!*		This.generatmpcanjes("lcanjes")
 	Set Procedure To d:\capass\modelos\correlativos,d:\capass\modelos\ctasxcobrar Additive
 	ocorr=Createobject("correlativo")
@@ -381,7 +381,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	Return nidr
 	Endfunc
 	Function registradctocanjeado(nidrv)
-	SET DATASESSION TO  this.idsesion
+	Set DataSession To  This.idsesion
 	ctdoc=This.tdoc
 	cform='E'
 	cndoc=xvtas.ndoc
@@ -558,5 +558,20 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		Return 0
 	Endif
 	Return nida
+	Endfunc
+	Function listarcanjesvtas(ccursor)
+	SET DATASESSION TO this.idsesion
+	dfi=cfechas(This.fechai)
+	dff=cfechas(This.fechaf)
+	TEXT TO lc NOSHOW TEXTMERGE
+	SELECT canj_fech,canj_vtas,canj_impo,canj_feci,canj_fecf,u.nomb as usuario,canj_fope,r.ndoc,r.impo,r.idauto,canj_idcan  FROM fe_canjesvtas AS c
+	inner join fe_usua as u  on u.idusua=c.canj_idus
+	INNER JOIN fe_rcom AS r ON r.rcom_idtr=c.canj_idcan
+	WHERE canj_fech BETWEEN '<<dfi>>' AND '<<dff>>' AND canj_acti='A'  AND r.acti='A'  ORDER BY canj_fech
+	ENDTEXT
+	If This.ejecutaconsulta(lc,ccursor)<1 Then
+		Return 0
+	Endif
+	Return 1
 	Endfunc
 Enddefine

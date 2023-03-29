@@ -503,7 +503,7 @@ Left(Thisform.frame.cmbmoneda.Value,1),Thisform.frame.txtdolar.Value
 	Function listarofertas(Calias)
 	TEXT TO lc NOSHOW textmerge
 	     SELECT idart as codigo,descri as producto,unid as unidad,uno,dos,tre,cua,cin,sei,
-	     IFNULL(ROUND(IF(tmon='S',((a.prec*v.igv)+b.prec)*prod_uti0,((a.prec*v.igv*IF(prod_dola>v.dola,prod_dola,v.dola))+b.prec)*prod_uti0),2),0) AS precioferta,prod_ocan as cantidad
+	     IFNULL(ROUND(IF(tmon='S',((a.prec*v.igv)+b.prec)*prod_uti0,((a.prec*v.igv*IF(prod_dola>v.dola,prod_dola,v.dola)))*prod_uti0)+b.prec,2),0) AS precioferta,prod_ocan as cantidad
 	     fROM fe_art  as a
 	     inner join fe_fletes as b  on b.idflete=a.idflete,
 	     fe_gene as v
