@@ -18,6 +18,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	crefe=""
 	nidaval=0
 	idauto=0
+	sintransaccion=""
 	Function mostrarpendientesxcobrar(nidclie,ccursor)
 	TEXT TO lc NOSHOW TEXTMERGE
 		SELECT `x`.`idclie`,
@@ -279,31 +280,39 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Function registraanticipos(nidclie,dfech,npago,cndoc,cdetalle,ndolar,cmoneda)
 	Set Procedure To d:\capass\modelos\cajae Additive
 	ocaja=Createobject('cajae')
-	If  This.IniciaTransaccion()=0 Then
-		Return 0
+	If This.sintransaccion<>'S'
+		If  This.IniciaTransaccion()=0 Then
+			Return 0
+		Endif
+		This.CONTRANSACCION='S'
 	Endif
-	This.CONTRANSACCION='S'
 	ur=This.IngresaCabeceraAnticipo(0,nidclie,dfech,4,npago,goapp.nidusua,goapp.tienda,0,Id())
 	If ur<1
-		This.DeshacerCambios()
+		If This.contrasaccion='S'
+			This.DeshacerCambios()
+		Endif
 		Return 0
 	Endif
 	nidanti=This.CancelaCreditosanticipos(cndoc,npago,'P',cmoneda,cdetalle,dfech,dfech,'F',-1,"",ur,Id(),goapp.nidusua,ur)
 	If nidanti<1 Then
-		This.DeshacerCambios()
+		If This.contrasaccion='S'
+			This.DeshacerCambios()
+		Endif
 		Return 0
 	Endif
 	nmp=Iif(cmoneda='D',Round(npago*ndolar,2),npago)
-	If ocaja.IngresaDatosLcajaEe(dfech,"",cdetalle,fe_gene.gene_idcre,;
-			nmp,0,'S',fe_gene.dola,goapp.nidusua,nidanti)<1 Then
-		This.DeshacerCambios()
+	If ocaja.IngresaDatosLcajaEe(dfech,"",cdetalle,fe_gene.gene_idcre,nmp,0,'S',fe_gene.dola,goapp.nidusua,nidanti)<1 Then
+		If This.contrasaccion='S'
+			This.DeshacerCambios()
+		Endif
 		Return 0
 	Endif
-	If This.GrabarCambios()=1 Then
-		Return 1
-	Else
-		Return 0
+	If This.contrasaccion='S'
+		If This.GrabarCambios()<1 Then
+			Return 0
+		Endif
 	Endif
+	Return 1
 	Endfunc
 	Function IngresaCabeceraAnticipo(nauto,nidcliente,dFecha,nidven,nimpoo,nidus,nidtda,ninic,cpc)
 	lc="FUNINGRESARCREDITOSANTICIPOS"

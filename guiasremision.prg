@@ -286,7 +286,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	Set Filter To
 	Set Procedure To imprimir Additive
 	m.obji			  =Createobject("Imprimir")
-	m.obji.tdoc		  ='09'
+	m.obji.tdoc		  = IIF(EMPTY(this.tdoc),'09',this.tdoc)
 	m.obji.ArchivoPdf =carpdf
 	m.obji.ElijeFormatoM()
 	Do Case

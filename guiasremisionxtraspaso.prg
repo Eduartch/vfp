@@ -207,16 +207,6 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
-*!*	*!*		If This.Idautog>0 Then
-*!*			If AnulaGuiasVentas(This.Idautog,goapp.nidusua)=0 Then
-*!*				This.DEshacerCambios()
-*!*				Return 0
-*!*			Endif
-*!*			If AnulaTransaccionrodi('','','V',This.Idauto,goapp.idusua,'',This.fecha,goapp.nidusua,goapp.tienda)=0 Then
-*!*				This.DEshacerCambios()
-*!*				Return 0
-*!*			Endif
-*!*	*!*		Endif
 	nauto =IngresaResumenTraspasos(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.Ndo2,'S',;
 		fe_gene.dola,fe_gene.igv,'T',0,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
 	If nauto<=0 Then
@@ -414,4 +404,166 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Endif
 	Return 1
 	Endfunc
+	Function GrabarTraspasodr()
+	Set DataSession To This.idsesion
+	If This.validar()<1 Then
+		Return 0
+	Endif
+	If This.IniciaTransaccion()<1 Then
+		Return 0
+	Endif
+	nauto=IngresaResumenDcto(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.sucursal1,'S',fe_gene.dola,fe_gene.igv,'T',0,'V',goapp.nidusua,1,This.sucursal1,0,0,0,0,0)
+	If nauto<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	nidg= This.IngresaGuiasXTraspaso(This.fecha,This.ptop,This.ptoll,nauto,This.fechat,	goapp.nidusua,This.Detalle,This.Idtransportista,This.ndoc,This.sucursal1)
+	sw=1
+	Select tmpv
+	Go Top
+	Do While !Eof()
+		If goapp.tiponegocio='D' Then
+			dfv=Ctod("01/01/0001")
+			nidkar=IngresaKardexFl(nauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,tmpv.equi,;
+				tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)
+			If nidkar=0
+				sw=0
+				Exit
+			Endif
+			If IngresaKardexFl(nauto,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,tmpv.equi,;
+					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)=0
+				sw=0
+				Exit
+			Endif
+		Else
+			nidkar=IngresaKardexUAl(nauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,tmpv.equi,;
+				tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)
+			If nidkar=0 Then
+				sw=0
+				Exit
+			Endif
+			If IngresaKardexUAl(nauto,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,tmpv.equi,;
+					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)=0 Then
+				sw=0
+				Exit
+			Endif
+		Endif
+		If GrabaDetalleGuias(nidkar,tmpv.cant,nidg)=0 Then
+			sw=0
+			Exit
+		Endif
+		If Actualizastock1(tmpv.coda,This.sucursal1,tmpv.cant,'V',tmpv.equi)=0 Then
+			sw=0
+			Exit
+		Endif
+		If Actualizastock1(tmpv.coda,This.sucursal2,tmpv.cant,'C',tmpv.equi)=0 Then
+			sw=0
+			Exit
+		Endif
+		Sele tmpv
+		Skip
+	Enddo
+	If sw=0 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If  This.generacorrelativo()<1  Then
+		This.DEshacerCambios()
+		Return
+	Endif
+	If This.GRabarCambios()<1 Then
+		Return 0
+	Endif
+	Select * From tmpv Into Cursor tmpvg Readwrite
+    This.Imprimir('S')
+	Return 1
+	Endfunc
+	Function ActualizarTraspasoDr()
+	Local nauto
+		Set DataSession To This.idsesion
+	If This.IniciaTransaccion()<1 Then
+		Return 0
+	Endif
+	If ActualizaResumenDcto(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.sucursal1,'S',;
+			fe_gene.dola,fe_gene.igv,'T',0,.tipo,goapp.nidusua,1,This.tienda,0,0,0,0,0,This.idautor)=0 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If This.Idautog>0 Then
+		If AnulaGuiasVentas(This.Idautog,goapp.nidusua)=0 Then
+			This.DEshacerCambios()
+			Return 0
+		Endif
+	Endif
+	nidg=This.IngresaGuiasXTraspaso(This.fecha,This.ptop,This.ptoll,This.Idauto,This.fechat,goapp.nidusua,This.Detalle,This.Idtransportista,This.ndoc,This.sucursal1)
+	If nidg<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If DesactivaDtraspaso(This.idautor)=0 Then
+		This.DEshacerCambios()
+		Return
+	Endif
+	sw=1
+	Select tmpv
+	Go Top
+	Do While !Eof()
+		If Deleted()
+			If tmpv.nreg>0
+				If ActualizakardexUAl(This.idautor,tmpv.coda,.tipo,tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,tmpv.nreg,0,tmpv.equi,tmpv.unid,0,0,tmpv.pos,0,fe_gene.igv)=0 Then
+					sw=0
+					Exit
+				Endif
+			Endif
+			Sele tmpv
+			Skip
+			Loop
+		Endif
+		If goapp.tiponegocio='D' Then
+			dfv=Ctod("01/01/0001")
+			If IngresaKardexFl(This.idautor,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,tmpv.equi,;
+					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)=0
+				sw=0
+				Exit
+			Endif
+			If IngresaKardexFl(This.idautor,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,tmpv.equi,;
+					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)=0
+				sw=0
+				Exit
+			Endif
+		Else
+			If IngresaKardexUAl(This.idautor,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,;
+					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)=0 Then
+				sw=0
+				Exit
+			Endif
+			If IngresaKardexUAl(This.idautor,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,;
+					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)=0 Then
+				sw=0
+				Exit
+			Endif
+		Endif
+		If ActualizaStock12(tmpv.coda,This.sucursal1,tmpv.caan,'V',tmpv.equi,0)=0 Then
+			sw=0
+			Exit
+		Endif
+		If ActualizaStock12(tmpv.coda,This.sucursal2,tmpv.caan,'C',tmpv.equi,0)=0 Then
+			sw=0
+			Exit
+		Endif
+		Sele tmpv
+		Skip
+	Enddo
+	If sw=0 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If GRabarCambios()<1 Then
+		Return 0
+	ENDIF
+	Select * From tmpv Into Cursor tmpvg Readwrite
+    This.Imprimir('S')
+	Return 1
+	Endfunc
 Enddefine
+
