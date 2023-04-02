@@ -1,6 +1,9 @@
 Define Class lineas As Odata Of "d:\capass\database\data.prg"
 	Function mostrarlineas(np1, np2, ccursor)
 	Local lc, lp
+	IF this.idsesion>0 then
+	   SET DATASESSION TO this.idsesion
+	ENDIF    
 	m.lc		 = 'PROMUESTRALINEAS'
 	goapp.npara1 = m.np1
 	goapp.npara2 = m.np2

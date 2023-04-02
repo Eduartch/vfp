@@ -275,10 +275,11 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 		tref With This.tref, Refe With This.referencia, archivo With This.archivo, ;
 		ndoc With This.ndoc, ndni With This.ndni, fechafactura With This.fechafacturacompra, detalle With This.detalle  In tmpvg
 *	Wait Window 'hola xxxx'
+	ctdoc=IIF(LEFT(this.ndoc,1)='T','TT','09')
 	If This.Cmulti = 'S' Then
-		carpdf=oempresa.nruc + "-09-" + Left(This.ndoc, 4) + '-' + Substr(This.ndoc, 5) + ".Pdf"
+		carpdf=oempresa.nruc + "-"+ctdoc+"-" + Left(This.ndoc, 4) + '-' + Substr(This.ndoc, 5) + ".Pdf"
 	Else
-		carpdf=fe_gene.nruc + "-09-" + Left(This.ndoc, 4) + '-' + Substr(This.ndoc, 5) + ".Pdf"
+		carpdf=fe_gene.nruc + "-"+ctdoc+"-" + Left(This.ndoc, 4) + '-' + Substr(This.ndoc, 5) + ".Pdf"
 	Endif
 	Select tmpvg
 	Go Top In tmpvg

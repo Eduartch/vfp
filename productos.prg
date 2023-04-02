@@ -691,4 +691,29 @@ Left(Thisform.frame.cmbmoneda.Value,1),Thisform.frame.txtdolar.Value
 	Endif
 	Return 1
 	Endfunc
+	Function listarpormarcaylinea(calias)
+	Set DataSession To This.idsesion
+	Do Case
+	Case This.cmar=0 And This.ccat=0
+		TEXT TO lc NOSHOW TEXTMERGE
+	     select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art where prod_acti='A' order by idart
+		ENDTEXT
+	Case This.ccat>0 And This.cmar>0
+		TEXT TO lc NOSHOW TEXTMERGE
+        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art where prod_acti='A' and idcat=<<this.ccat>> and idmar=<<this.cmar>> order by idart
+		ENDTEXT
+	Case This.ccat>0 And This.cmar=0
+		TEXT TO lc NOSHOW TEXTMERGE
+        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art  where prod_acti='A' and idcat=<<this.ccat>> order by idart
+		ENDTEXT
+	Case This.ccat=0 And This.cmar>0
+		TEXT TO lc NOSHOW TEXTMERGE
+        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art  where prod_acti='A' and idmar=<<this.cmar>> order by idart
+		ENDTEXT
+	Endcase
+	If This.ejecutaconsulta(lc,calias)<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine

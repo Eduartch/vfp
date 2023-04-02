@@ -54,8 +54,8 @@ Define Class ventas As Odata Of 'd:\capass\database\data.prg'
 	idautoguia=0
 	detalle=""
 	iddire=0
-	fechai=DATE()
-	fechaf=DATE()
+	fechai=Date()
+	fechaf=Date()
 	Function mostraroventasservicios(np1,ccursor)
 	TEXT TO lc NOSHOW TEXTMERGE
 	        SELECT b.nruc,b.razo,b.dire,b.ciud,a.dolar,a.fech,a.fecr,a.mone,a.idauto,a.vigv,a.valor,a.igv,
@@ -846,4 +846,38 @@ Define Class ventas As Odata Of 'd:\capass\database\data.prg'
 	Select (ccursor)
 	Return monto
 	Endfunc
+	Function mnostrarventasagrupdasporcantidadymes(calias)
+	fi=cfechas(This.fechai)
+	ff=cfechas(This.fechaf)
+	Set DataSession To This.idsesion
+	TEXT TO lc NOSHOW TEXTMERGE
+	  SELECT idart,SUM(enero) AS enero,SUM(febrero) AS febrero,SUM(marzo) AS marzo,
+      SUM(abril) AS abril,SUM(mayo) AS mayo,SUM(junio) AS junio,SUM(julio) AS julio,SUM(agosto) AS agosto,
+      SUM(septiembre) AS septiembre,SUM(octubre) AS octubre,SUM(noviembre) AS noviembre,SUM(diciembre) AS diciembre
+      FROM( 
+      SELECT idart,
+	  CASE mes WHEN 1 THEN cant ELSE 0 END AS enero,
+	  CASE mes WHEN 2 THEN cant ELSE 0 END AS febrero,
+	  CASE mes WHEN 3 THEN cant ELSE 0 END AS marzo,
+	  CASE mes WHEN 4 THEN cant ELSE 0 END AS abril,
+	  CASE mes WHEN 5 THEN cant ELSE 0 END AS mayo,
+	  CASE mes WHEN 6 THEN cant ELSE 0 END AS junio,
+	  CASE mes WHEN 7 THEN cant ELSE 0 END AS julio,
+	  CASE mes WHEN 8 THEN cant ELSE 0 END AS agosto,
+	  CASE mes WHEN 9 THEN cant ELSE 0 END AS septiembre,
+	  CASE mes WHEN 10 THEN cant ELSE 0 END AS octubre,
+	  CASE mes WHEN 11 THEN cant ELSE 0 END AS noviembre,
+	  CASE mes WHEN 12 THEN cant ELSE 0 END AS diciembre
+	  FROM(
+	  SELECT idart,SUM(cant) AS cant,MONTH(fech) AS mes FROM fe_kar AS k
+	  INNER JOIN fe_rcom AS r ON r.`idauto`= k.`idauto`
+	  WHERE r.fech BETWEEN '<<fi>>' AND '<<ff>>' AND r.acti='A' AND k.`acti`='A' and r.idcliente>0
+	  GROUP BY idart,mes) AS xx) AS yy GROUP BY idart ORDER BY idart
+	ENDTEXT
+	If This.EjecutaConsulta(lc,calias)<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+
 Enddefine

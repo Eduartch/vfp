@@ -70,7 +70,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	Return 1
 	Endfunc
 	Function Grabarguiaremitente()
-	If This.IniciaTransaccion()=0 Then
+	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
 	If This.idautog>0 Then
@@ -79,7 +79,6 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 			Return 0
 		Endif
 	Endif
-*	wait WINDOW 'hola '+this.ptoll
 	nidg=This.IngresaGuiasX(This.fecha,This.ptop,Alltrim(This.ptoll),This.idauto,This.fechat,goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.ubigeocliente)
 	If nidg=0 Then
 		This.DeshacerCambios()
@@ -100,9 +99,6 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 		If This.GrabarCambios()=0 Then
 			Return 0
 		Endif
-*This.comprobante1.Cmulti=This.Cmulti
-*vdvto=This.comprobante1.obtenerdatosguiaremitente(nidg,'SF')
-*This.archivo=This.comprobante1.archivoxml
 		This.imprimir('S')
 		Return  1
 	Else

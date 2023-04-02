@@ -487,7 +487,6 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
 		Endif
 	Else
 		xc=This.Registrapagosporcajarodi(dfecha,cndoc,cdetalle,nidcta,0,nimporte,cmone,ndolar,goapp.nidusua,ncontrol,'E',nidtda)
-		*IngresaDatosLcajaE(dfecha,cndoc,cdetalle,nidcta,	0,nimporte,cmone,ndolar,goapp.nidusua,ncontrol,'E')
 		If xc=0 Then
 			q=0
 		Else
@@ -565,7 +564,7 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
 	nidalma=This.codt
 	TEXT to lc NOSHOW TEXTMERGE
 		select day(a.lcaj_fech) as dia,a.lcaj_deta as deta,
-		ifnull(if(tdoc='01',concat('F/.',b.ndoc),concat('B/.',b.ndoc)),a.lcaj_ndoc)  as ndoc,ifnull(b.tdoc,'99') as tdoc,
+		ifnull(if(tdoc='01',concat('F/.',b.ndoc),concat('B/.',b.ndoc)),a.lcaj_dcto)  as ndoc,ifnull(b.tdoc,'99') as tdoc,
 		lcaj_orig as origen,if(lcaj_deud>0,'I','S') as tipo,if(lcaj_deud>0, 'a' , 'b') as orden,
 		if(a.lcaj_orig='CC',a.lcaj_deud,CAST(0 as decimal(10,2))) as pagos,lcaj_idca As idcaja,
 		if(a.lcaj_orig='CB',a.lcaj_acre,CAST(0 as decimal(10,2))) as bancos from fe_lcaja as a

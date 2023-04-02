@@ -1,5 +1,6 @@
 Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\guiasremision'
 	Function grabarx3()
+    Set DataSession To This.idsesion
 	If This.validar()<1 Then
 		Return  0
 	Endif
