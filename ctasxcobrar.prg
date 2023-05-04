@@ -242,7 +242,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		`a`.`tipo`      AS `tipo`,`a`.`dola`      AS `dola`,
 		`a`.`nrou`      AS `nrou`,`a`.`banco`     AS `banco`,
 		`a`.`idcred`    AS `idcred`,a.fech AS fepd,v.ncontrol,a.estd,a.ndoc,
-		v.rcre_idrc,rr.rcre_form
+		v.rcre_idrc,rr.rcre_form,a.impo as impoo
 		FROM (
 		SELECT ncontrol,rcre_idrc,rcre_idcl,MAX(`c`.`fevto`) AS `fevto`,ROUND(SUM((`c`.`impo` - `c`.`acta`)),2) AS `importe` FROM
 		fe_rcred AS r
@@ -264,7 +264,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		`a`.`tipo`      AS `tipo`,`a`.`dola`      AS `dola`,
 		`a`.`nrou`      AS `nrou`,`a`.`banco`     AS `banco`,
 		`a`.`idcred`    AS `idcred`,a.fech AS fepd,v.ncontrol,a.estd,a.ndoc,
-		v.rcre_idrc,rr.rcre_form
+		v.rcre_idrc,rr.rcre_form,a.impo as impoo
 		FROM (
 		SELECT ncontrol,rcre_idrc,rcre_idcl,MAX(`c`.`fevto`) AS `fevto`,ROUND(SUM((`c`.`impo` - `c`.`acta`)),2) AS `importe` FROM
 		fe_rcred AS r

@@ -124,7 +124,7 @@ Define Class inventarios As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	Return 1
 	Endfunc
-	Function RegistraInventarioIniciual(df,ccursor)
+	Function RegistraInventarioInicial(df,ccursor)
 	sw=1
 	lc='ProIngresaInventarioInicial'
 	If This.IniciaTransaccion()<1 Then

@@ -267,21 +267,12 @@ Define Class producto As Odata Of 'd:\capass\database\data'
 	Endfunc
 	Function Actualizacostos1()
 	lc='PROACTUALIZACOSTOS'
-*Thisform.frame.txtidcosto.Value,;
-thisform.frame.txtcosto.Value,Thisform.frame.txtflete.Value,Thisform.frame.txtcoston.Value,;
-Left(Thisform.frame.cmbmoneda.Value,1),Thisform.frame.txtdolar.Value
 	goapp.npara1=This.nidcosto
 	goapp.npara2=This.costosflete
 	goapp.npara3=This.mflete
 	goapp.npara4=This.costoneto
 	goapp.npara5=This.moneda
 	goapp.npara6=This.ndolar
-*	Wait Window This.nidcosto
-*	Wait Window This.costosflete
-*	Wait Window This.mflete
-*	Wait Window This.costoneto
-*	Wait Window This.moneda
-*	Wait Window This.ndolar
 	TEXT TO lp NOSHOW
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6)
 	ENDTEXT
