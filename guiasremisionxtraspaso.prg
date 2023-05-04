@@ -1,5 +1,8 @@
 Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasremision'
 	Function grabar()
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
 	If This.IniciaTransaccion()=0 Then
 		Return 0
 	Endif
@@ -53,6 +56,9 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Endif
 	Endfunc
 	Function actualizar()
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
 	If This.IniciaTransaccion()=0 Then
 		Return 0
 	Endif
@@ -406,7 +412,7 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Endfunc
 	Function GrabarTraspasodr()
 	Set DataSession To This.idsesion
-	If This.validar()<1 Then
+	If This.validarguia()<1 Then
 		Return 0
 	Endif
 	If This.IniciaTransaccion()<1 Then
@@ -475,17 +481,17 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	Select * From tmpv Into Cursor tmpvg Readwrite
-    This.Imprimir('S')
+	This.Imprimir('S')
 	Return 1
 	Endfunc
 	Function ActualizarTraspasoDr()
 	Local nauto
-		Set DataSession To This.idsesion
+	Set DataSession To This.idsesion
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
-	If ActualizaResumenDcto(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.sucursal1,'S',;
-			fe_gene.dola,fe_gene.igv,'T',0,.tipo,goapp.nidusua,1,This.tienda,0,0,0,0,0,This.idautor)=0 Then
+	If ActualizaResumenDcto(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.sucursal2,'S',;
+			fe_gene.dola,fe_gene.igv,'T',0,'V',goapp.nidusua,1,This.tienda,0,0,0,0,0,This.Idauto)=0 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
@@ -500,7 +506,7 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 		This.DEshacerCambios()
 		Return 0
 	Endif
-	If DesactivaDtraspaso(This.idautor)=0 Then
+	If DesactivaDtraspaso(This.Idauto)=0 Then
 		This.DEshacerCambios()
 		Return
 	Endif
@@ -510,7 +516,7 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Do While !Eof()
 		If Deleted()
 			If tmpv.nreg>0
-				If ActualizakardexUAl(This.idautor,tmpv.coda,.tipo,tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,tmpv.nreg,0,tmpv.equi,tmpv.unid,0,0,tmpv.pos,0,fe_gene.igv)=0 Then
+				If ActualizakardexUAl(This.Idauto,tmpv.coda,.tipo,tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,tmpv.nreg,0,tmpv.equi,tmpv.unid,0,0,tmpv.pos,0,fe_gene.igv)=0 Then
 					sw=0
 					Exit
 				Endif
@@ -521,27 +527,30 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 		Endif
 		If goapp.tiponegocio='D' Then
 			dfv=Ctod("01/01/0001")
-			If IngresaKardexFl(This.idautor,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,tmpv.equi,;
-					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)=0
+			nidkar= IngresaKardexFl(This.Idauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,tmpv.equi,tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)
+			If nidkar=0
 				sw=0
 				Exit
 			Endif
-			If IngresaKardexFl(This.idautor,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,tmpv.equi,;
-					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)=0
+			If IngresaKardexFl(This.Idauto,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,tmpv.equi,tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo,fe_gene.igv,Iif(Empty(tmpv.fechavto),dfv,tmpv.fechavto),tmpv.nlote)=0
 				sw=0
 				Exit
 			Endif
 		Else
-			If IngresaKardexUAl(This.idautor,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,;
+			nidkar=IngresaKardexUAl(This.Idauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal1,0,0,tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)
+			If nidkar=0 Then
+				sw=0
+				Exit
+			Endif
+			If IngresaKardexUAl(This.Idauto,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,;
 					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)=0 Then
 				sw=0
 				Exit
 			Endif
-			If IngresaKardexUAl(This.idautor,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I','K',0,This.sucursal2,0,0,;
-					tmpv.unid,tmpv.idepta,tmpv.pos,tmpv.costo/fe_gene.igv,fe_gene.igv)=0 Then
-				sw=0
-				Exit
-			Endif
+		Endif
+		If GrabaDetalleGuias(nidkar,tmpv.cant,nidg)=0 Then
+			sw=0
+			Exit
 		Endif
 		If ActualizaStock12(tmpv.coda,This.sucursal1,tmpv.caan,'V',tmpv.equi,0)=0 Then
 			sw=0
@@ -560,9 +569,9 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Endif
 	If GRabarCambios()<1 Then
 		Return 0
-	ENDIF
+	Endif
 	Select * From tmpv Into Cursor tmpvg Readwrite
-    This.Imprimir('S')
+	This.Imprimir('S')
 	Return 1
 	Endfunc
 Enddefine

@@ -8,14 +8,14 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 		Return 0
 	Endif
 	nauto=IngresaResumenDcto('09','E',;
-		this.ndoc ,This.Fecha,This.Fecha,"",nv,nigv,nt,'','S',;
+		this.ndoc ,This.Fecha,This.Fecha,"",this.nvalor,this.nigv,this.ntotal,'','S',;
 		fe_gene.dola,fe_gene.igv,'k',This.Codigo,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
 	If nauto<1
 		This.DeshacerCambios()
 		Return 0
 	Endif
 	nidg=IngresaGuiasConsignacionx3(This.Fecha,This.ptop,This.ptoll,nauto,This.Fechat,;
-		goapp.nidusua,This.Detallecreditos,idtr1,This.ndoc,'N',this.ubigeo,this.codt)
+		goapp.nidusua,This.Detalle,this.Idtransportista,This.ndoc,'N',this.ubigeocliente,this.codt)
 	If nidg<1 Then
 		This.DeshacerCambios()
 		Return 0
@@ -59,7 +59,7 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 	If This.GrabarCambios()<1 Then
 		Return 0
 	ENDIF
-	select * FROM (this.calias) INTo CURSOR tmpvg
+	select * FROM (this.calias) INTo CURSOR tmpvg READWRITE 
 	this.imprimir()
 	Return 1
 	Endfunc

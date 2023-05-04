@@ -114,6 +114,9 @@ Define Class producto As Odata Of 'd:\capass\database\data'
 	Return 1
 	Endfunc
 	Function MuestraProductosDescCod(np1, np2, np3, np4, ccursor)
+	IF this.Idsesion>1 then
+	   SET DATASESSION TO this.idsesion
+	ENDIF    
 	Local lc, lp
 	m.lc		 = 'PROMUESTRAPRODUCTOS1'
 	goapp.npara1 = m.np1
@@ -574,27 +577,16 @@ Left(Thisform.frame.cmbmoneda.Value,1),Thisform.frame.txtdolar.Value
 	lc='PROMUESTRAPRODUCTOS'
 	goapp.npara1=np1
 	goapp.npara2=np2
-	TEXT to lp noshow
+    IF this.Idsesion>1 then
+       SET DATASESSION TO this.idsesion 
+    ENDIF 
+   	TEXT to lp NOSHOW 
      (?goapp.npara1,?goapp.npara2)
 	ENDTEXT
 	If This.EJECUTARP(lc,lp,ccursor)<1 Then
 		Return 0
-	Else
-		Return 1
-	Endif
-	Endfunc
-	Function MostrarSolounproducto(ncoda,ndola,ccursor)
-	lc='PROMUESTRAP1'
-	goapp.npara1=ncoda
-	goapp.npara2=ndola
-	TEXT to lp noshow
-     (?goapp.npara1,?goapp.npara2)
-	ENDTEXT
-	If This.EJECUTARP(lc,lp,ccursor)<1 Then
-		Return 0
-	Else
-		Return 1
-	Endif
+	ENDIF 
+	Return 1
 	Endfunc
 	Function calcularstock()
 	ncon=This.abreconexion1(goapp.xopcion)
@@ -669,10 +661,10 @@ Left(Thisform.frame.cmbmoneda.Value,1),Thisform.frame.txtdolar.Value
 	Endfunc
 	Function ultimaventa(ncoda,ccursor)
 	TEXT TO lc NOSHOW TEXTMERGE
-	SELECT c.razo,MAX(r.fech)as fech,ndoc,prec FROM fe_kar AS k
+	SELECT c.razo,fech,ndoc,prec FROM fe_kar AS k
 	INNER JOIN fe_rcom AS r ON r.idauto=k.idauto
 	INNER JOIN fe_clie AS c ON c.idclie=r.idcliente
-	WHERE idart=<<ncoda>> AND k.acti='A' AND r.acti='A' LIMIT 1
+	WHERE idart=<<ncoda>> AND k.acti='A' AND r.acti='A' order by fech desc LIMIT 1
 	ENDTEXT
 	If This.ejecutaconsulta(lc,ccursor)<1 Then
 		Return 0
@@ -681,39 +673,67 @@ Left(Thisform.frame.cmbmoneda.Value,1),Thisform.frame.txtdolar.Value
 	Endfunc
 	Function ultimacompra(ncoda,ccursor)
 	TEXT TO lc NOSHOW TEXTMERGE
-	SELECT c.razo,MAX(r.fech)as fech,ndoc,prec FROM fe_kar AS k
+	SELECT c.razo,fech,ndoc,prec FROM fe_kar AS k
 	INNER JOIN fe_rcom AS r ON r.idauto=k.idauto
 	INNER JOIN fe_prov AS c ON c.idprov=r.idprov
-	WHERE idart=<<ncoda>> AND k.acti='A' AND r.acti='A' LIMIT 1
+	WHERE idart=<<ncoda>> AND k.acti='A' AND r.acti='A' order by fech desc  LIMIT 1
 	ENDTEXT
 	If This.ejecutaconsulta(lc,ccursor)<1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
-	Function listarpormarcaylinea(calias)
+	Function listarpormarcaylinea(Calias)
 	Set DataSession To This.idsesion
 	Do Case
 	Case This.cmar=0 And This.ccat=0
 		TEXT TO lc NOSHOW TEXTMERGE
-	     select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art where prod_acti='A' order by idart
+	     select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art where prod_acti<>'I' order by idart
 		ENDTEXT
 	Case This.ccat>0 And This.cmar>0
 		TEXT TO lc NOSHOW TEXTMERGE
-        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art where prod_acti='A' and idcat=<<this.ccat>> and idmar=<<this.cmar>> order by idart
+        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art where prod_acti<>'I' and idcat=<<this.ccat>> and idmar=<<this.cmar>> order by idart
 		ENDTEXT
 	Case This.ccat>0 And This.cmar=0
 		TEXT TO lc NOSHOW TEXTMERGE
-        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art  where prod_acti='A' and idcat=<<this.ccat>> order by idart
+        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art  where prod_acti<>'I' and idcat=<<this.ccat>> order by idart
 		ENDTEXT
 	Case This.ccat=0 And This.cmar>0
 		TEXT TO lc NOSHOW TEXTMERGE
-        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art  where prod_acti='A' and idmar=<<this.cmar>> order by idart
+        select idart,descri,unid,uno as tienda,dos as almacen,tre as interno,idmar,idcat FROM fe_art  where prod_acti<>'I' and idmar=<<this.cmar>> order by idart
 		ENDTEXT
 	Endcase
-	If This.ejecutaconsulta(lc,calias)<1 Then
+	If This.ejecutaconsulta(lc,Calias)<1 Then
 		Return 0
 	Endif
 	Return 1
+	Endfunc
+	Function calcularstockproducto(nidart,nalma,ccursor)
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
+	TEXT TO lc NOSHOW TEXTMERGE
+	 SELECT a.tcompras- a.tventas as stock
+	 FROM (SELECT b.idart,SUM(IF(b.tipo='C',b.cant,0)) AS tcompras,SUM(IF(b.tipo='V',b.cant,0)) AS tventas,b.alma
+	 FROM fe_kar AS b WHERE b.acti<>'I' and b.alma=<<nalma>> and b.idart=<<nidart>> GROUP BY  idart) AS a;
+	ENDTEXT
+	If This.ejecutaconsulta(lc,ccursor)<1 Then
+		Return 0
+	Endif
+	Return 1
+	ENDFUNC
+	
+	Function MostrarSolounproducto(ncoda,ndola,ccursor)
+	lc='PROMUESTRAP1'
+	goapp.npara1=ncoda
+	goapp.npara2=ndola
+	TEXT to lp noshow
+     (?goapp.npara1,?goapp.npara2)
+	ENDTEXT
+	If This.EJECUTARP(lc,lp,ccursor)<1 Then
+		Return 0
+	Else
+		Return 1
+	Endif
 	Endfunc
 Enddefine

@@ -33,14 +33,16 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	goapp.npara1=np1
 	goapp.npara2=np2
 	goapp.npara3=np3
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
 	TEXT to lp noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3)
 	ENDTEXT
 	If This.EJECUTARP(lc,lp,ccur)<1 Then
 		Return 0
-	Else
-		Return 1
 	Endif
+	Return 1
 	Endfunc
 	Function actualizarpassword(np1,np2)
 	cpass=Alltrim(np2)
@@ -50,7 +52,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	If This.ejecutarsql(lc)<1 Then
 		Return 0
 	Endif
-	This.Url="http://compania-sysven.com/app88/enc.php"
+	This.Url="http://companiasysven.com/app88/enc.php"
 	If  Type('oempresa') = 'U' Then
 		cruc=fe_gene.nruc
 	Else

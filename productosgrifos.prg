@@ -20,9 +20,10 @@ Define Class productosgrifos As producto  Of 'd:\capass\modelos\productos.prg'
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
+	Endfunc
 	Function consultarkardexproductogrifos(ccoda,dfechai,dfechaf,calmacen,ccursor)
-	TEXT TO lc NOSHOW TEXTMERGE
+	If nalma>0 Then
+		TEXT TO lc NOSHOW TEXTMERGE
 	   SELECT '' as nped,d.ndo2,d.fech,d.ndoc,d.tdoc,a.tipo,d.mone as cmoneda,a.cant,d.fusua,ifnull(g.nomb,'') as usua1,
 	   a.prec,d.vigv as igv,d.dolar,f.nomb as usua,d.idcliente as codc,b.razo AS cliente,d.idprov as codp,c.razo AS proveedor,d.deta,a.alma
 	   FROM fe_kar as a
@@ -32,7 +33,20 @@ Define Class productosgrifos As producto  Of 'd:\capass\modelos\productos.prg'
 	   inner join fe_usua as f ON(f.idusua=d.idusua)
 	   left join fe_usua as g ON (g.idusua=d.idusua1)
 	   WHERE a.idart=<<ccoda>> and d.acti<>'I' and d.fech between '<<dfechai>>' and  '<<dfechaf>>' and a.acti<>'I' AND a.alma=<<calmacen>> ORDER BY d.fech,d.tipom,d.fusua
-	ENDTEXT
+		ENDTEXT
+	Else
+		TEXT TO lc NOSHOW TEXTMERGE
+	   SELECT '' as nped,d.ndo2,d.fech,d.ndoc,d.tdoc,a.tipo,d.mone as cmoneda,a.cant,d.fusua,ifnull(g.nomb,'') as usua1,
+	   a.prec,d.vigv as igv,d.dolar,f.nomb as usua,d.idcliente as codc,b.razo AS cliente,d.idprov as codp,c.razo AS proveedor,d.deta,a.alma
+	   FROM fe_kar as a
+	   inner JOIN fe_rcom as d on (d.idauto=a.idauto)
+	   left join fe_prov as c ON(d.idprov=c.idprov)
+	   left JOIN fe_clie as b ON(d.idcliente=b.idclie)
+	   inner join fe_usua as f ON(f.idusua=d.idusua)
+	   left join fe_usua as g ON (g.idusua=d.idusua1)
+	   WHERE a.idart=<<ccoda>> and d.acti<>'I' and d.fech between '<<dfechai>>' and  '<<dfechaf>>' and a.acti<>'I' ORDER BY d.fech,d.tipom,d.fusua
+		ENDTEXT
+	Endif
 	If This.ejecutaconsulta(lc,ccursor)<1 Then
 		Return  0
 	Endif

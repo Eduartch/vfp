@@ -1,10 +1,18 @@
 Define Class inventarios As Odata Of 'd:\capass\database\data.prg'
 	Function saldosinicialeskardex(df,ncoda,nalma,ccursor)
+	IF nalma>0 then
 	TEXT TO lc NOSHOW textmerge
     SELECT k.idart,SUM(IF(tipo='C',cant,-cant)) AS inicial FROM fe_rcom AS r
 	INNER JOIN fe_kar AS k ON k.`idauto`=r.`idauto`
 	WHERE fech<'<<df>>' AND idart=<<ncoda>> AND k.alma=<<nalma>> AND r.acti='A' AND k.acti='A' GROUP BY idart
     ENDTEXT
+    ELSE
+    TEXT TO lc NOSHOW textmerge
+    SELECT k.idart,SUM(IF(tipo='C',cant,-cant)) AS inicial FROM fe_rcom AS r
+	INNER JOIN fe_kar AS k ON k.`idauto`=r.`idauto`
+	WHERE fech<'<<df>>' AND idart=<<ncoda>> AND r.acti='A' AND k.acti='A' GROUP BY idart
+    ENDTEXT
+    ENDIF 
 	IF this.ejecutaconsulta(lc,ccursor)<1 then
 	   RETURN 0
 	ENDIF

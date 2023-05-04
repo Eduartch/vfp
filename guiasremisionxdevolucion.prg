@@ -54,7 +54,7 @@ Define Class guiaremisionxdevolucion As guiaremision Of 'd:\capass\modelos\guias
 			Endcase
 			If tmpvg.cant>Ts Then
 				s=0
-				cmensaje='En Stock '+ ALLTRIM(STR(ts,10))+'  no Disponible para esta Transacción '
+				cmensaje='En Stock '+ Alltrim(Str(Ts,10))+'  no Disponible para esta Transacción '
 				Exit
 			Endif
 		Endif
@@ -132,7 +132,7 @@ Define Class guiaremisionxdevolucion As guiaremision Of 'd:\capass\modelos\guias
 	Endif
 	Return 1
 	Endfunc
-Function grabarodi()
+	Function grabarodi()
 	If This.idsesion>1 Then
 		Set DataSession To  This.idsesion
 	Endif
@@ -187,12 +187,12 @@ Function grabarodi()
 			Endcase
 			If tmpvg.cant>Ts Then
 				s=0
-				cmensaje='En Stock '+ ALLTRIM(STR(ts,10))+'  no Disponible para esta Transacción '
+				cmensaje='En Stock '+ Alltrim(Str(Ts,10))+'  no Disponible para esta Transacción '
 				Exit
 			Endif
 		Endif
 		nidkar=INGRESAKARDEXR(Na,tmpvg.coda,"V",0,tmpvg.cant,"I","K",0,goapp.tienda,0,0,'')
-		*INGRESAKARDEXR(.nauto,tmpc.coda,'C',xprec,tmpc.cant,cincl,'K',0,calma,nidcosto,0,tmpc.codigoi)
+*INGRESAKARDEXR(.nauto,tmpc.coda,'C',xprec,tmpc.cant,cincl,'K',0,calma,nidcosto,0,tmpc.codigoi)
 		If nidkar<1 Then
 			s=0
 			cmensaje='Al Registrar Kardex'
@@ -206,6 +206,68 @@ Function grabarodi()
 		If Actualizastock(tmpvg.coda,goapp.tienda,tmpvg.cant,'V')<1 Then
 			s=0
 			cmensaje='Al actualizar Stock'
+			Exit
+		Endif
+		Select tmpvg
+		Skip
+	Enddo
+	If This.generacorrelativo()=1  And s=1 Then
+		If This.GRabarCambios()=0 Then
+			Return 0
+		Endif
+		This.Imprimir('S')
+		Return  1
+	Else
+		This.DEshacerCambios()
+		This.cmensaje=cmensaje
+		Return 0
+	Endif
+	Endfunc
+	Function grabarD()
+	If This.idsesion>1 Then
+		Set DataSession To  This.idsesion
+	Endif
+	s=1
+	nidkar=0
+	cmensaje=""
+	If This.validar()<1 Then
+		Return 0
+	Endif
+	If This.IniciaTransaccion()<1 Then
+		Return 0
+	Endif
+	Na=IngresaResumenDcto('09','E',;
+		this.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,'','S',;
+		fe_gene.dola,fe_gene.igv,'k',This.idprov,'C',goapp.nidusua,0,goapp.tienda,0,0,0,0,0)
+	If Na<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	nidg=This.IngresaGuiasXdcompras(This.fecha,This.ptop,This.ptoll,Na,This.fechat,goapp.nidusua,This.Detalle,This.Idtransportista,This.ndoc,goapp.tienda)
+	If nidg<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	Select tmpvg
+	sws=1
+	Go Top
+	Do While !Eof()
+		dfv=Ctod("01/01/0001")
+		nidkar=IngresaKardexFl(na,tmpvg.coda,'V',tmpvg.Prec,tmpvg.cant,'I','K',0,goapp.tienda,0,0,tmpvg.equi,;
+			tmpvg.unid,tmpvg.idepta,tmpvg.pos,tmpvg.costo,fe_gene.igv,Iif(Empty(tmpvg.fechavto),dfv,tmpvg.fechavto),tmpvg.nlote)
+		If nidkar<1
+			sws=0
+			cmensaje="Al Registrar el detalle de la guia"
+			Exit
+		Endif
+		If GrabaDetalleGuiasCons(tmpvg.coda,tmpvg.cant,nidg,nidkar)=0
+			sws=0
+			cmensaje="Al Registrar el detalle de la guia por devolución"
+			Exit
+		Endif
+		If Actualizastock1(tmpvg.coda,goapp.tienda,tmpvg.cant,'V',tmpvg.equi)=0 Then
+			cmensaje="Al Actualizar Stock"
+			sws=0
 			Exit
 		Endif
 		Select tmpvg

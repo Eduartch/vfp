@@ -1,4 +1,4 @@
-# Define URL "http://companiasysven.com/"
+#Define URL "http://companiasysven.com/"
 Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	fecha				= ""
 	fechat				= .F.
@@ -64,6 +64,10 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	idprov              =0
 	proyecto            =""
 	codt                =0
+	nvalor=0
+	nigv=0
+	ntotal=0
+	tienda=0
 	Function VerificaSiguiaVtaEstaIngresada(np1)
 	Local lc
 	TEXT To m.lc Noshow Textmerge
@@ -137,12 +141,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 		cdesc=Alltrim(tmpvg.Descri)
 		If Deleted()
 			If nreg > 0 Then
-				If ActualizaStock12(tmpvg.coda, tmpvg.alma, tmpvg.cant, 'C', tmpvg.equi, tmpvg.caant) = 0 Then
-					Sw			  =0
-					This.Cmensaje ="Al Actualizar Stock -  " + Alltrim(cdesc)
-					Exit
-				Endif
-				If ActualizakardexUAl(This.idauto, tmpvg.coda, 'V', tmpvg.Prec, tmpvg.cant, 'I', 'K', This.idvendedor, tmpvg.alma, 0, tmpvg.nreg, 0, tmpvg.equi, tmpvg.unid, tmpvg.idepta, 0, tmpvg.pos, tmpvg.costo, tmpvg.tigv) = 0 Then
+			     If ActualizakardexUAl(This.idauto, tmpvg.coda, 'V', tmpvg.Prec, tmpvg.cant, 'I', 'K', This.idvendedor, tmpvg.alma, 0, tmpvg.nreg, 0, tmpvg.equi, tmpvg.unid, tmpvg.idepta, 0, tmpvg.pos, tmpvg.costo, tmpvg.tigv) = 0 Then
 					Sw			  =0
 					This.Cmensaje ="Al Desactivar Ingreso de Item - " + Alltrim(cdesc)
 					Exit
@@ -275,7 +274,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 		tref With This.tref, Refe With This.referencia, archivo With This.archivo, ;
 		ndoc With This.ndoc, ndni With This.ndni, fechafactura With This.fechafacturacompra, detalle With This.detalle  In tmpvg
 *	Wait Window 'hola xxxx'
-	ctdoc=IIF(LEFT(this.ndoc,1)='T','TT','09')
+	ctdoc=Iif(Left(This.ndoc,1)='T','TT','09')
 	If This.Cmulti = 'S' Then
 		carpdf=oempresa.nruc + "-"+ctdoc+"-" + Left(This.ndoc, 4) + '-' + Substr(This.ndoc, 5) + ".Pdf"
 	Else
@@ -287,7 +286,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	Set Filter To
 	Set Procedure To imprimir Additive
 	m.obji			  =Createobject("Imprimir")
-	m.obji.tdoc		  = IIF(EMPTY(this.tdoc),'09',this.tdoc)
+	m.obji.tdoc		  = Iif(Empty(This.tdoc),'09',This.tdoc)
 	m.obji.ArchivoPdf =carpdf
 	m.obji.ElijeFormatoM()
 	Do Case
@@ -461,14 +460,14 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	TEXT TO lc NOSHOW TEXTMERGE
      select guia_idgui as idauto FROM fe_guias WHERE guia_ndoc='<<this.ndoc>>' AND guia_acti='A' limit 1
 	ENDTEXT
-	If This.EjecutaConsulta(lc,'Ig')<1 Then
+	If This.EjecutaConsulta(lc,'ig')<1 Then
 		Return 0
 	Endif
 	If ig.idauto>0 Then
 		cencontrado='S'
 	Else
 		cencontrado='N'
-	Endif
+	ENDIF
 	If This.proyecto<>'psysr'
 		If  Verificacantidadantesvtas(This.Calias)=0
 			This.Cmensaje="Ingrese Cantidad es Obligatorio"
@@ -479,7 +478,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 			This.Cmensaje="Ingrese Cantidad es Obligatorio"
 			Return 0
 		Endif
-	Endif
+	ENDIF
 	Do Case
 	Case cencontrado='S' And This.idautog=0
 		This.Cmensaje="NÚMERO de Guia de Remisión Ya Registrado"
@@ -496,7 +495,7 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 *!*		Case !esfechavalida(This.fechat)
 *!*			This.Cmensaje="La Fecha de emisón no es Válida"
 *!*			Return 0
-	Case  This.fechat< This.fecha
+	Case This.fechat<This.fecha
 		This.Cmensaje="La Fecha de Traslado No Puede Ser Antes que la Fecha de Emisión"
 		Return 0
 	Case Len(Alltrim(This.ptoll))=0
@@ -520,10 +519,10 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	Case This.Idtransportista=0 And This.tdoc='09'
 		This.Cmensaje="El Transportista es Obligatorio"
 		Return 0
-	Case (Empty(.txtrazont.Value) Or Len(Alltrim(This.ructr))<>11 Or  Len(Alltrim(This.constancia))=0) And This.tipotransporte='01' And This.tdoc='09'
+	Case (Empty(this.razont) Or Len(Alltrim(This.ructr))<>11 Or  Len(Alltrim(This.constancia))=0) And This.tipotransporte='01' And This.tdoc='09'
 		This.Cmensaje="Es obligatorio el RUC, el Nombre y el Registro MTC"
 		Return 0
-	Case Empty(.txtrazont.Value) And Len(Alltrim(This.ructr))<>11 And This.tipotransporte='02' And Len(Alltrim(This.brevete))<>9 And Len(Alltrim(This.conductor))=0 And This.tdoc='09'
+	Case Empty(this.razont) And Len(Alltrim(This.ructr))<>11 And This.tipotransporte='02' And Len(Alltrim(This.brevete))<>9 And Len(Alltrim(This.conductor))=0 And This.tdoc='09'
 		This.Cmensaje="Es obligatorio el nombre de Chofer y Brevete"
 		Return 0
 	Case This.tipotransporte='02' And (!Isalpha(Left(This.brevete,1))  Or  !Isdigit(Substr(This.brevete,2))) And This.tdoc='09'
@@ -532,9 +531,6 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 	Case Empty(This.ubigeocliente)
 		This.Cmensaje="Ingrese el Ubigeo del Punto de LLegada"
 		Return 0
-*!*		Case Verificacantidadantesvtas(This.Calias)=0
-*!*			This.Cmensaje="Ingrese Cantidad es Obligatorio"
-*!*			Return 0
 	Otherwise
 		Return 1
 	Endcase
@@ -905,6 +901,17 @@ Define Class guiaremision As Odata Of 'd:\capass\database\data'
 		peso N(10,2),alma N(10,2),ndoc c(12),nreg N(10),codc c(5),tref c(2),Refe c(12),fecr d,fechafactura d,;
 		calma c(3),Valida c,nitem N(3),saldo N(10,2),idin N(8),nidkar N(10),coda1 c(15),fech d,fect d,ptop c(150),ptoll c(120),archivo c(120),Codigo c(15),;
 		razon c(120),nruc c(11),ndni c(8),conductor c(120),marca c(100),placa c(20),placa1 c(20),constancia c(20),brevete c(20),razont c(120),ructr c(11),Motivo c(1),detalle c(100))
+	Select (Calias)
+	Index On Descri Tag Descri
+	Index On nitem Tag Items
+	Endfunc
+	Function CreaTemporalGuiasElectronicas(Calias)
+	Create Cursor unidades(uequi N(7,4),ucoda N(8),uunid c(60),uitem N(4),uprecio N(12,6),ucosto N(8,4),uidepta N(8),ucomi N(6,3))
+	Create Cursor (Calias)(coda N(8), duni c(20),Descri c(120), unid c(20), cant N(10, 2), Prec N(10, 5), uno N(10, 2), Dos N(10, 2), lote c(15), ;
+		peso N(10, 2), alma N(10, 2), ndoc c(12), nreg N(10), codc c(5), tref c(2), Refe c(20), fecr d, detalle c(120), fechafactura d,costo N(10,3),;
+		calma c(3), Valida c, nitem N(3), saldo N(10, 2), idin N(8), nidkar N(10), coda1 c(15), fech d, fect d, ptop c(150), ptoll c(120), archivo c(120), valida1 c(1), ;
+		razon c(120), nruc c(11), ndni c(8), conductor c(120), marca c(100), placa c(15), placa1 c(15), constancia c(30), equi N(8,4),prem N(10,4),pos N(3),idepta N(5),;
+		brevete c(20), razont c(120), ructr c(11), Motivo c(1), Codigo c(30),comi N(5,3),idem N(8),tigv N(5,3),caant N(12,2),nlote c(20),fechavto d)
 	Select (Calias)
 	Index On Descri Tag Descri
 	Index On nitem Tag Items

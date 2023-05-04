@@ -1,8 +1,11 @@
 Define Class ctasporpagar As odata Of 'd:\capass\database\data.prg'
+	codt=0
 	Function registra
 	Lparameters Calias, nauto, ncodigo, cmoneda, dfecha, ntotal, ccta, ndolar
 	Local sw, r As Integer
-	Set DataSession To This.idsesion
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
 	If !Used((Calias))
 		This.cmensaje='no usado'
 		Return 0
@@ -166,6 +169,26 @@ Define Class ctasporpagar As odata Of 'd:\capass\database\data.prg'
      <<nauto>>,<<nu>>
 	ENDTEXT
 	If  This.ejecutarp(lc,lp,'') < 1
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function MuestraSaldosDctos(ccursor)
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
+	If This.codt=0 Then
+		TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+	      select a.idpr as idprov,a.ndoc,a.saldo as importe,a.moneda as mone,a.banc,a.fech,a.fevto,a.tipo,
+	      a.dola,a.docd,a.nrou,a.banco,a.iddeu,a.idauto,a.ncontrol FROM vpdtespago as a order by a.fevto,a.ndoc
+		ENDTEXT
+	Else
+		TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+	      select a.idpr as idprov,a.ndoc,a.saldo as importe,a.moneda as mone,a.banc,a.fech,a.fevto,a.tipo,
+	      a.dola,a.docd,a.nrou,a.banco,a.iddeu,a.idauto,a.ncontrol FROM vpdtespago as a where  codt=<<this.codt>> order by a.fevto,a.ndoc
+		ENDTEXT
+	Endif
+	If This.EjecutaConsulta(lc,ccursor)<1  Then
 		Return 0
 	Endif
 	Return 1

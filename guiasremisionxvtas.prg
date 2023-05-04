@@ -20,7 +20,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
+	Endfunc
 	Function listaritemsparaguiaunidades(nid,calias)
 	TEXT TO lc NOSHOW TEXTMERGE
            select a.idauto,a.idkar,a.idart AS coda,a.saldo AS cant,r.fech,r.form,r.idcliente AS idclie,
@@ -176,14 +176,12 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
-	nauto=IngresaResumenDcto('09','E',;
-		.ndoc,.fecha,.fecha,"",0,0,0,'','S',;
-		fe_gene.dola,fe_gene.igv,'k',.Codigo,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
+	nauto=IngresaResumenDcto('09','E',this.ndoc,this.fecha,this.fecha,"",0,0,0,'','S',fe_gene.dola,fe_gene.igv,'k',this.Codigo,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
 	If nauto<1 Then
 		This.DeshacerCambios()
 		Return 0
 	Endif
-	nidg=This.IngresaGuiasX(This.fecha,This.ptop,Alltrim(This.ptoll),This.idauto,This.fechat,goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.ubigeocliente)
+	nidg=This.IngresaGuiasX(This.fecha,This.ptop,Alltrim(This.ptoll),nauto,This.fechat,goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.ubigeocliente)
 	If nidg<1 Then
 		This.DeshacerCambios()
 		Return 0
@@ -227,9 +225,9 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	Local lc, lp
 	lc			  = "FunDetalleGuiaVentas"
 	cur			  = "ig"
-	goapp.npara1  = np1
-	goapp.npara2  = np2
-	goapp.npara3  = np3
+	goapp.npara1  = nidk
+	goapp.npara2  = ncant
+	goapp.npara3  = nidg
 	TEXT To lp Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3)
 	ENDTEXT
@@ -260,6 +258,166 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 		Return 0
 	Endif
 	This.imprimir('S')
+	Return 1
+	Endfunc
+	Function grabarguiaremitentevtasx3
+	If This.IniciaTransaccion()<1 Then
+		Return 0
+	Endif
+	nidg=This.IngresaGuiasX3vtas(This.fecha,This.ptop,Alltrim(This.ptoll),this.codigo,This.fechat,goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.ubigeocliente)
+	If nidg<1 Then
+		This.DeshacerCambios()
+		Return 0
+	Endif
+	Select tmpvg
+	Go Top
+	s=1
+	Do While !Eof()
+		If This.GrabaDetalleGuiasx3(0,tmpvg.cant,nidg,tmpvg.coda)<1 Then
+			s=0
+			Exit
+		Endif
+		Select tmpvg
+		Skip
+	Enddo
+	If  This.generacorrelativo()=1 And s=1  Then
+		If This.GrabarCambios()<1 Then
+			Return 0
+		Endif
+		This.imprimir('S')
+		Return  1
+	Else
+		This.DeshacerCambios()
+		Return 0
+	Endif
+	Endfunc
+	Function GrabaDetalleGuiasx3(nidk,ncant,nidg,ncoda)
+	Local lc, lp
+	lc			  = "proDetalleGuiaVentas"
+	cur			  = ""
+	goapp.npara1  = nidk
+	goapp.npara2  = ncant
+	goapp.npara3  = nidg
+	goapp.npara4  = ncoda
+	TEXT To lp Noshow
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4)
+	ENDTEXT
+	
+	If This.EJECUTARP(lc, lp, cur)<1 Then
+		Return 0
+	Endif
+	Return 1
+	ENDFUNC
+	Function IngresaGuiasX3vtas(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10,np11)
+	Local lc, lp
+	lc			  = "FUNINGRESAGUIAS1"
+	cur			  = "YY"
+	goapp.npara1  = np1
+	goapp.npara2  = np2
+	goapp.npara3  = np3
+	goapp.npara4  = np4
+	goapp.npara5  = np5
+	goapp.npara6  = np6
+	goapp.npara7  = np7
+	goapp.npara8  = np8
+	goapp.npara9  = np9
+	goapp.npara10 = np10
+	goapp.npara11 = np11
+	TEXT To lp Noshow
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11)
+	ENDTEXT
+	nidgg=This.EJECUTARF(lc, lp, cur)
+	If nidgg<1 Then
+		Return 0
+	Endif
+	Return nidgg
+	ENDFUNC
+	Function actualiaguiasremitentevtasx3()
+	This.contransaccion='S'
+	If This.IniciaTransaccion() = 0
+		This.contransaccion=''
+		Return 0
+	Endif
+	If This.ActualizaGuiasVtasx3(This.fecha, This.ptop, This.ptoll, 0, This.fechat, goapp.nidusua, This.detalle, This.Idtransportista, This.ndoc, This.idautog, goapp.tienda,this.codigo) < 1
+		Return 0
+	Endif
+	If This.ActualizaDetalleGuiasVtas(This.calias) < 1 Then
+		This.DeshacerCambios()
+		This.contransaccion=""
+		Return 0
+	Endif
+	If This.GrabarCambios() = 0 Then
+		This.contransaccion=""
+		Return 0
+	Endif
+	This.imprimir('S')
+	Return 1
+	ENDFUNC
+	Function ActualizaGuiasVtasx3(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11,np12)
+	Local lc, lp
+	m.lc		  ="ProActualizaGuiasVtas"
+	cur			  =""
+	goapp.npara1  =m.np1
+	goapp.npara2  =m.np2
+	goapp.npara3  =m.np3
+	goapp.npara4  =m.np4
+	goapp.npara5  =m.np5
+	goapp.npara6  =m.np6
+	goapp.npara7  =m.np7
+	goapp.npara8  =m.np8
+	goapp.npara9  =m.np9
+	goapp.npara10 =This.idautog
+	goapp.npara11 =m.np11
+	goapp.npara12 =m.np12
+	goapp.npara13= This.ubigeocliente
+	TEXT To m.lp Noshow
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?this.idautog,?goapp.npara11,?goapp.npara12,?goapp.npara13)
+	ENDTEXT
+	If This.EJECUTARP(m.lc, m.lp, cur) < 1 Then
+		Return 0
+	Else
+		Return 1
+	Endif
+	ENDFUNC
+	Function ActualizaDetalleGuiasVtasx3(ccursor)
+	Sw=1
+	Select (m.ccursor)
+	Set Filter To coda<>0
+	Set Deleted Off
+	Go Top
+	Do While !Eof()
+		cdesc=Alltrim(tmpvg.Descri)
+		If Deleted()
+			If nreg > 0 Then
+			  	If This.ActualizaDetalleGuiaCons1(tmpvg.coda, tmpvg.cant, tmpvg.idem, tmpvg.nreg, This.idautog, 0, '') = 0 Then
+					Sw			  =0
+					This.Cmensaje ="Al Desactivar Ingreso (Guia)  de Item  - " + Alltrim(cdesc)
+					Exit
+				Endif
+			Endif
+		Else
+			
+			If tmpvg.nreg = 0 Then
+				If  this.GrabaDetalleGuiasx3(nidkar, tmpvg.cant, This.idautog,tmpvg.coda) = 0 Then
+					s			  =0
+					This.Cmensaje ="Al Ingresar Detalle de Guia " + Alltrim(cdesc)
+					Exit
+				Endif
+			Else
+				If This.ActualizaDetalleGuiaCons1(tmpvg.coda, tmpvg.cant, tmpvg.idem, tmpvg.nreg, This.idautog, 1, '') < 1 Then
+					Sw			  =0
+					This.Cmensaje =Alltrim(This.Cmensaje) + " Al Actualizar Ingreso (Guia)  de Item  - " + Alltrim(cdesc)
+					Exit
+				Endif
+			Endif
+		Endif
+		SELECT (ccursor)
+		Skip
+	Enddo
+	Set Deleted On
+	If Sw = 0 Then
+		Return 0
+	Endif
 	Return 1
 	Endfunc
 Enddefine

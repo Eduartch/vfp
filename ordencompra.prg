@@ -353,10 +353,13 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Endfunc
 **************************************
 	Function CreaTemporal(Calias)
-	Set DataSession To This.idsesion
+	If This.idsesion>0
+		Set DataSession To This.idsesion
+	Endif
 	Create Cursor (Calias)(coda N(8), Descri c(150), unid c(4), cant N(10, 3), Prec N(13, 3), d1 N(7, 4), nreg N(8), ndoc c(10), nitem N(5), uno N(10, 2), Dos N(10, 2), ;
 		incluido c(1), razo c(120), aten c(120), Moneda c(20), facturar c(200), despacho c(200), Forma c(100), observa c(200), fech d,;
-		tipro c(1), come N(8, 2), Comc N(8, 2),tre N(10,2),cua N(10,2),cin N(10,2),sei N(10,2),Impo N(12,2),Valida c(1),codigo c(20))
+		tipro c(1), come N(8, 2), Comc N(8, 2),tre N(10,2),cua N(10,2),cin N(10,2),sei N(10,2),Impo N(12,2),Valida c(1),codigo c(20),;
+		despacharpor c(100),ructr c(11),direcciont c(100),contactot c(100),telefonot c(20))
 	Select (Calias)
 	Index On Descri Tag Descri
 	Index On nitem Tag Items
@@ -365,16 +368,16 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Set DataSession To This.idsesion
 	TEXT TO lc NOSHOW TEXTMERGE
 	   SELECT   doco_coda,Descri,unid,doco_cant,doco_prec,doco_idro,ocom_mone  FROM fe_rocom as r
-	   inner join fe_docom AS d on d.doco_idro=r.ocom_idroc 
+	   inner join fe_docom AS d on d.doco_idro=r.ocom_idroc
        INNER JOIN fe_art AS a ON a.idart=d.doco_coda WHERE doco_idro=<<nid>> AND doco_acti='A' and r.ocom_acti='A'
-    ENDTEXT
+	ENDTEXT
 	If This.EjecutaConsulta(lc,ccursor)<1 Then
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
-	FUNCTION mostrarocompralopez(cndoc,ccursor) 	
-	TEXT TO lc NOSHOW TEXTMERGE 
+	Endfunc
+	Function mostrarocompralopez(cndoc,ccursor)
+	TEXT TO lc NOSHOW TEXTMERGE
 	  SELECT
 	  `b`.`doco_iddo`  AS `doco_iddo`,
 	  `b`.`doco_coda`  AS `doco_coda`,
@@ -417,10 +420,54 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
      JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
      JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
      WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
-     ENDTEXT 
-     IF this.ejecutaconsulta(lc,ccursor)<1 then
-        RETURN 0
-     ENDIF
-     RETURN 1   
+	ENDTEXT
+	If This.EjecutaConsulta(lc,ccursor)<1 Then
+		Return 0
+	Endif
+	Return 1
 	ENDFUNC
+		Function mostrarocompra(cndoc,ccursor)
+	TEXT TO lc NOSHOW TEXTMERGE
+	  SELECT
+	  `b`.`doco_iddo`  AS `doco_iddo`,
+	  `b`.`doco_coda`  AS `doco_coda`,
+	  `b`.`doco_cant`  AS `doco_cant`,
+	  `b`.`doco_prec`  AS `doco_prec`,
+	  `c`.`descri`     AS `descri`,
+	  `c`.`prod_smin`  AS `prod_smin`,
+	  `c`.`unid`       AS `unid`,c.prod_cod1,
+	  `c`.`prod_smax`  AS `prod_smax`,
+	  `a`.`ocom_valor` AS `ocom_valor`,
+	  `a`.`ocom_igv`   AS `ocom_igv`,
+	  `a`.`ocom_impo`  AS `ocom_impo`,
+	  `a`.`ocom_idroc` AS `ocom_idroc`,
+	  `a`.`ocom_fech`  AS `ocom_fech`,
+	  `a`.`ocom_idpr`  AS `ocom_idpr`,
+	  `a`.`ocom_desp`  AS `ocom_desp`,
+	  `a`.`ocom_form`  AS `ocom_form`,
+	  `a`.`ocom_mone`  AS `ocom_mone`,
+	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,
+	  `a`.`ocom_tigv`  AS `ocom_tigv`,
+	  `a`.`ocom_obse`  AS `ocom_obse`,
+	  `a`.`ocom_aten`  AS `ocom_aten`,
+	  `a`.`ocom_deta`  AS `ocom_deta`,
+	  `a`.`ocom_idus`  AS `ocom_idus`,
+	  `a`.`ocom_fope`  AS `ocom_fope`,
+	  `a`.`ocom_idpc`  AS `ocom_idpc`,
+	  `a`.`ocom_idac`  AS `ocom_idac`,
+	  `a`.`ocom_fact`  AS `ocom_fact`,
+	  `d`.`razo`       AS `razo`,
+	  `e`.`nomb`       AS `nomb`
+	 FROM `fe_rocom` `a`
+     JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
+     JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`
+     JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
+     JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
+     WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
+	ENDTEXT
+	If This.EjecutaConsulta(lc,ccursor)<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine

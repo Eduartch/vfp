@@ -1,16 +1,16 @@
 Define Class cajae As odata Of  'd:\capass\database\data.prg'
-    dfecha=DATE()
-    codt=0
-    ndoc=""
-    nsgte=0
+	dfecha=Date()
+	codt=0
+	ndoc=""
+	nsgte=0
 	idserie=0
 	Function ReporteCajaEfectivo(dfi, dff, Calias)
 	Local lc
 	fi = cfechas(dfi)
 	ff = cfechas(dff)
-	IF this.idsesion>0 then
-	   SET DATASESSION TO this.idsesion
-	ENDIF 
+	If This.idsesion>0 Then
+		Set DataSession To This.idsesion
+	Endif
 	TEXT To lc Noshow Textmerge
 	   Select a.lcaj_ndoc,a.lcaj_fech,a.lcaj_deta,
 	   c.ncta,c.nomb,If(lcaj_mone='S',a.lcaj_deud,Round(a.lcaj_deud*a.lcaj_dola,2)) As debe,
@@ -35,7 +35,7 @@ Define Class cajae As odata Of  'd:\capass\database\data.prg'
 	If This.EjecutaConsulta(lc, 'iniciocaja') < 1 Then
 		Return 0
 	Endif
-	Return IIF(ISNULL(iniciocaja.si),0,iniciocaja.si)
+	Return Iif(Isnull(iniciocaja.si),0,iniciocaja.si)
 	Endfunc
 	Function IngresaDatosLCajaEe(np1,np2,np3,np4,np5,np6,np7,np8,np9,np10)
 	lc="FunIngresaDatosLcajaEe"
@@ -94,7 +94,7 @@ Define Class cajae As odata Of  'd:\capass\database\data.prg'
         FROM fe_lcaja  as a WHERE
         a.lcaj_fech between '<<dfecha1>>' and  '<<dfecha>>' and  a.lcaj_acti='A'  and  a.lcaj_form='E'  and  lcaj_idus=<<nidus>> and lcaj_codt=<<nidt>> group by lcaj_idus
 	ENDTEXT
-	If EjecutaConsulta(lc,ccursor)<1 Then
+	If This.EjecutaConsulta(lc,ccursor)<1 Then
 		Return -1
 	Endif
 	Select (ccursor)
@@ -119,7 +119,7 @@ Define Class cajae As odata Of  'd:\capass\database\data.prg'
 	TEXT to lp noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12)
 	ENDTEXT
-	nidc=This.EjeCUTARF(lc,lp,cur)
+	nidc=This.EJECUTARF(lc,lp,cur)
 	If nidc<0 Then
 		Return 0
 	Endif
@@ -142,11 +142,11 @@ Define Class cajae As odata Of  'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
-	FUNCTION reportecaja0(dfi, dff, Calias)
+	Endfunc
+	Function reportecaja0(dfi, dff, Calias)
 	fi = cfechas(dfi)
 	ff = cfechas(dff)
-	SET DATASESSION TO this.idsesion
+	Set DataSession To This.idsesion
 	TEXT To lc Noshow Textmerge
 	       select a.lcaj_ndoc,a.lcaj_fech,a.lcaj_deta,
 		   c.ncta,c.nomb,if(lcaj_mone='S',a.lcaj_deud,ROUND(a.lcaj_deud*a.lcaj_dola,2)) as debe,
@@ -160,20 +160,44 @@ Define Class cajae As odata Of  'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC 
+	Endfunc
 	Function Saldoinicialcajaefectivo0(df)
 	F = cfechas(df)
-	calias='c_'+SYS(2015)
+	Calias='c_'+Sys(2015)
 	TEXT To lc Noshow Textmerge Pretext 7
      SELECT CAST((SUM(IF(lcaj_mone='S',a.lcaj_deud,ROUND(a.lcaj_deud*a.lcaj_dola,2)))-SUM(IF(a.lcaj_mone='S',a.lcaj_acre,ROUND(a.lcaj_acre*a.lcaj_dola,2)))) as decimal(12,2)) AS si
 	 FROM fe_lcaja AS a
 	 WHERE a.lcaj_acti='A' AND a.lcaj_fech<'<<f>>' AND lcaj_idct>0
 	ENDTEXT
-	If This.EjecutaConsulta(lc, (calias)) < 1 Then
+	If This.EjecutaConsulta(lc, (Calias)) < 1 Then
 		Return 0
 	Endif
-	Select (calias)
+	Select (Calias)
 	nsaldo=Iif(Isnull(si),0,si)
 	Return nsaldo
+	Endfunc
+	Function IngresaDatosLCajaECreditos(np1,np2,np3,np4,np5,np6,np7,np8,np9,np10,np11,np12,np13)
+	lc="FunIngresaDatosLcajaECreditos"
+	cur="Cred"
+	goapp.npara1=np1
+	goapp.npara2=np2
+	goapp.npara3=np3
+	goapp.npara4=np4
+	goapp.npara5=np5
+	goapp.npara6=np6
+	goapp.npara7=np7
+	goapp.npara8=np8
+	goapp.npara9=np9
+	goapp.npara10=np10
+	goapp.npara11=np11
+	goapp.npara12=np12
+	goapp.npara13=np13
+	TEXT to lp NOSHOW 
+    (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7, ?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12,?goapp.npara13)
+	ENDTEXT
+	If this.EJECUTARF(lc,lp,cur)<1 Then
+		Return 0
+	ENDIF 
+	Return cred.Id
 	Endfunc
 Enddefine

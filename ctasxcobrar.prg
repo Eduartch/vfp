@@ -19,6 +19,8 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	nidaval=0
 	idauto=0
 	sintransaccion=""
+	concargocaja=""
+	idcajero=0
 	Function mostrarpendientesxcobrar(nidclie,ccursor)
 	TEXT TO lc NOSHOW TEXTMERGE
 		SELECT `x`.`idclie`,
@@ -227,6 +229,9 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Return 1
 	Endfunc
 	Function vtosxcliente(nidclie,ccursor)
+	IF this.idsesion>0 then
+	   SET DATASESSION TO this.idsesion
+	ENDIF    
 	If This.chktienda = 0 Then
 		TEXT TO lc NOSHOW TEXTMERGE
 		SELECT `x`.`idclie`,`x`.`razo`      AS `razo`,
@@ -286,9 +291,9 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		Endif
 		This.CONTRANSACCION='S'
 	Endif
-	ur=This.IngresaCabeceraAnticipo(0,nidclie,dfech,4,npago,goapp.nidusua,goapp.tienda,0,Id())
+	ur=This.IngresaCabeceraAnticipo(0,nidclie,dfech,this.codv,npago,goapp.nidusua,goapp.tienda,0,Id())
 	If ur<1
-		If This.contrasaccion='S'
+		If This.contransaccion='S'
 			This.DeshacerCambios()
 		Endif
 		Return 0
@@ -301,13 +306,13 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	nmp=Iif(cmoneda='D',Round(npago*ndolar,2),npago)
-	If ocaja.IngresaDatosLcajaEe(dfech,"",cdetalle,fe_gene.gene_idcre,nmp,0,'S',fe_gene.dola,goapp.nidusua,nidanti)<1 Then
+	If ocaja.IngresaDatosLcajaEe(dfech,"",cdetalle,fe_gene.gene_idcre,nmp,0,'S',fe_gene.dola,this.idcajero,nidanti)<1 Then
 		If This.contrasaccion='S'
 			This.DeshacerCambios()
 		Endif
 		Return 0
 	Endif
-	If This.contrasaccion='S'
+	If This.contransaccion='S'
 		If This.GrabarCambios()<1 Then
 			Return 0
 		Endif

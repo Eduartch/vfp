@@ -1,6 +1,6 @@
 Define Class cpesisven As Odata Of 'd:\capass\database\data'
-    codt=0
-  	Function ConsultaBoletasyNotasporenviar(f1, f2)
+	codt=0
+	Function ConsultaBoletasyNotasporenviar(f1, f2)
 	Local lc
 	TEXT To lc Noshow Textmerge
 	    SELECT resu_fech,enviados,resumen,resumen-enviados,enviados-resumen
@@ -78,19 +78,31 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	Return 1
 	Endfunc
 	Function consultarguiasxenviar(ccursor)
+*!*		 SELECT guia_fech AS guia_fech,guia_ndoc AS ndoc,t.razon AS transportista,guia_idgui AS idguia,guia_moti AS motivo,
+*!*	           guia_tick AS ticket FROM fe_guias AS g
+*!*	           INNER JOIN fe_tra AS t ON t.idtra=g.guia_idtr
+*!*	          WHERE  guia_acti='A' AND LEFT(guia_mens,1)<>'0' AND LEFT(guia_ndoc,1)='T' order by guia_ndoc,guia_fech
+*!*
+
+*!*	    SELECT guia_fech AS guia_fech,guia_ndoc AS ndoc,c.razo AS cliente,t.razon AS transportista,guia_idgui AS idguia,guia_moti AS motivo,
+*!*	           guia_tick AS ticket FROM fe_guias AS g
+*!*	           INNER JOIN fe_tra AS t ON t.idtra=g.guia_idtr
+*!*	           INNER JOIN fe_clie AS c ON c.idclie=g.`guia_idcl`
+*!*	           WHERE  guia_acti='A' AND LEFT(guia_mens,1)<>'0' AND guia_moti='v'
+*!*	           UNION ALL
 	TEXT TO lc NOSHOW textmerge
-	       SELECT fech,ndoc,cliente,Transportista,idguia,motivo,ticket FROM
-          (SELECT fech,ndoc,cliente,Transportista,idguia,'V' AS motivo,guia_tick as ticket FROM  vguiasventas
-           WHERE LEFT(ndoc,1)<>'S' AND LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
+	      SELECT fech,ndoc,cliente,Transportista,idguia,motivo,ticket FROM
+          (SELECT fech,ndoc,cliente,Transportista,idguia,'V' AS motivo,guia_tick AS ticket FROM  vguiasventas
+           WHERE LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
            UNION ALL
-           SELECT fech,ndoc,cliente,Transportista,idguia,'D' AS motivo,guia_tick as ticket FROM  vguiasdevolucion
-           WHERE LEFT(ndoc,1)<>'S' AND LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
+           SELECT fech,ndoc,cliente,Transportista,idguia,'D' AS motivo,guia_tick AS ticket FROM  vguiasdevolucion
+           WHERE LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
            UNION ALL
-           SELECT fech,ndoc,cliente,Transportista,idguia,'C' AS motivo,guia_tick as ticket FROM  vguiasrcompras
-           WHERE LEFT(ndoc,1)<>'S' AND LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
+           SELECT fech,ndoc,cliente,Transportista,idguia,'C' AS motivo,guia_tick AS ticket FROM  vguiasrcompras
+           WHERE  LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
            UNION ALL
            SELECT guia_fech AS fech,guia_ndoc AS ndoc,g.empresa AS cliente,IFNULL(t.razon,'') AS Transportista,
-           guia_idgui AS idguia,'T' AS Motivo,guia_tick  as ticket FROM fe_guias AS a
+           guia_idgui AS idguia,'T' AS Motivo,guia_tick  AS ticket FROM fe_guias AS a
            LEFT JOIN fe_tra AS t ON t.idtra=a.guia_idtr,fe_gene  AS g
            WHERE LEFT(guia_ndoc,1)='T'  AND  LEFT(guia_mens,1)<>'0' AND guia_moti='T' AND guia_acti='A')AS w
            GROUP BY fech,ndoc,cliente,Transportista,idguia,motivo,ticket  ORDER BY fech,ndoc
@@ -99,7 +111,36 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
+	Endfunc
+	Function consultarguiasxenviaralpharmaco(ccursor)
+	TEXT TO lc NOSHOW textmerge
+	      SELECT fech,ndoc,cliente,Transportista,idguia,motivo,ticket FROM
+          (SELECT fech,ndoc,cliente,Transportista,idguia,'V' AS motivo,guia_tick AS ticket FROM  vguiasventas
+           WHERE LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
+           UNION ALL
+           SELECT guia_fech AS guia_fech,guia_ndoc AS ndoc,c.razo AS cliente,t.razon AS transportista,guia_idgui AS idguia,guia_moti AS motivo,
+           guia_tick AS ticket FROM fe_guias AS g
+           INNER JOIN fe_tra AS t ON t.idtra=g.guia_idtr
+           INNER JOIN fe_clie AS c ON c.idclie=g.`guia_idcl`
+           WHERE  guia_acti='A' AND LEFT(guia_mens,1)<>'0' AND guia_moti='v'
+           UNION ALL
+           SELECT fech,ndoc,cliente,Transportista,idguia,'D' AS motivo,guia_tick AS ticket FROM  vguiasdevolucion
+           WHERE LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
+           UNION ALL
+           SELECT fech,ndoc,cliente,Transportista,idguia,'C' AS motivo,guia_tick AS ticket FROM  vguiasrcompras
+           WHERE  LEFT(guia_mens,1)<>'0' AND LEFT(ndoc,1)='T'
+           UNION ALL
+           SELECT guia_fech AS fech,guia_ndoc AS ndoc,g.empresa AS cliente,IFNULL(t.razon,'') AS Transportista,
+           guia_idgui AS idguia,'T' AS Motivo,guia_tick  AS ticket FROM fe_guias AS a
+           LEFT JOIN fe_tra AS t ON t.idtra=a.guia_idtr,fe_gene  AS g
+           WHERE LEFT(guia_ndoc,1)='T'  AND  LEFT(guia_mens,1)<>'0' AND guia_moti='T' AND guia_acti='A')AS w
+           GROUP BY fech,ndoc,cliente,Transportista,idguia,motivo,ticket  ORDER BY fech,ndoc
+	ENDTEXT
+	If This.EjecutaConsulta(lc,ccursor)<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 	Function consultarguiasxenviarxtienda(ccursor)
 	TEXT TO lc NOSHOW textmerge
 	       SELECT fech,ndoc,cliente,Transportista,idguia,motivo,ticket FROM

@@ -3,6 +3,7 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 	Set Procedure To d:\capass\modelos\cajae,d:\capass\modelos\ctasxpagar Additive
 	ocaja=Createobject("cajae")
 	octaspagar=Createobject("ctasporpagar")
+	octaspagar.idsesion=This.idsesion
 	If This.validaocompras()<1 Then
 		Return 0
 	Endif
@@ -27,7 +28,7 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 		Return 0
 	Endif
 	If  This.nforma=2 Then
-		If  octaspagar.registrarcuentasporpagar('tmpd',nauto,This.nidprov,This.cmoneda,This.dFecha,This.nimpo8,This.nidctat,This.ndolar)<1 Then
+		If  octaspagar.registra('tmpd',nauto,This.nidprov,This.cmoneda,This.dFecha,This.nimpo8,This.nidctat,This.ndolar)<1 Then
 			This.Cmensaje=octaspagar.Cmensaje
 			This.DeshacerCambios()
 			Return 0

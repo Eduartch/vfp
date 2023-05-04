@@ -197,7 +197,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		SELECT k.idart,SUM(cant) AS cant,SUM(k.cant*k.prec) AS importe
 		FROM fe_rcom AS r
 		INNER JOIN fe_kar AS k ON k.idauto=r.idauto
-		WHERE tdoc='20' AND k.acti='A' AND r.acti='A' AND form='E' AND r.fech BETWEEN '<<dfi>>' AND '<<dff>>' and rcom_idtr=0 GROUP BY idart) AS s
+		WHERE tdoc='20' AND k.acti='A' AND r.acti='A' AND form='E' AND r.fech BETWEEN '<<dfi>>' AND '<<dff>>' and rcom_idtr=0 and r.codt=<<this.almacen>> GROUP BY idart) AS s
 		INNER JOIN fe_art AS a ON a.idart=s.idart
 		INNER JOIN fe_fletes AS  f ON f.idflete=a.idflete,fe_gene AS g
 	ENDTEXT
@@ -208,7 +208,8 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		SELECT r.idauto
 		FROM fe_rcom AS r
 		INNER JOIN fe_kar AS k ON k.idauto=r.idauto
-		WHERE tdoc='20' AND k.acti='A' AND r.acti='A' AND form='E' AND r.fech BETWEEN '<<dfi>>' AND '<<dff>>' GROUP BY idauto
+		WHERE tdoc='20' AND k.acti='A' AND r.acti='A' AND form='E' AND r.fech BETWEEN '<<dfi>>' AND '<<dff>>'
+		and rcom_idtr=0 and r.codt=<<this.almacen>> GROUP BY idauto
 	ENDTEXT
 	If This.ejecutaconsulta(lcx,'ldx')<1 Then
 		Return 0
@@ -340,6 +341,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		Endif
 		ocorr.ndoc=xvtas.ndoc
 		ocorr.nsgte=This.nsgte
+        ocorr.nsgte=VAL(SUBSTR(xvtas.ndoc,5))
 		ocorr.idserie=This.idserie
 		If ocorr.generacorrelativo()<1  Then
 			This.Cmensaje=ocorr.Cmensaje
@@ -398,7 +400,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	cidpc=Id()
 	nidusua=goapp.nidusua
 	nidtda=goapp.tienda
-	nAuto=This.IngresaResumenDctocanjeado(This.tdoc,cform,cndoc,This.fecha,This.fecha,cdeta,nv,nigv,nt,'','S',fe_gene.dola,fe_gene.igv,'k',ccodp,'V',goapp.nidusua,1,goapp.tienda,fe_gene.idctav,fe_gene.idctai,fe_gene.idctat,'',nidrv)
+	nAuto=This.IngresaResumenDctocanjeado(This.tdoc,cform,xvtas.ndoc,This.fecha,This.fecha,cdeta,nv,nigv,nt,'','S',fe_gene.dola,fe_gene.igv,'k',ccodp,'V',goapp.nidusua,1,goapp.tienda,fe_gene.idctav,fe_gene.idctai,fe_gene.idctat,'',nidrv)
 	If nAuto<1 Then
 		Return 0
 	Endif
@@ -510,7 +512,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	vd=1
 	Select ldx
 	Scan All
-		TEXT TO ulcx TEXTMERGE
+		TEXT TO ulcx NOSHOW  TEXTMERGE
            UPDATE fe_rcom SET rcom_idtr=<<nidrv>> where idauto=<<ldx.idauto>>
 		ENDTEXT
 		If This.ejecutarsql(ulcx)<1 Then
