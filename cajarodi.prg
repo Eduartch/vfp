@@ -208,11 +208,11 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
         CAST(0 as decimal(12,2)) as usada,
 		CAST(IF(a.lcaj_form='D',IFNULL(ROUND(k.cant*k.prec,2),0),IF(a.lcaj_orig='CB',a.lcaj_acre,0)) AS DECIMAL(12,2)) AS bancos,
 		if(a.lcaj_form='T',if(lcaj_tarj=0,ROUND(k.cant*k.prec,2),0),0) as tarjeta1,
-		if(a.lcaj_acre>0,if(a.lcaj_orig='Ca',a.lcaj_acre,0),0) as gastos
+		if(a.lcaj_acre>0,if(a.lcaj_orig='Ca',if(lcaj_form='C',0,a.lcaj_acre),0),0) as gastos
 		from fe_lcaja as a
 		left join fe_rcom as b on b.idauto=a.lcaj_idau
 		left join (select idart,alma,cant,prec,idauto from fe_kar as q where acti='A' AND q.alma=<<nidalma>> AND tipo='V') as k on k.idauto=b.idauto
-		where a.lcaj_fech='<<dfecha>>' and a.lcaj_acti='A' and a.lcaj_codt=<<nidalma>> and a.caja_form='E'
+		where a.lcaj_fech='<<dfecha>>' and a.lcaj_acti='A' and a.lcaj_codt=<<nidalma>> and a.caja_form='E' and lcaj_form='E'
 		union all
 		select k.prec,k.idart as coda,day(a.lcaj_fech) as dia,k.cant,
 		 CASE a.lcaj_form

@@ -20,7 +20,7 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 		SELECT f.fech AS resu_fech,IF(f.mone='S',ABS(f.impo),ABS(f.impo*f.dolar)) AS resu_impo,' ' AS resu_mens,2 AS Tipo FROM fe_rcom f
 		INNER JOIN fe_ncven g ON g.ncre_idan=f.idauto
 		INNER JOIN fe_rcom AS w ON w.idauto=g.ncre_idau
-		WHERE  f.fech between '<<f1>>' and '<<f2>>' and f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1)='F' AND w.tdoc='03' AND f.idcliente>0 ) AS x)
+		WHERE  f.fech between '<<f1>>' and '<<f2>>' and f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1) in('F','B') AND w.tdoc='03' AND f.idcliente>0 ) AS x)
 		AS y GROUP BY resu_fech ORDER BY resu_fech) AS zz  WHERE resumen-enviados>=1
 	ENDTEXT
 	If  This.EjecutaConsulta(lc, 'rbolne') < 1 Then
@@ -53,7 +53,7 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 		SELECT f.fech AS resu_fech,IF(f.mone='S',ABS(f.impo),ABS(f.impo*f.dolar)) AS resu_impo,' ' AS resu_mens,2 AS Tipo FROM fe_rcom f
 		INNER JOIN fe_ncven g ON g.ncre_idan=f.idauto
 		INNER JOIN fe_rcom AS w ON w.idauto=g.ncre_idau
-		WHERE f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1)='F' AND w.tdoc='03' AND f.idcliente>0 and f.codt=<<goapp.tienda>>) AS x)
+		WHERE f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1) in('F','B') AND w.tdoc='03' AND f.idcliente>0 and f.codt=<<goapp.tienda>>) AS x)
 		AS y GROUP BY resu_fech ORDER BY resu_fech) AS zz  WHERE resumen-enviados>=1
 		ENDTEXT
 	Else
@@ -71,7 +71,7 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 		SELECT f.fech AS resu_fech,IF(f.mone='S',ABS(f.impo),ABS(f.impo*f.dolar)) AS resu_impo,' ' AS resu_mens,2 AS Tipo FROM fe_rcom f
 		INNER JOIN fe_ncven g ON g.ncre_idan=f.idauto
 		INNER JOIN fe_rcom AS w ON w.idauto=g.ncre_idau
-		WHERE f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1)='F' AND w.tdoc='03' AND f.idcliente>0 ) AS x)
+		WHERE f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1) in('F','B') AND w.tdoc='03' AND f.idcliente>0 ) AS x)
 		AS y GROUP BY resu_fech ORDER BY resu_fech) AS zz  WHERE resumen-enviados>=1
 		ENDTEXT
 	Endif

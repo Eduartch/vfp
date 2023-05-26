@@ -402,8 +402,7 @@ Define Class clientex As cliente
 	TEXT To m.lc Noshow Textmerge
 		   Select  nomb, logc_fope From fe_acrecli F
 			   inner Join fe_usua u   On u.idusua=F.logc_idus
-			   Where logc_idcl =<<goapp.npara1>>
-			   Order By logc_fope Desc;
+			   Where logc_idcl =<<goapp.npara1>>   Order By logc_fope Desc;
 	ENDTEXT
 	If This.Ejecutaconsulta(m.lc, m.ccur) < 1 Then
 		Return 0
@@ -417,12 +416,7 @@ Define Class clientex As cliente
 	m.lc		 = ''
 	goapp.npara1 = This.Codigo
 	TEXT To m.lc Noshow Textmerge Pretext 7
-		Select  proy_nomb,
-				proy_idcl,
-				proy_idpr
-			From fe_proyectos
-			Where proy_idcl= <<goapp.npara1>>
-				And proy_acti = 'A'
+		Select  proy_nomb,proy_idcl,proy_idpr From fe_proyectos Where proy_idcl= <<goapp.npara1>> 		And proy_acti = 'A'
 	ENDTEXT
 	If This.Ejecutaconsulta(m.lc, m.ccur) < 1  Then
 		Return 0
@@ -436,14 +430,7 @@ Define Class clientex As cliente
 	m.lc		 = ''
 	goapp.npara1 = This.Codigo
 	TEXT To m.lc Noshow Textmerge Pretext 7
-		 Select  succ_nomb,
-				 succ_dire,
-				 succ_ciud,
-				 succ_idcl,
-				 succ_id
-			 From fe_succliente
-			 Where succ_idcl= <<goapp.npara1>>
-				 And succ_acti = 'A'
+		 Select  succ_nomb, succ_dire, succ_ciud, succ_idcl, succ_id From fe_succliente	 Where succ_idcl= <<goapp.npara1>>	 And succ_acti = 'A'
 	ENDTEXT
 	If This.Ejecutaconsulta(m.lc, m.ccur) < 1  Then
 		Return 0

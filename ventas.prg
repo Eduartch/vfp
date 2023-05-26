@@ -513,55 +513,46 @@ Define Class ventas As Odata Of 'd:\capass\database\data.prg'
 	Function ValidarNotaCreditoVentas()
 	Do Case
 	Case This.monto = 0 And  This.tiponotacredito <> '13'
-
 		This.Cmensaje = "Importes Deben de Ser Diferente de Cero"
 		Return 0
 	Case Len(Alltrim(This.serie)) < 4 Or Len(Alltrim(This.numero)) < 8;
 			OR This.serie = "0000" Or Val(This.numero) = 0
 		This.Cmensaje = "Falta Ingresar Correctamente el Número del  Documento"
-
 		Return 0
-	Case This.tdocref = '01' And  !'FN' $ Left(This.serie,2)
+	Case This.tdocref = '01' And  !'FN' $ Left(This.serie,2) AND this.tdoc='07'
 		This.Cmensaje = "Número del  Documento NO Válido"
-
 		Return 0
+    Case This.tdocref = '01' And  !'FD' $ Left(This.serie,2) AND this.tdoc='08'
+		This.Cmensaje = "Número del  Documento NO Válido"
+		Return 0		
 	Case This.codigo=0
 		This.Cmensaje = "Ingrese Un Cliente"
-
 		Return 0
 	Case (Len(Alltrim(This.nombre)) < 5 Or !validaruc(This.ruc)) And This.tdocref = '01'
 		This.Cmensaje = "Es Necesario Ingresar el Nombre Completo de Cliente, RUC Válido"
-
 		Return 0
 	Case (Len(Alltrim(This.nombre)) < 5 Or Len(Alltrim(This.dni)) <> 8) And This.tdocref = '03'
 		This.Cmensaje = "Es Necesario Ingresar el Nombre Completo de Cliente, DNI Válidos"
-
 		Return 0
 	Case Year(This.fecha) <> Val(goapp.año)
 		This.Cmensaje = "La Fecha No es Válida"
-
 		Return 0
 	Case  permiteingresox(This.fecha) = 0
 		This.Cmensaje = "No Es posible Registrar en esta Fecha estan bloqueados Los Ingresos"
-
 		Return 0
 	Case PermiteIngresoVentas1(This.serie +This.numero, This.tdoc, 0, This.fecha) = 0
 		This.Cmensaje = "N° de Documento de Venta Ya Registrado"
-
 		Return 0
 	Case Left(This.tiponotacredito, 2) = '13' And This.agrupada = 0
 		This.Cmensaje = "Tiene que seleccionar la opción  Agrupada para este documento"
 		Return 0
 	Case Left(This.tiponotacredito, 2) = '13' And This.monto > 0
 		This.Cmensaje = "Los Importes Deben de ser 0"
-
 		Return 0
 	Case Left(This.tiponotacredito, 2) = '13' And This.montonotacredito13 = 0
 		This.Cmensaje = "Ingrese Importe para Nota Crédito Tipo 13"
-
 		Return 0
 	Case This.tdoc ='07'
-
 		If This.monto >This.montoreferencia
 			This.Cmensaje = "El Importe No Puede Ser Mayor al del Documento"
 			Return 0

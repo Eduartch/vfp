@@ -33,15 +33,15 @@ Define Class presentaciones As Odata Of 'd:\capass\database\data'
 	Return 1
 	Endfunc
 	Function muestrapresentacionkya(np1,cur)
+	*IF(b.epta_cost>0,IF(b.epta_mone='S',IF(b.epta_esti='M',ROUND(b.epta_cost*((b.epta_marg/100)+1),2),ROUND(b.epta_cost*((b.epta_marg/100)+1),2)),IF(b.epta_esti='M',ROUND(b.epta_cost*g.dola*((b.epta_marg/100)+1),2),ROUND(b.epta_cost*g.dola*((b.epta_marg/100)+1),2))),b.epta_prec) AS epta_prec,
 	TEXT to lc NOSHOW TEXTMERGE
-		SELECT a.pres_desc,b.epta_cant,b.epta_cost,b.epta_marg,
-		IF(b.epta_cost>0,IF(b.epta_mone='S',IF(b.epta_esti='M',ROUND(b.epta_cost*((b.epta_marg/100)+1),2),ROUND(b.epta_cost*((b.epta_marg/100)+1),2)),IF(b.epta_esti='M',ROUND(b.epta_cost*g.dola*((b.epta_marg/100)+1),2),ROUND(b.epta_cost*g.dola*((b.epta_marg/100)+1),2))),b.epta_prec) AS epta_prec,
+		SELECT a.pres_desc,b.epta_cant,b.epta_cost,b.epta_marg,epta_prec,
 		IF(b.epta_mone='S',ROUND(b.epta_cost/((100-g.pmvtas)/100),2),ROUND((b.epta_cost*g.dola)/((100-g.pmvtas)/100),2)) AS precio1,
 		IF(b.epta_mone='S',b.epta_cost,ROUND(b.epta_cost*g.dola,2)) AS costo,
 		b.epta_pres,b.epta_idar,b.epta_idep,b.epta_mone,b.epta_esti 
 		FROM fe_epta AS b
 		INNER JOIN fe_presentaciones AS a  ON b.epta_pres=a.pres_idpr,fe_gene AS g
-		WHERE b.epta_acti='A' AND a.pres_acti='A' ORDER BY b.epta_cant;
+		WHERE b.epta_acti='A' AND a.pres_acti='A' AND epta_idar=<<np1>> ORDER BY b.epta_cant;
 	ENDTEXT
 	If This.ejecutaconsulta(lc,cur)<1 Then
 		Return 0

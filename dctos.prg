@@ -10,9 +10,24 @@ Define Class dctos As Odata Of "d:\capass\database\data.prg"
 	dct[3,1]='NOTAS-PEDIDO'
 	dct[3,2]='20'
 	dct[3,3]=3
-*!*		dct[4,1]='OTROS'
-*!*		dct[4,2]='25'
-*!*		dct[4,3]=3
+	Create Cursor (ccursor) (nomb c(10), tdoc c(2),idtdoc N(2))
+	Insert Into (ccursor) From Array dct
+	Return 1
+	ENDFUNC
+	Function mostrarvtasregistro(ccursor)
+	Dimension dct[4,4]
+	dct[1,1]='FACTURA     '
+	dct[1,2]='01'
+	dct[1,3]=1
+	dct[2,1]='BOLETA      '
+	dct[2,2]='03'
+	dct[2,3]=2
+	dct[3,1]='NOTAS CREDITO'
+	dct[3,2]='07'
+	dct[3,3]=3
+	dct[4,1]='NOTAS DEBITO'
+	dct[4,2]='08'
+	dct[4,3]=3
 	Create Cursor (ccursor) (nomb c(10), tdoc c(2),idtdoc N(2))
 	Insert Into (ccursor) From Array dct
 	Return 1

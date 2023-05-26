@@ -300,27 +300,12 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		nit=nit+1
 		Insert Into vtas2(ndoc,nitem,Auto)Values(cdcto,nit,x)
 	Next
-*!*		Select ndoc,Sum(Round(cant*Prec,2)) As importe,Count(*) As nitem,Auto From vtas2 Into Cursor;
-*!*			xvtas Readwrite Group By Auto
-*!*		Select xvtas
-*!*		Do While !Eof()
-*!*			cimporte=Diletras(xvtas.importe,'S')
-*!*			ntotal=xvtas.importe
-*!*			nvalor=Round(xvtas.importe/fe_gene.igv,2)
-*!*			nigv=Round(ntotal-nvalor,2)
-*!*			Select vtas2
-*!*			Replace cletras With cimporte,ndoc With xvtas.ndoc,valor With nvalor,igv With nigv,Total With ntotal For vtas2.Auto=xvtas.Auto
-*!*			Select xvtas
-*!*			Skip
-*!*		Enddo
 	Select * From vtas2 Into Table Addbs(Sys(5)+Sys(2003))+'canjes'
-*!*		Go Top In xvtas
 	Return 1
 	Endfunc
 	Function generacanjes()
 	sw=1
 	Set DataSession To This.idsesion
-*!*		This.generatmpcanjes("lcanjes")
 	Set Procedure To d:\capass\modelos\correlativos,d:\capass\modelos\ctasxcobrar Additive
 	ocorr=Createobject("correlativo")
 	octascobrar=Createobject("ctasporcobrar")
@@ -341,7 +326,7 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		Endif
 		ocorr.ndoc=xvtas.ndoc
 		ocorr.nsgte=This.nsgte
-        ocorr.nsgte=VAL(SUBSTR(xvtas.ndoc,5))
+		ocorr.nsgte=Val(Substr(xvtas.ndoc,5))
 		ocorr.idserie=This.idserie
 		If ocorr.generacorrelativo()<1  Then
 			This.Cmensaje=ocorr.Cmensaje
@@ -391,13 +376,9 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	nigv=Round(xvtas.importe-Round(xvtas.importe/fe_gene.igv,2),2)
 	nt=xvtas.importe
 	ccodp=9083
-	ctg="K"
-	cor="CK"
 	cmvtoc="I"
 	cdeta='Canje  '+ Dtoc(This.fechai)+ '-' + ' Hasta '+Dtoc(This.fechaf)
 	cdetalle=''
-	ndvto=0
-	cidpc=Id()
 	nidusua=goapp.nidusua
 	nidtda=goapp.tienda
 	nAuto=This.IngresaResumenDctocanjeado(This.tdoc,cform,xvtas.ndoc,This.fecha,This.fecha,cdeta,nv,nigv,nt,'','S',fe_gene.dola,fe_gene.igv,'k',ccodp,'V',goapp.nidusua,1,goapp.tienda,fe_gene.idctav,fe_gene.idctai,fe_gene.idctat,'',nidrv)
@@ -418,7 +399,6 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	Local sws As Integer
 	ccodv=4
 	sws=1
-	Cmensaje=""
 	Select vtas2
 	Set Filter To Auto=xvtas.Auto And coda>0
 	Go Top
@@ -516,8 +496,8 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
            UPDATE fe_rcom SET rcom_idtr=<<nidrv>> where idauto=<<ldx.idauto>>
 		ENDTEXT
 		If This.ejecutarsql(ulcx)<1 Then
-			Exit
 			vd=0
+			Exit
 		Endif
 	Endscan
 	If vd=0 Then
@@ -562,11 +542,12 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 	Return nida
 	Endfunc
 	Function listarcanjesvtas(ccursor)
-	SET DATASESSION TO this.idsesion
+	Set DataSession To This.idsesion
 	dfi=cfechas(This.fechai)
 	dff=cfechas(This.fechaf)
 	TEXT TO lc NOSHOW TEXTMERGE
-	SELECT canj_fech,canj_vtas,canj_impo,canj_feci,canj_fecf,u.nomb as usuario,canj_fope,r.ndoc,r.impo,r.idauto,canj_idcan  FROM fe_canjesvtas AS c
+	SELECT canj_fech,canj_vtas,canj_impo,canj_feci,canj_fecf,u.nomb as usuario,canj_fope,r.ndoc,r.impo,r.idauto,canj_idcan,tdoc  
+	FROM fe_canjesvtas AS c
 	inner join fe_usua as u  on u.idusua=c.canj_idus
 	INNER JOIN fe_rcom AS r ON r.rcom_idtr=c.canj_idcan
 	WHERE canj_fech BETWEEN '<<dfi>>' AND '<<dff>>' AND canj_acti='A'  AND r.acti='A'  ORDER BY canj_fech
@@ -575,5 +556,74 @@ Define Class ventaslopez As ventas Of d:\capass\modelos\ventas
 		Return 0
 	Endif
 	Return 1
+	Endfunc
+	Function mostrarventaporid(nidauto,ccursor)
+	IF this.idsesion>1 then
+	   SET DATASESSION TO this.idsesion
+	ENDIF 
+	TEXT TO lc NOSHOW TEXTMERGE
+	  SELECT  a.kar_Cost  AS kar_cost,
+	  c.idusua,a.kar_comi  AS kar_comi,
+	  a.codv      AS codv,
+	  a.idauto    AS idauto,
+	  c.codt      AS alma,
+	  a.kar_idco  AS idcosto,
+	  a.idkar     AS idkar,
+	  a.idart     AS Coda,
+	  a.cant      AS cant,
+	  a.prec      AS prec,
+	  c.valor     AS valor,
+	  c.igv       AS igv,
+	  c.impo      AS impo,
+	  c.fech      AS fech,
+	  c.fecr      AS fecr,
+	  c.form      AS form,
+	  c.deta      AS deta,
+	  c.exon      AS exon,
+	  c.ndo2      AS ndo2,
+	  c.rcom_entr AS rcom_entr,
+	  c.idcliente AS idclie,
+	  d.razo      AS razo,
+	  d.nruc      AS nruc,
+	  d.dire      AS dire,
+	  d.ciud      AS ciud,
+	  d.ndni      AS ndni,
+	  a.tipo      AS tipo,
+	  c.tdoc      AS tdoc,
+	  c.ndoc      AS ndoc,
+	  c.dolar     AS dolar,
+	  c.mone      AS mone,
+	  b.descri    AS descri,
+	  IFNULL(xx.idcaja,0) AS idcaja,
+	  b.unid      AS unid,
+	  b.premay    AS pre1,
+	  b.tipro     AS tipro,
+	  b.peso      AS peso,
+	  b.premen    AS pre2,
+	  IFNULL(z.vend_idrv,0) AS nidrv,
+	  c.vigv      AS vigv,
+	  a.dsnc      AS dsnc, a.dsnd      AS dsnd,
+	  a.gast      AS gast, c.idcliente AS idcliente,
+	  c.codt      AS codt, b.pre3      AS pre3,
+	  b.cost      AS costo,  b.uno       AS uno,
+	  b.dos       AS dos,b.tre,b.cua,
+	  (b.uno + b.dos+b.tre+b.cua) AS TAlma,
+	  c.fusua     AS fusua,  p.nomv      AS Vendedor,
+	  q.nomb      AS Usuario,	  a.incl      AS incl,
+	  c.rcom_mens AS rcom_mens,rcom_idtr
+	FROM fe_art b
+    INNER JOIN fe_kar a  ON a.idart = b.idart
+    INNER  JOIN fe_rcom c ON a.idauto = c.idauto
+    LEFT JOIN fe_caja xx   ON xx.idauto = c.idauto
+    INNER JOIN fe_clie d  ON c.idcliente = d.idclie
+    INNER  JOIN fe_vend p      ON p.idven = a.codv
+    INNER JOIN fe_usua q     ON q.idusua = c.idusua
+    LEFT JOIN (SELECT vend_idau,vend_idrv FROM fe_rvendedor WHERE vend_acti='A') AS z  ON z.vend_idau = c.idauto
+    WHERE c.acti <> 'I'   AND a.acti <> 'I' AND c.idauto=<<nidauto>> order by idkar 
+	ENDTEXT
+	IF this.ejecutaconsulta(lc,ccursor)<1 then
+	   RETURN 0
+	ENDIF
+	RETURN 1
 	Endfunc
 Enddefine
