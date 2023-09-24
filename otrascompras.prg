@@ -7,6 +7,7 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 	If This.validaocompras()<1 Then
 		Return 0
 	Endif
+	cformapago=IIF(This.cforma='C','',this.cforma)
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
@@ -22,7 +23,7 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 		This.DeshacerCambios()
 		Return 0
 	Endif
-	If _Screen.ocajae.IngresaDatosLCajaEFectivorodi(This.dfechar,"",This.cproveedor,This.nidctat,0,This.nimpo8,This.cmoneda,This.ndolar,goapp.nidusua,This.nidprov,nauto,This.cforma,This.cndoc,This.ctdoc,goapp.tienda,'Ca',0,"","","")<1 Then
+	If _Screen.ocajae.IngresaDatosLCajaEFectivorodi1(This.dfechar,"",This.cproveedor,This.nidctat,0,This.nimpo8,This.cmoneda,This.ndolar,goapp.nidusua,This.nidprov,nauto,This.cforma,This.cndoc,This.ctdoc,goapp.tienda,'Ca',0,"","","",cformapago)<1 Then
 		This.Cmensaje=ocaja.Cmensaje
 		This.DeshacerCambios()
 		Return 0
@@ -80,10 +81,11 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 	octaspagar=Createobject("ctasporpagar")
 	Set DataSession To This.idsesion
 	octaspagar.idsesion=This.idsesion
+	cformapago=IIF(This.cforma='C','',this.cforma)
 	If This.validaocompras()<1 Then
 		Return 0
 	Endif
-	If This.IniciaTransaccion()=0 Then
+	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
 	If This.ActualizaResumenDctoC(This.cTDOC,This.cforma,This.cndoc,This.dFecha,This.dfechar,This.cdetalle,This.nimpo1+This.nimpo2+This.nimpo3+This.nimpo4,This.nimpo5,This.nimpo8,'',This.cmoneda,;
@@ -91,8 +93,8 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 		This.DeshacerCambios()
 		Return 0
 	Endif
-	If ocaja.IngresaDatosLCajaEFectivo11(This.dfechar,"",This.cproveedor,This.nidctat,0,This.nimpo8,This.cmoneda,;
-			this.ndolar,goapp.nidusua,This.nidprov,This.nreg,This.cforma,This.cndoc,This.ctdoc)<1 Then
+	If _Screen.ocajae.IngresaDatosLCajaEFectivorodi1(This.dfechar,"",This.cproveedor,This.nidctat,0,This.nimpo8,This.cmoneda,This.ndolar,goapp.nidusua,This.nidprov,This.nreg,This.cforma,This.cndoc,This.ctdoc,goapp.tienda,'Ca',0,"","","",cformapago)<1 Then
+		This.Cmensaje=ocaja.Cmensaje
 		This.DeshacerCambios()
 		Return 0
 	Endif
@@ -112,7 +114,7 @@ Define Class otrascompras As compras Of 'd:\capass\modelos\compras'
 				Return 0
 			Endif
 		Endif
-		If  ctaspagar.registra('tmpd',This.nreg,This.nidprov,This.cmoneda,This.dFecha,This.nimpo8,This.nidctat,This.ndolar)<1 Then
+		If  octaspagar.registra('tmpd',This.nreg,This.nidprov,This.cmoneda,This.dFecha,This.nimpo8,This.nidctat,This.ndolar)<1 Then
 			This.DeshacerCambios()
 			Return 0
 		Endif

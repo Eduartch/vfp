@@ -193,11 +193,11 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
          WHEN 'T' THEN 'Tarjeta'
          ELSE 'Deposito'
          END AS forma,a.lcaj_deta as deta,
-		ifnull(if(lcaj_tdoc='01',if(left(b.ndoc,1)='F',b.ndoc,concat('F/.',b.ndoc)),
-        if(left(b.ndoc,1)='B',b.ndoc,concat('B/.',b.ndoc))),a.lcaj_dcto) as ndoc,
+		IFNULL(lcaj_dcto,b.ndoc) AS ndoc,
         ifnull(b.tdoc,'99') as tdoc,
 		ifnull(ROUND(k.cant*k.prec,2),0) as Np,
-		CAST(if(lcaj_form='C',ifnull(ROUND(k.cant*k.prec,2),a.lcaj_deud),0)  as decimal(12,2)) as credito,lcaj_orig AS origen,if(lcaj_deud>0,'I','E') as tipo,
+		CAST(if(lcaj_form='C',ifnull(ROUND(k.cant*k.prec,2),a.lcaj_deud),0)  as decimal(12,2)) as credito,
+		lcaj_orig AS origen,if(lcaj_deud>0,'I','E') as tipo,
 		case lcaj_orig
 		when "CK" then 'a'
 		when "Ca" then 'c'
@@ -208,21 +208,20 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
         CAST(0 as decimal(12,2)) as usada,
 		CAST(IF(a.lcaj_form='D',IFNULL(ROUND(k.cant*k.prec,2),0),IF(a.lcaj_orig='CB',a.lcaj_acre,0)) AS DECIMAL(12,2)) AS bancos,
 		if(a.lcaj_form='T',if(lcaj_tarj=0,ROUND(k.cant*k.prec,2),0),0) as tarjeta1,
-		if(a.lcaj_acre>0,if(a.lcaj_orig='Ca',if(lcaj_form='C',0,a.lcaj_acre),0),0) as gastos
+		if(a.lcaj_acre>0,if(a.lcaj_orig='Ca',if(lcaj_form='C',0,a.lcaj_acre),if(lcaj_orig='CB',0,lcaj_acre)),0) as gastos
 		from fe_lcaja as a
 		left join fe_rcom as b on b.idauto=a.lcaj_idau
 		left join (select idart,alma,cant,prec,idauto from fe_kar as q where acti='A' AND q.alma=<<nidalma>> AND tipo='V') as k on k.idauto=b.idauto
-		where a.lcaj_fech='<<dfecha>>' and a.lcaj_acti='A' and a.lcaj_codt=<<nidalma>> and a.caja_form='E' and lcaj_form='E'
+		where a.lcaj_fech='<<dfecha>>' and a.lcaj_acti='A' and a.lcaj_codt=<<nidalma>> and a.caja_form='E' 
 		union all
 		select k.prec,k.idart as coda,day(a.lcaj_fech) as dia,k.cant,
-		 CASE a.lcaj_form
-         WHEN 'E' THEN 'Efecivo'
-         WHEN 'C' THEN 'Crédito'
-         WHEN 'T' THEN 'Tarjeta'
-         ELSE 'Deposito'
-         END AS forma,a.lcaj_deta As deta,
-	    ifnull(if(lcaj_tdoc='01',if(left(b.ndoc,1)='F',b.ndoc,concat('F/.',b.ndoc)),
-        if(left(b.ndoc,1)='B',b.ndoc,concat('B/.',b.ndoc))),a.lcaj_dcto) as ndoc,
+		CASE a.lcaj_form
+        WHEN 'E' THEN 'Efecivo'
+        WHEN 'C' THEN 'Crédito'
+        WHEN 'T' THEN 'Tarjeta'
+        ELSE 'Deposito'
+        END AS forma,a.lcaj_deta As deta,
+	    ifnull(a.lcaj_dcto,ndoc) as ndoc,
         ifnull(b.tdoc,'99') as tdoc,
 		ROUND(k.cant*-k.prec,2) as Np,
         if(lcaj_form='C',ROUND(k.cant*-k.prec,2),0) as credito,lcaj_orig As origen,if(lcaj_deud>0,'I','S') as tipo,'a' as orden,0 as pagos,0 as ingresos,
@@ -231,8 +230,8 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
 		from fe_lcaja as a
 		inner join fe_rcom as b on b.idauto=a.lcaj_idau
         inner join (select q.idart,alma,cant,q.prec,idauto from fe_kar as q join fe_art a on a.idart=q.idart
-        where acti='A' AND q.alma=<<nidalma>> AND tipo='C' and a.tipro='C') as k on k.idauto=b.idauto
-		where a.lcaj_fech='<<dfecha>>'  and a.lcaj_acti='A' and a.lcaj_codt=<<nidalma>> 
+        where acti='A' AND q.alma=<<nidalma>> AND tipo='C' and a.tipro='C' ) as k on k.idauto=b.idauto
+		where a.lcaj_fech='<<dfecha>>'  and a.lcaj_acti='A' and a.lcaj_codt=<<nidalma>> and b.idcliente>0
 		union all
         select 0 as prec,' ' as coda,day(a.lcaj_fech) as dia,0 as cant,
 		'Tarjeta' as forma,a.lcaj_deta As deta,
@@ -464,16 +463,16 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
 	Endif
 	Return nidcaja
 	Endfunc
-	Function registrapagos2(dfecha,cndoc,cdetalle,nidcta,nimporte,cmone,ndolar,ncontrol,ctipo,nidtda)
+	Function registrapagos2(dfecha,cndoc,cdetalle,nidcta,nimporte,cmone,ndolar,nctrl,ctipo,nidtda)
 	If This.iniciatransaccion()<1 Then
 		Return 0
 	Endif
 	If ctipo='I'  Then
-		xc= This.Registrapagosporcajarodi(dfecha,cndoc,cdetalle,nidcta,nimporte,0,cmone,ndolar,goapp.nidusua,ncontrol,'E',nidtda)
+		xc= This.Registrapagosporcajarodi(dfecha,cndoc,cdetalle,nidcta,nimporte,0,cmone,ndolar,goapp.nidusua,nctrl,'E',nidtda)
 		If xc=0 Then
 			q=0
 		Else
-			If  ncontrol>0 Then
+			If  nctrl>0 Then
 				Select atmp
 				Scan All
 					cxr=CancelaCreditosCCajaE(cndoc,atmp.saldo,'P',atmp.moneda,cdetalle,dfecha,atmp.fevto,atmp.tipo,atmp.ncontrol,atmp.nrou,atmp.idrc,Id(),goapp.nidusua,xc)
@@ -486,11 +485,11 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
 			Endif
 		Endif
 	Else
-		xc=This.Registrapagosporcajarodi(dfecha,cndoc,cdetalle,nidcta,0,nimporte,cmone,ndolar,goapp.nidusua,ncontrol,'E',nidtda)
+		xc=This.Registrapagosporcajarodi(dfecha,cndoc,cdetalle,nidcta,0,nimporte,cmone,ndolar,goapp.nidusua,nctrl,'E',nidtda)
 		If xc=0 Then
 			q=0
 		Else
-			If ncontrol>0 Then
+			If nctrl>0 Then
 				Select atmp
 				Scan All
 					cxd=CancelaDeudasCCajae(dfecha,atmp.fevto,atmp.saldo,cndoc,'P',	atmp.moneda,cdetalle,atmp.tipo,atmp.idrd,goapp.nidusua,atmp.ncontrol,'',Id(),ndolar,xc)
@@ -569,7 +568,8 @@ Define Class cajarodi As cajae Of 'd:\capass\modelos\cajae'
 		if(a.lcaj_orig='CC',a.lcaj_deud,CAST(0 as decimal(10,2))) as pagos,lcaj_idca As idcaja,
 		if(a.lcaj_orig='CB',a.lcaj_acre,CAST(0 as decimal(10,2))) as bancos from fe_lcaja as a
 		left join fe_rcom as b on b.idauto=a.lcaj_idau
-		where a.lcaj_fech='<<df>>' and a.lcaj_acti='A' and (a.lcaj_deud<>0 or lcaj_acre<>0) and a.lcaj_codt=<<nidalma>> and a.caja_form='C' order by idcaja
+		where a.lcaj_fech='<<df>>' and a.lcaj_acti='A' and (a.lcaj_deud<>0 or lcaj_acre<>0) 
+		and a.lcaj_codt=<<nidalma>> and a.caja_form='C' order by idcaja
 	ENDTEXT
 	If This.ejecutaconsulta(lc,ccursor)<1 Then
 		Return 0

@@ -18,7 +18,7 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 		a.lcaj_idct As idcta,lcaj_tran,If(lcaj_deud>0,'I','S') As tipomvto,lcaj_idca,lcaj_dcto
 		From fe_lcaja As a
 		inner Join fe_plan As c On c.idcta=a.lcaj_idct
-		Where a.lcaj_acti='A' And a.lcaj_fech Between '<<fi>>' And '<<ff>>'  And lcaj_form='E' Order By a.lcaj_fech
+		Where a.lcaj_acti='A' And a.lcaj_fech Between '<<fi>>' And '<<ff>>'  And (lcaj_form='E' OR (lcaj_form='T' AND lcaj_deud>0)) Order By a.lcaj_fech
 	Endtext
 	If This.EjecutaConsulta(lc, (Calias)) < 1 Then
 		Return 0
@@ -28,9 +28,10 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 	Function Saldoinicialcajaefectivo(df)
 	F = cfechas(df)
 	Text To lc Noshow Textmerge Pretext 7
-     SELECT CAST((SUM(IF(lcaj_mone='S',a.lcaj_deud,ROUND(a.lcaj_deud*a.lcaj_dola,2)))-SUM(IF(a.lcaj_mone='S',a.lcaj_acre,ROUND(a.lcaj_acre*a.lcaj_dola,2)))) as decimal(12,2)) AS si
+     SELECT 
+     CAST((SUM(IF(lcaj_mone='S',a.lcaj_deud,ROUND(a.lcaj_deud*a.lcaj_dola,2)))-SUM(IF(a.lcaj_mone='S',a.lcaj_acre,ROUND(a.lcaj_acre*a.lcaj_dola,2)))) as decimal(12,2)) AS si
 	 FROM fe_lcaja AS a
-	 WHERE a.lcaj_acti='A' AND a.lcaj_fech<'<<f>>' AND lcaj_form='E'  AND lcaj_idct>0
+	 WHERE a.lcaj_acti='A' AND a.lcaj_fech<'<<f>>'  AND lcaj_idct>0 AND (lcaj_form='E' OR (lcaj_form='T' AND lcaj_deud>0))
 	Endtext
 	If This.EjecutaConsulta(lc, 'iniciocaja') < 1 Then
 		Return 0
@@ -90,7 +91,7 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 	dfecha1 = cfechas(Ctod("28/12/2017"))
 	ccursor = 'c_' + Sys(2015)
 	Text To lc Noshow Textmerge
-        lcaj_idus,SUM(if(a.lcaj_deud<>0,lcaj_deud,-lcaj_acre)) as saldo
+        select lcaj_idus,SUM(if(a.lcaj_deud<>0,lcaj_deud,-lcaj_acre)) as saldo
         FROM fe_lcaja  as a WHERE
         a.lcaj_fech between '<<dfecha1>>' and  '<<dfecha>>' and  a.lcaj_acti='A'  and  a.lcaj_form='E'  and  lcaj_idus=<<nidus>> and lcaj_codt=<<nidt>> group by lcaj_idus
 	Endtext

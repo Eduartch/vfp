@@ -1,3 +1,4 @@
+#define URLP "http://companiasysven.com"
 Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	Function mostrarusuarios(ccursor)
 	TEXT TO lc NOSHOW TEXTMERGE
@@ -52,7 +53,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	If This.ejecutarsql(lc)<1 Then
 		Return 0
 	Endif
-	This.Url="http://companiasysven.com/app88/enc.php"
+	This.Url= URLP+ "/app88/enc.php"
 	If  Type('oempresa') = 'U' Then
 		cruc=fe_gene.nruc
 	Else

@@ -65,7 +65,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Text To lc Noshow Textmerge
        SELECT fech,'S' AS mone,CAST(acta as decimal(10,2)) As acta,CAST(0 AS SIGNED) AS SW,idcred,banc AS deta,ndoc,tipo,rcre_idrc FROM fe_cred f
        INNER JOIN fe_rcred AS g ON g.rcre_idrc=f.cred_idrc
-       WHERE ncontrol=-1 AND acti='A' AND rcre_Acti='A'  AND rcre_idcl=<<nid>> and acta>0
+       WHERE ncontrol=-1 AND acti='A' AND rcre_Acti='A'  AND rcre_idcl=<<nid>> and acta>0.1
 	Endtext
 	If This.EjecutaConsulta(lc, ccursor) < 1 Then
 		Return 0

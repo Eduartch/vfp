@@ -18,23 +18,23 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Endif
 	nauto =IngresaResumenTraspasos(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.Ndo2,'S',;
 		fe_gene.dola,fe_gene.igv,'T',0,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
-	If nauto<=0 Then
+	If nauto<1 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
 	nidg= This.IngresaGuiasXTraspaso(This.fecha,This.ptop,This.ptoll,nauto,This.fechat,;
 		goapp.nidusua,This.Detalle,This.Idtransportista,This.ndoc,goapp.tienda)
-	If nidg=0 Then
+	If nidg<1 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
 	If This.Fracciones= 'U' Then
-		If This.grabadetalleguiau(nauto)=0 Then
+		If This.grabadetalleguiau(nauto)<1 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
 	Else
-		If This.Grabardetalleguiatraspaso(nauto)=0 Then
+		If This.Grabardetalleguiatraspaso(nauto)<1 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
@@ -44,6 +44,7 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 			Return 0
 		Endif
 		If This.tdoc='09' And goapp.Emisorguiasremisionelectronica='S' Then
+			Select * From tmpv Into Cursor tmpvg Readwrite
 			This.Imprimir('S')
 			Return 1
 		Else
@@ -95,7 +96,7 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 			Return 0
 		Endif
 	Endif
-	If This.GRabarCambios()=0 Then
+	If This.GRabarCambios()<1 Then
 		Return 0
 	Endif
 	If This.tdoc='09' And goapp.Emisorguiasremisionelectronica='S' Then
@@ -133,10 +134,13 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Function validarguia()
 	Do Case
 	Case  This.recibido='E'
-		Thisform.cmensaje="NO es Posible Actualizar este Traspaso Porque ya esta Recibido"
+		This.cmensaje="NO es Posible Actualizar este Traspaso Porque ya esta Recibido"
+		Return 0
+	Case This.sucursal1=0 Or This.sucursal2=0
+		This.cmensaje="Seleccione al Tienda/Almacen de Ingreso y Salida"
 		Return 0
 	Case This.sucursal1=This.sucursal2
-		Thisform.cmensaje="La Transferencia Debe ser entre almacenes Diferentes"
+		This.cmensaje="La Transferencia Debe ser entre almacenes Diferentes"
 		Return 0
 	Endcase
 	If This.validar()<1 Then
@@ -153,24 +157,28 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Go Top
 	sw=1
 	Do While !Eof()
-		If DevuelveStocks1(tmpv.coda,This.sucursal1,"St")=0 Then
+		If DevuelveStocks1(tmpv.coda,This.sucursal1,"St")<1 Then
 			sw=0
+			This.cmensaje='Al Obtener Stock'
 			Exit
 		Endif
 		If tmpv.cant>st.saldo Then
 			sw=0
+			This.cmensaje='Stock NO Disponible'
 			Exit
 		Endif
 		If This.Conseries='S' Then
 			nidk=IngresaDtraspasos(nauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I',0,'T',This.Detalle,This.sucursal1,This.sucursal2,0)
 			If nidk<1 Then
 				sw=0
+				This.cmensaje='Al Obtener ID del Kardex'
 				Exit
 			Endif
 			If !Empty(tmpv.serieproducto) Then
 				obj.AsignaValores(tmpv.serieproducto,nauto,nidk,tmpv.coda)
 				If obj.RegistraDseries(tmpv.idseriep)<=0 Then
 					sw=0
+					This.cmensaje='Al Obtener ID del Kardex'
 					Exit
 				Endif
 			Endif
@@ -178,26 +186,30 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 			nidk=IngresaDtraspasos(nauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I',0,'T',This.Detalle,This.sucursal1,This.sucursal2,0)
 			If nidk=0 Then
 				sw=0
+				This.cmensaje='Al Obtener ID del Kardex'
 				Exit
 			Endif
-
 		Endif
 		If GrabaDetalleGuias(nidk,tmpv.cant,nidg)=0 Then
 			sw=0
+			This.cmensaje='Al Registrar Detalle'
 			Exit
 		Endif
 		If This.Coningresosucursal='S' Then
 			If IngresaDtraspasos(nauto,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I',0,'T',This.Detalle,This.sucursal2,This.sucursal1,0)=0 Then
 				sw=0
+				This.cmensaje='Al Obtener ID del Kardex'
 				Exit
 			Endif
 			If ActualizaStock(tmpv.coda,This.sucursal2,tmpv.cant,'C')<0 Then
 				sw=0
+				This.cmensaje='Al Actualizar Stock'
 				Exit
 			Endif
 		Endif
 		If ActualizaStock(tmpv.coda,This.sucursal1,tmpv.cant,'V')<0 Then
 			sw=0
+			This.cmensaje='Al Actualizar Stock'
 			Exit
 		Endif
 		Select tmpv
@@ -573,6 +585,155 @@ Define Class guiaremisionxtraspaso As guiaremision Of 'd:\capass\modelos\guiasre
 	Select * From tmpv Into Cursor tmpvg Readwrite
 	This.Imprimir('S')
 	Return 1
+	Endfunc
+	Function registrarsoloingreso(calias)
+	If This.IniciaTransaccion()<1 Then
+		Return 0
+	Endif
+	nauto=IngresaResumenDcto(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.sucursal1,'S',fe_gene.dola,fe_gene.igv,'R',0,'C',goapp.nidusua,0,This.sucursal1,0,0,0,0,0)
+	If nauto<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	sw=1
+	Select tmpv
+	Go Top
+	Do While !Eof()
+		If IngresaDtraspasos(nauto,tmpv.coda,'C',tmpv.Prec,tmpv.cant,'I',0,'T',This.Detalle,This.sucursal1,This.sucursal2,0)<1 Then
+			sw=0
+			Exit
+		Endif
+		If ActualizaStock(tmpv.coda,This.sucursal2,tmpv.cant,"C")<=0 Then
+			sw=0
+			Exit
+		Endif
+		Select tmpv
+		Skip
+	Enddo
+	If sw=0 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If This.GRabarCambios()<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function GrabarLopez()
+	If This.validartraspasolopez()<1 Then
+		Return 0
+	Endif
+	Set Classlib To 'd:\librerias\clasesvisuales' Additive
+	ovstock=Createobject("verificastockproducto")
+	If This.IniciaTransaccion()<1
+		Return 0
+	Endif
+	nauto =IngresaTraspasoAlmacenEnviado(This.tdoc,'E',This.ndoc,This.fecha,This.fecha,This.Detalle,0,0,0,This.Ndo2,'S',;
+		fe_gene.dola,fe_gene.igv,'T',0,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0,'P')
+	If nauto<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	nidg= This.IngresaGuiasXTraspaso(This.fecha,This.ptop,This.ptoll,nauto,This.fechat,goapp.nidusua,This.Detalle,This.Idtransportista,This.ndoc,goapp.tienda)
+	If nidg<1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	sw = 1
+	cmensaje=""
+	Select tmpv
+	Go Top
+	Do While !Eof()
+		cdescri = tmpv.Desc
+		If ovstock.ejecutar(tmpv.coda, tmpv.cant, This.sucursal1) <= 0 Then
+			cmensaje="Stock no Disponible"
+			sw = 0
+			Exit
+		Endif
+		If This.registradetalletraspaso(nauto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','T',This.Detalletraspaso,nidg)<1 Then
+			sw = 0
+			cmensaje=This.cmensaje
+			Exit
+		Endif
+		If ActualizaStock(tmpv.coda,This.sucursal1, tmpv.cant, "V") < 1 Then
+			sw = 0
+			cmensaje="Al Actualizar Stock"
+			Exit
+		Endif
+		Select tmpv
+		Skip
+	Enddo
+	If sw = 1 And This.generacorrelativo()=1  Then
+		If This.GRabarCambios() < 1 Then
+			Return
+		Endif
+		If This.tdoc='09' And goapp.Emisorguiasremisionelectronica='S' Then
+			Select * From tmpv Into Cursor tmpvg Readwrite
+			This.Imprimir('S')
+			Return 1
+		Else
+			Replace All almacen1 With This.calmacen1 ,almacen2 With This.calmacen2,fech With This.fecha,;
+				ndoc With This.ndoc,Detalle With This.Detalle  In tmpv
+		    DO form ka_ldctos1 to verdad		
+			Select tmpv
+			Go Top In tmpv
+			Report Form (This.Archivointerno) To Printer Prompt Noconsole
+			Return  1
+		Endif
+	Else
+		This.DEshacerCambios()
+		This.cmenesaje=Alltrim(cmensaje) +" Item: " + Alltrim(cdescri) + " No Tiene Stock Disponible"
+		Return 0
+	Endif
+	Endfunc
+	Function registradetalletraspaso(nauto,ccoda,ctipo,nprec,ncant,cincl,cttip,cdeta,nidg)
+	lc="FUNINGRESAKARDEX"
+	goapp.npara1=nauto
+	goapp.npara2=ccoda
+	goapp.npara3=ctipo
+	goapp.npara4=nprec
+	goapp.npara5=ncant
+	goapp.npara6=cincl
+	goapp.npara7=0
+	goapp.npara8=cttip
+	goapp.npara9=cdeta
+	goapp.npara10=This.sucursal1
+	goapp.npara11=This.sucursal2
+	goapp.npara12=0
+	TEXT to lp noshow
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12)
+	ENDTEXT
+	nidkar=This.EJECUTARF(lc,lp,"trasp")
+	If nidkar<1 Then
+		Return 0
+	Endif
+	If GrabaDetalleGuias(nidkar,ncant,nidg)=0 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function validartraspasolopez(calias)
+	If This.validar()<1 Then
+		Return 0
+	Endif
+	This.cmensaje=""
+	Do Case
+	Case This.encontrado="V"
+		This.cmensaje="No Es Posible Actualizar Este Documento"
+	Case This.sinstock="S"
+		This.cmensaje="Hay Un Item que No Tiene Stock Disponible"
+	Case This.titems=0
+		This.cmensaje="Ingrese Los Productos"
+	Case This.sucursal1=This.sucursal2
+		This.cmensaje="Seleccione Otro Almacen"
+	Case (Month(This.fecha)<>goapp.mes Or Year(This.fecha)<>Val(goapp.año)) And This.fechaautorizada=0	And This.fecha<=fe_gene.fech
+		This.cmensaje="Ingrese Una Fecha Permitida Por el Sistema"
+	Endcase
+	If This.cmensaje<>'' Then
+		Return 0
+	Else
+		Return 1
+	Endif
 	Endfunc
 Enddefine
 

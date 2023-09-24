@@ -157,9 +157,8 @@ Define Class cliente As Odata Of 'd:\capass\database\data.prg'
 
 	If This.EJECUTARP10(cproc, m.lparametros, m.nombrecursor) < 1 Then
 		Return 0
-	Else
-		Return 1
-	Endif
+	ENDIF
+	RETURN 1
 	Function ActualizaClienteRetenedor(np1, np2)
 	Local lc
 	TEXT To m.lc Noshow Textmerge
@@ -211,7 +210,8 @@ Define Class cliente As Odata Of 'd:\capass\database\data.prg'
 		Return 0
 	ENDIF
 	RETURN 1
-	Endfunc
+	ENDFUNC
+
 Enddefine
 ***************************************
 Define Class clientex As cliente

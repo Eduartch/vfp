@@ -34,8 +34,10 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	m.Moneda = ""
 	m.cusua = ""
 	m.nper = 0
-	m.modelo = ""
+	m.cmodelo = ""
 	m.ccai = ""
+	m.tipovista = ""
+	m.constock=  ""
 ************************************
 	Function MuestraProductosJ1(np1, np2, np3, np4, ccursor)
 	lc = 'PROMUESTRAPRODUCTOSJx'
@@ -326,19 +328,20 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Endfunc
 	Function MostrarSolounproducto(np1, Calias)
 	Local lc, lp
+	If This.Idsesion>0 Then
+		Set DataSession To This.Idsesion
+	Endif
 *:Global ccur
 	m.lc		 = "PROMUESTRAP1"
 	goApp.npara1 = m.np1
 	goApp.npara2 = fe_gene.dola
-	ccur		 = m.Calias
 	TEXT To m.lp Noshow
      (?goapp.npara1,?goapp.npara2)
 	ENDTEXT
-	If This.EJECUTARP(m.lc, m.lp, ccur) < 1 Then
+	If This.EJECUTARP(m.lc, m.lp, Calias) < 1 Then
 		Return 0
-	Else
-		Return 1
 	Endif
+	Return 1
 	Endfunc
 	Function CreaProductosXm1(opr)
 	Local lc, lp
@@ -383,7 +386,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	nidproducto = This.EJECUTARf(m.lc, m.lp, cur)
 	If nidproducto < 1 Then
 		Return 0
-	ENDIF 
+	Endif
 	Return nidproducto
 	Endfunc
 	Function ModificaProductosXM1(opr)
@@ -469,7 +472,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 		TEXT To lc Noshow Textmerge
 		    UPDATE fe_art SET prod_cod1='<<cdeta>>' WHERE idart=<<nidart>>
 		ENDTEXT
-		If This.ejecutarsql(lc) < 1 Then
+		If This.Ejecutarsql(lc) < 1 Then
 			Ab = 0
 			Exit
 		Endif
@@ -524,7 +527,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	TEXT To lc Noshow  Textmerge
 	UPDATE fe_art SET prod_uti0=<<np2>>,prod_ocan=<<np3>>,prod_ocom=<<np4>> where idart=<<np1>>
 	ENDTEXT
-	If This.ejecutarsql(lc) < 1 Then
+	If This.Ejecutarsql(lc) < 1 Then
 		Return 0
 	Endif
 	Return 1
@@ -578,7 +581,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Return 1
 	Endfunc
 	Function CalcularStock()
-	ncon = This.abreconexion1(goApp.xopcion)
+	ncon = This.Abreconexion1(goApp.xopcion)
 	lc = 'calcularstock()'
 	If This.EJECUTARP1(lc, "", "", ncon) < 1 Then
 		This.CierraConexion(ncon)
@@ -613,7 +616,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Case  Empty(This.cdesc)
 		This.Cmensaje = 'Ingrese Nombre de producto'
 		Return 0
-	Case  Empty(This.unid)
+	Case  Empty(This.cunid)
 		This.Cmensaje = 'Ingrese Unidad'
 		Return 0
 	Case  This.ccat = 0
@@ -643,7 +646,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	     UPDATE fe_art SET prod_grat='N' WHERE idart=<<this.ncoda>>
 		ENDTEXT
 	Endif
-	If This.ejecutarsql(lc) < 1 Then
+	If This.Ejecutarsql(lc) < 1 Then
 		Return 0
 	Endif
 	Return 1
@@ -711,19 +714,6 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Endif
 	Return 1
 	Endfunc
-	Function MostrarSolounproducto(ncoda, ndola, ccursor)
-	lc = 'PROMUESTRAP1'
-	goApp.npara1 = ncoda
-	goApp.npara2 = ndola
-	TEXT To lp Noshow
-     (?goapp.npara1,?goapp.npara2)
-	ENDTEXT
-	If This.EJECUTARP(lc, lp, ccursor) < 1 Then
-		Return 0
-	Else
-		Return 1
-	Endif
-	Endfunc
 	Function MuestraTProductosDescCod(np1, np2, np3, np4, ccursor)
 	lc = 'PromuestraTodoslosproductos'
 	goApp.npara1 = np1
@@ -742,13 +732,13 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	dfi = cfechas(fe_gene.fech - 90)
 	dff = cfechas(fe_gene.fech)
 	TEXT To lc Noshow Textmerge
-	    SELECT  b.razo,c.fech,cant,ROUND(prec*c.vigv,2) AS prec,c.mone,c.tdoc,c.ndoc,a.tipo,a.idart
+	    SELECT  b.razo,c.fech,cant,ROUND(prec*c.vigv,2) AS prec,c.mone,c.tdoc,c.ndoc,a.tipo,a.idart,a.tipo
 		FROM fe_rcom  AS c
 		INNER JOIN fe_prov AS b ON (b.idprov=c.idprov)
 		INNER JOIN fe_kar AS a   ON(a.idauto=c.idauto)
 		WHERE  c.acti='A' AND a.acti='A' AND fech BETWEEN '<<dfi>>' AND '<<dff>>'
 		UNION ALL
-		SELECT b.razo,c.fech,cant,prec,c.mone,c.tdoc,c.ndoc,a.tipo,a.idart FROM fe_rcom AS c
+		SELECT b.razo,c.fech,cant,prec,c.mone,c.tdoc,c.ndoc,a.tipo,a.idart,a.tipo FROM fe_rcom AS c
 	    INNER JOIN fe_clie AS b ON (b.idclie=c.idcliente)
 	    INNER JOIN  fe_kar AS a   ON(a.idauto=c.idauto)
 	  	WHERE c.acti='A' AND a.acti='A' AND fech BETWEEN '<<dfi>>' AND '<<dff>>'
@@ -759,8 +749,8 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Return  1
 	Endfunc
 	Function MuestraTProductos(np1, np2, ccursor)
-	lc='PROMUESTRATPRODUCTOS'
-    goApp.npara1 = np1
+	lc = 'PROMUESTRATPRODUCTOS'
+	goApp.npara1 = np1
 	goApp.npara2 = np2
 	TEXT To lp Noshow
      (?goapp.npara1,?goapp.npara2)
@@ -770,6 +760,179 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Endif
 	Return 1
 	Endfunc
+	Function condetraccionunidades(dfi, dff, nmonto, ntienda, Calias)
+	fi = cfechas(dfi)
+	ff = cfechas(dff)
+	If ntienda = 0 Then
+		TEXT To lc NOSHOW TEXTMERGE
+	    SELECT ndoc,fech,iden,referencia,SUM(importe) as importe,prod_detr,SUM(ROUND((importe*prod_detr)/100,2)) as montod,alma,impo,idauto
+	    from(Select a.idart as coda,z.descri,a.kar_unid as unid,a.cant,if(b.mone="S",a.Prec,a.Prec*b.dolar) As prec,
+	    if(b.mone="S",cant*a.Prec,cant*a.Prec*b.dolar) As importe,b.ndoc,b.fech,IF(tdoc='03',e.ndni,e.nruc) as iden,b.impo,b.idauto,
+	    e.razo as referencia,a.alma,z.prod_detr From fe_kar as a
+		inner join fe_art as z on z.idart=a.idart
+		inner join fe_rcom as b on b.idauto=a.idauto
+		inner join fe_clie as e on e.idclie=b.idcliente
+		where a.acti='A' and b.acti='A' and b.fech between '<<fi>>' and '<<ff>>' and z.prod_detr>0 and b.tdoc='01') as x
+		where impo><<nm>> group by idauto,ndoc,iden,referencia,alma,impo,prod_detr order by fech
+		ENDTEXT
+	Else
+		TEXT To lc NOSHOW TEXTMERGE
+	    SELECT ndoc,fech,iden,referencia,SUM(importe) as importe,prod_detr,SUM(ROUND((importe*prod_detr)/100,2)) as montod,alma,impo,idauto
+	    from(Select a.idart as coda,z.descri,a.kar_unid as unid,a.cant,if(b.mone="S",a.Prec,a.Prec*b.dolar) As prec,
+	    if(b.mone="S",cant*a.Prec,cant*a.Prec*b.dolar) As importe,b.ndoc,b.fech,IF(tdoc='03',e.ndni,e.nruc) as iden,b.impo,b.idauto,
+	    e.razo as referencia,a.alma,z.prod_detr From fe_kar as a
+		inner join fe_art as z on z.idart=a.idart
+		inner join fe_rcom as b on b.idauto=a.idauto
+		inner join fe_clie as e on e.idclie=b.idcliente
+		where a.acti='A' and b.acti='A' and b.fech between '<<fi>>' and '<<ff>>' and z.prod_detr>0 and b.tdoc='01' and b.codt=<<ntienda>>) as x
+		where impo><<nm>> group by idauto,ndoc,iden,referencia,alma,impo,prod_detr order by fech
+		ENDTEXT
+	Endif
+	This.conconexion = 1
+	If This.EjecutaConsulta(lc, Calias) < 1 Then
+		This.conconexion = 0
+		Return 0
+	Endif
+	This.conconexion = 0
+	Return 1
+	ENDFUNC
+	Function condetraccion(dfi, dff, nmonto, ntienda, Calias)
+	fi = cfechas(dfi)
+	ff = cfechas(dff)
+	If ntienda = 0 Then
+		TEXT To lc NOSHOW TEXTMERGE
+	    SELECT ndoc,fech,iden,referencia,SUM(importe) as importe,prod_detr,SUM(ROUND((importe*prod_detr)/100,2)) as montod,alma,impo,idauto
+	    from(Select a.idart as coda,z.descri,z.unid,a.cant,if(b.mone="S",a.Prec,a.Prec*b.dolar) As prec,
+	    if(b.mone="S",cant*a.Prec,cant*a.Prec*b.dolar) As importe,b.ndoc,b.fech,IF(tdoc='03',e.ndni,e.nruc) as iden,b.impo,b.idauto,
+	    e.razo as referencia,a.alma,z.prod_detr From fe_kar as a
+		inner join fe_art as z on z.idart=a.idart
+		inner join fe_rcom as b on b.idauto=a.idauto
+		inner join fe_clie as e on e.idclie=b.idcliente
+		where a.acti='A' and b.acti='A' and b.fech between '<<fi>>' and '<<ff>>' and z.prod_detr>0 and b.tdoc='01') as x
+		where impo><<nm>> group by idauto,ndoc,iden,referencia,alma,impo,prod_detr order by fech
+		ENDTEXT
+	Else
+		TEXT To lc NOSHOW TEXTMERGE
+	    SELECT ndoc,fech,iden,referencia,SUM(importe) as importe,prod_detr,SUM(ROUND((importe*prod_detr)/100,2)) as montod,alma,impo,idauto
+	    from(Select a.idart as coda,z.descri,z.unid,a.cant,if(b.mone="S",a.Prec,a.Prec*b.dolar) As prec,
+	    if(b.mone="S",cant*a.Prec,cant*a.Prec*b.dolar) As importe,b.ndoc,b.fech,IF(tdoc='03',e.ndni,e.nruc) as iden,b.impo,b.idauto,
+	    e.razo as referencia,a.alma,z.prod_detr From fe_kar as a
+		inner join fe_art as z on z.idart=a.idart
+		inner join fe_rcom as b on b.idauto=a.idauto
+		inner join fe_clie as e on e.idclie=b.idcliente
+		where a.acti='A' and b.acti='A' and b.fech between '<<fi>>' and '<<ff>>' and z.prod_detr>0 and b.tdoc='01' and b.codt=<<ntienda>>) as x
+		where impo><<nm>> group by idauto,ndoc,iden,referencia,alma,impo,prod_detr order by fech
+		ENDTEXT
+	Endif
+	This.conconexion = 1
+	If This.EjecutaConsulta(lc, Calias) < 1 Then
+		This.conconexion = 0
+		Return 0
+	Endif
+	This.conconexion = 0
+	Return 1
+	Endfunc
+	Function activar(nidart)
+	TEXT TO lc NOSHOW TEXTMERGE
+		UPDATE fe_art SET prod_acti='A' WHERE idart=<<nidart>>
+	ENDTEXT
+	If This.Ejecutarsql(lc)<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+*********************
+	Function DesactivaProductos(np1)
+	TEXT TO lc NOSHOW TEXTMERGE
+     SELECT SUM(IF(tipo='C',cant,-cant)) as stock FROM fe_kar WHERE acti='A' AND idart=<<np1>> GROUP BY idart
+	ENDTEXT
+	If This.EjecutaConsulta(lc,'vs')<1 Then
+		Return 0
+	Endif
+	If vs.stock<>0 Then
+		This.Cmensaje="Tiene Stock NO es Posible Desactivar "+Alltrim(Str(vs.stock,12,2))
+		Return 0
+	Endif
+	lc = 'PROMUESTRATPRODUCTOS'
+	goApp.npara1 = np1
+	TEXT To lp Noshow
+     (?goapp.npara1,?goapp.npara2)
+	ENDTEXT
+	If This.EJECUTARP(lc, lp, "") < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function listarinactivos(np1,opt,Calias)
+	cbuscar='%'+Alltrim(np1)+'%'
+	If opt=1 Then
+		TEXT TO lc NOSHOW TEXTMERGE
+		   SELECT idart,descri,unid,uno,dos,tre,cua,cero,c.idgrupo,c.dcat,prod_dola,m.dmar,
+		   prod_cod1, peso,a.prec,tipro,a.idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,
+		   prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,
+		   ulfc,prod_ent1,prod_ent2,prod_icbper,g.idgrupo,g.desgrupo AS grupo,prod_acti
+		   FROM fe_art  AS a
+		   INNER JOIN fe_fletes AS b ON(b.idflete=a.idflete)
+		   INNER JOIN fe_mar AS m ON m.idmar=a.idmar
+		   INNER JOIN fe_cat AS c ON(c.idcat=a.idcat)
+		   INNER JOIN fe_grupo AS g ON g.idgrupo=c.idgrupo,fe_gene AS v
+		   WHERE descri LIKE '<<cbuscar>>' AND prod_acti='I' ORDER BY DESCRI;
+		ENDTEXT
+	Else
+		TEXT TO lc NOSHOW TEXTMERGE
+		   SELECT idart,descri,unid,uno,dos,tre,cua,cero,c.idgrupo,c.dcat,prod_dola,m.dmar,
+		   prod_cod1, peso,a.prec,tipro,a.idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,
+		   prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,
+		   ulfc,prod_ent1,prod_ent2,prod_icbper,g.idgrupo,g.desgrupo AS grupo,prod_acti
+		   FROM fe_art  AS a
+		   INNER JOIN fe_fletes AS b ON(b.idflete=a.idflete)
+		   INNER JOIN fe_mar AS m ON m.idmar=a.idmar
+		   INNER JOIN fe_cat AS c ON(c.idcat=a.idcat)
+		   INNER JOIN fe_grupo AS g ON g.idgrupo=c.idgrupo,fe_gene AS v
+		   WHERE prod_cod1 LIKE '<<cbuscar>>' AND prod_acti='I' ORDER BY DESCRI;
+		ENDTEXT
+	Endif
+	This.conconexion=1
+	If This.EjecutaConsulta(lc,Calias)<1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function MuestraProductosconstock(np1, np2, ccursor)
+	If !Pemstatus(goApp,'soloconstock',5) Then
+		AddProperty(goApp,'soloconstock','')
+	Endif
+	If goapp.soloconstock='S' Then
+		lc = 'ProMuestraProductosconstock'
+		goApp.npara1 = np1
+		goApp.npara2 = np2
+		goApp.npara3  = This.constock
+		If This.Idsesion > 1 Then
+			Set DataSession To This.Idsesion
+		Endif
+		TEXT To lp Noshow
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3)
+		ENDTEXT
+	ELSE
+	   	lc = 'ProMuestraProductos'
+		goApp.npara1 = np1
+		goApp.npara2 = np2
+		If This.Idsesion > 1 Then
+			Set DataSession To This.Idsesion
+		Endif
+		TEXT To lp Noshow
+        (?goapp.npara1,?goapp.npara2)
+		ENDTEXT
+	Endif
+	This.conconexion=1
+	If This.EJECUTARP(lc, lp, ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	ENDFUNC
+	
 Enddefine
+
+
 
 

@@ -13,8 +13,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	       INNER JOIN fe_rcom AS r ON r.idauto=a.idauto
 	       INNER JOIN fe_clie AS c  ON c.idclie=r.idcliente
 	       INNER JOIN fe_art AS e ON e.idart=a.idart
-	       where saldo>0
-	       ORDER BY a.idkar
+	       where saldo>0  ORDER BY a.idkar
 	ENDTEXT
 	If This.ejecutaconsulta(lc,calias)<1 Then
 		Return 0
@@ -176,7 +175,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
-	nauto=IngresaResumenDcto('09','E',this.ndoc,this.fecha,this.fecha,"",0,0,0,'','S',fe_gene.dola,fe_gene.igv,'k',this.Codigo,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
+	nauto=IngresaResumenDcto('09','E',This.ndoc,This.fecha,This.fecha,"",0,0,0,'','S',fe_gene.dola,fe_gene.igv,'k',This.Codigo,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
 	If nauto<1 Then
 		This.DeshacerCambios()
 		Return 0
@@ -264,7 +263,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
-	nidg=This.IngresaGuiasX3vtas(This.fecha,This.ptop,Alltrim(This.ptoll),this.codigo,This.fechat,goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.ubigeocliente)
+	nidg=This.IngresaGuiasX3vtas(This.fecha,This.ptop,Alltrim(This.ptoll),This.Codigo,This.fechat,goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.ubigeocliente)
 	If nidg<1 Then
 		This.DeshacerCambios()
 		Return 0
@@ -302,12 +301,11 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	TEXT To lp Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4)
 	ENDTEXT
-	
 	If This.EJECUTARP(lc, lp, cur)<1 Then
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
+	Endfunc
 	Function IngresaGuiasX3vtas(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10,np11)
 	Local lc, lp
 	lc			  = "FUNINGRESAGUIAS1"
@@ -331,14 +329,14 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 		Return 0
 	Endif
 	Return nidgg
-	ENDFUNC
+	Endfunc
 	Function actualiaguiasremitentevtasx3()
 	This.contransaccion='S'
 	If This.IniciaTransaccion() = 0
 		This.contransaccion=''
 		Return 0
 	Endif
-	If This.ActualizaGuiasVtasx3(This.fecha, This.ptop, This.ptoll, 0, This.fechat, goapp.nidusua, This.detalle, This.Idtransportista, This.ndoc, This.idautog, goapp.tienda,this.codigo) < 1
+	If This.ActualizaGuiasVtasx3(This.fecha, This.ptop, This.ptoll, 0, This.fechat, goapp.nidusua, This.detalle, This.Idtransportista, This.ndoc, This.idautog, goapp.tienda,This.Codigo) < 1
 		Return 0
 	Endif
 	If This.ActualizaDetalleGuiasVtas(This.calias) < 1 Then
@@ -352,7 +350,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	Endif
 	This.imprimir('S')
 	Return 1
-	ENDFUNC
+	Endfunc
 	Function ActualizaGuiasVtasx3(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11,np12)
 	Local lc, lp
 	m.lc		  ="ProActualizaGuiasVtas"
@@ -378,7 +376,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	Else
 		Return 1
 	Endif
-	ENDFUNC
+	Endfunc
 	Function ActualizaDetalleGuiasVtasx3(ccursor)
 	Sw=1
 	Select (m.ccursor)
@@ -389,16 +387,16 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 		cdesc=Alltrim(tmpvg.Descri)
 		If Deleted()
 			If nreg > 0 Then
-			  	If This.ActualizaDetalleGuiaCons1(tmpvg.coda, tmpvg.cant, tmpvg.idem, tmpvg.nreg, This.idautog, 0, '') = 0 Then
+				If This.ActualizaDetalleGuiaCons1(tmpvg.coda, tmpvg.cant, tmpvg.idem, tmpvg.nreg, This.idautog, 0, '') = 0 Then
 					Sw			  =0
 					This.Cmensaje ="Al Desactivar Ingreso (Guia)  de Item  - " + Alltrim(cdesc)
 					Exit
 				Endif
 			Endif
 		Else
-			
+
 			If tmpvg.nreg = 0 Then
-				If  this.GrabaDetalleGuiasx3(nidkar, tmpvg.cant, This.idautog,tmpvg.coda) = 0 Then
+				If  This.GrabaDetalleGuiasx3(nidkar, tmpvg.cant, This.idautog,tmpvg.coda) = 0 Then
 					s			  =0
 					This.Cmensaje ="Al Ingresar Detalle de Guia " + Alltrim(cdesc)
 					Exit
@@ -411,11 +409,40 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 				Endif
 			Endif
 		Endif
-		SELECT (ccursor)
+		Select (ccursor)
 		Skip
 	Enddo
 	Set Deleted On
 	If Sw = 0 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function listarguiasxcanjear(nidtda,cestado,calias)
+	Do Case
+	Case cestado='P'
+		TEXT TO lc NOSHOW TEXTMERGE
+	         SELECT guia_ndoc,guia_fech,ndoc,fech,c.razo,r.impo FROM fe_guias AS g
+             INNER JOIN fe_rcom AS r ON r.`idauto`=g.guia_idau
+             inner join fe_clie as c on c.idclie=r.idcliente
+             WHERE guia_acti='A' AND r.`acti`='A' AND r.`codt`=<<nidtda>> AND r.tdoc='09'
+		ENDTEXT
+	Case cestado='T'
+		TEXT TO lc NOSHOW TEXTMERGE
+	         SELECT guia_ndoc,guia_fech,ndoc,fech,c.razo,r.impo FROM fe_guias AS g
+             INNER JOIN fe_rcom AS r ON r.`idauto`=g.guia_idau
+             inner join fe_clie as c on c.idclie=r.idcliente
+             WHERE guia_acti='A' AND r.`acti`='A' AND r.`codt`=<<nidtda>>
+		ENDTEXT
+	Case cestado="F"
+		TEXT TO lc NOSHOW TEXTMERGE
+	         SELECT guia_ndoc,guia_fech,ndoc,fech,c.razo,r.impo FROM fe_guias AS g
+             INNER JOIN fe_rcom AS r ON r.`idauto`=g.guia_idau
+             inner join fe_clie as c on c.idclie=r.idcliente
+             WHERE guia_acti='A' AND r.`acti`='A' AND r.tdoc='01' and  r.`codt`=<<nidtda>>
+		ENDTEXT
+	Endcase
+	If This.ejecutaconsulta(lc,calias)<1 Then
 		Return 0
 	Endif
 	Return 1

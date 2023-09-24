@@ -1,4 +1,18 @@
 Define Class guiaremisionxcompras As guiaremision Of 'd:\capass\modelos\guiasremision'
+*********************************
+	Function CreaTemporalGuiasElectronicasrodi(Calias)
+	Create Cursor (Calias)(coda c(15), duni c(20),Descri c(120), unid c(20), cant N(10, 2), Prec N(10, 5), uno N(10, 2), Dos N(10, 2), lote c(15), ;
+		peso N(10, 2), alma N(10, 2), ndoc c(12), nreg N(10), codc c(5), tref c(2), Refe c(20), fecr d, detalle c(120), fechafactura d,costo N(10,3),;
+		calma c(3), Valida c, nitem N(3), saldo N(10, 2), idin N(8), nidkar N(10), coda1 c(15), fech d, fect d, ptop c(150),;
+		ptoll c(120), archivo c(120), valida1 c(1),valido c(1), stock N(10,2),;
+		razon c(120), nruc c(11), ndni c(8), conductor c(120), marca c(100), placa c(15),;
+		placa1 c(15), constancia c(30), equi N(8,4),prem N(10,4),pos N(3),idepta N(5),;
+		brevete c(20), razont c(120), ructr c(11), motivo c(1), codigo c(30),comi N(5,3),idem N(8),;
+		tigv N(5,3),caant N(12,2),nlote c(20),fechavto d,tipotra c(15))
+	Select (Calias)
+	Index On Descri Tag Descri
+	Index On nitem Tag Items
+	Endfunc
 	Function grabar()
 	If This.IniciaTransaccion()<1Then
 		Return 0
@@ -9,7 +23,7 @@ Define Class guiaremisionxcompras As guiaremision Of 'd:\capass\modelos\guiasrem
 		Endif
 	Endif
 	nidg=This.IngresaGuiasXComprasRemitente(This.fecha,This.ptop,This.ptoll,0,This.fechat,;
-		goapp.nidusua,This.Detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.Referencia,This.Fechafacturacompra)
+		goapp.nidusua,This.detalle,This.Idtransportista,This.ndoc,goapp.tienda,This.Referencia,This.Fechafacturacompra)
 	If nidg<1 Then
 		This.DEshacerCambios()
 		Return 0
@@ -29,7 +43,7 @@ Define Class guiaremisionxcompras As guiaremision Of 'd:\capass\modelos\guiasrem
 		If This.GRabarCambios()=0 Then
 			Return 0
 		Endif
-    	This.Imprimir('S')
+		This.Imprimir('S')
 		Return  1
 	Else
 		This.DEshacerCambios()
@@ -54,7 +68,7 @@ Define Class guiaremisionxcompras As guiaremision Of 'd:\capass\modelos\guiasrem
 	goapp.npara11 = np11
 	goapp.npara12 = np12
 	goapp.npara13 =This.idprov
-	goapp.npara14= this.ubigeocliente
+	goapp.npara14= This.ubigeocliente
 	TEXT To lp NOSHOW TEXTMERGE
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,
      ?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12,?goapp.npara13,?goapp.npara14)

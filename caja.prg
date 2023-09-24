@@ -1,4 +1,12 @@
 Define Class caja As Odata Of "d:\capass\database\data.prg"
+    dfecha=DATE()
+    dfi=DATE()
+	dff=DATE()
+	nidusua=0
+	cmoneda=""
+	ntienda=0
+	conusuario=0
+	ante=0
 	Function Registrarcaja(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11, np12, np13, np14, np15)
 	Local lc, lp
 *:Global cur
@@ -32,7 +40,7 @@ Define Class caja As Odata Of "d:\capass\database\data.prg"
 	Function buscasiestaregistradodcto(np1, np2)
 	Local lc
 	TEXT To m.lc Noshow Textmerge
-			 Select  lcaj_idca  As idcaja  From fe_lcaja Where lcaj_dcto='<<np1>>' And lcaj_acti = 'A'  And lcaj_tdoc = '<<np2>>'
+	Select  lcaj_idca  As idcaja  From fe_lcaja Where lcaj_dcto='<<np1>>' And lcaj_acti = 'A'  And lcaj_tdoc = '<<np2>>'
 	ENDTEXT
 	If This.EjecutaConsulta(m.lc, 'yaestaencaja') < 1 Then
 		Return 0
@@ -69,5 +77,166 @@ Define Class caja As Odata Of "d:\capass\database\data.prg"
 		Return 0
 	Endif
 	Return 1
-	Endfunc
+	ENDFUNC
+	FUNCTION salanteriorm(ff1,ff2,cmoneda)
+	f1=cfechas(ff1)
+	f2=cfechas(ff2)
+	ccursor='c_'+SYS(2015)
+	TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+	    select SUM(if(a.lcaj_deud<>0,lcaj_deud,0)) as ingresoss,SUM(if(a.lcaj_acre<>0,lcaj_acre,0)) as egresoss
+	    FROM fe_lcaja  as a WHERE  a.lcaj_fech between '<<f1>>' and '<<f2>>'  and a.lcaj_acti='A' and a.lcaj_form='E' 
+	    and lcaj_idus=<<this.nidusua>>  and lcaj_mone='<<this.cmoneda>>' group by lcaj_idus
+	ENDTEXT
+	If this.Ejecutaconsulta(lc,ccursor)<1
+		RETURN 0
+	ENDIF
+	SELECT (ccursor)
+	RETURN ingresoss-egresoss
+	ENDFUNC 
+	FUNCTION listarcajam(ccursor)
+	F=cfechas(this.dfecha)
+	Do Case
+	Case this.ntienda=0 And this.conusuario =1
+		TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+	        select deta,ndoc,
+			round(case forma when 'E' then if(tipo='I',impo,0) else 0 end,2) as efectivo,
+			round(case forma when 'C' then if(tipo='I',impo,0) else 0 end,2) as credito,
+			round(case forma when 'D' then if(tipo='I',impo,0) else 0 end,2) as deposito,
+			round(case forma when 'H' then if(tipo='I',impo,0) else 0 end,2) as cheque,
+			round(case forma when 'T' then if(tipo='I',impo,0) else 0 end,2) as tarjeta,
+			round(case forma when 'A' then if(tipo='I',impo,0) else 0 end,2) as antic,
+			round(case tipo when 'S' then if(forma='E',impo,0) else 0 end,2) as egresos,
+			usua,fechao,usuavtas,forma,mone,tmon1,dola,nimpo,tipo,tdoc,idcredito,iddeudas,idauto,refe
+			from(
+			SELECT a.lcaj_tdoc as tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I',if(lcaj_acre=0,'I','S')) as tipo,
+			if(left(lcaj_dcto,1)='0',concat(if(lcaj_tdoc='01','F/.',if(lcaj_tdoc='03','B/.','P/.')),lcaj_dcto),lcaj_dcto) as ndoc,
+			if(lcaj_deud<>0,lcaj_deud,if(lcaj_acre=0,lcaj_deud,lcaj_acre)) as impo,
+            lcaj_deta as deta,lcaj_mone as  mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,lcaj_dola as dola,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a 
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau>0 AND a.lcaj_idus=<<this.nidusua>> and lcaj_mone='<<this.cmoneda>>'
+			union all
+			SELECT a.lcaj_tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I','S') as tipo,a.lcaj_dcto as ndoc,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as impo,
+            a.lcaj_deta as deta,a.lcaj_mone as mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,a.lcaj_dola as dola,a.lcaj_deud as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau=0 AND a.lcaj_idus=<<this.nidusua>> and lcaj_mone='<<this.cmoneda>>')
+			as b order by tipo,ndoc,tdoc
+		ENDTEXT
+		this.ante=1
+	Case this.ntienda=1 And this.conusuario=0
+    	TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+		    select deta,ndoc,
+			round(case forma when 'E' then if(tipo='I',impo,0) else 0 end,2) as efectivo,
+			round(case forma when 'C' then if(tipo='I',impo,0) else 0 end,2) as credito,
+			round(case forma when 'D' then if(tipo='I',impo,0) else 0 end,2) as deposito,
+			round(case forma when 'H' then if(tipo='I',impo,0) else 0 end,2) as cheque,
+			round(case forma when 'T' then if(tipo='I',impo,0) else 0 end,2) as tarjeta,
+		    round(case forma when 'A' then if(tipo='I',impo,0) else 0 end,2) as antic,
+			round(case tipo when 'S' then if(forma='E',impo,0) else 0 end,2) as egresos,
+			usua,fechao,usuavtas,forma,mone,tmon1,dola,nimpo,tipo,tdoc,idcredito,iddeudas,idauto,refe
+			from(
+			SELECT a.lcaj_tdoc as tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I',if(lcaj_acre=0,'I','S')) as tipo,
+			if(left(lcaj_dcto,1)='0',concat(if(lcaj_tdoc='01','F/.',if(lcaj_tdoc='03','B/.','P/.')),lcaj_dcto),lcaj_dcto) as ndoc,
+			if(lcaj_deud<>0,lcaj_deud,if(lcaj_acre=0,lcaj_deud,lcaj_acre)) as impo,
+            lcaj_deta as deta,lcaj_mone as  mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,lcaj_dola as dola,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau>0 AND a.lcaj_codt=<<this.ntienda>> and lcaj_mone='<<this.cmoneda>>'  
+			union all
+			SELECT a.lcaj_tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I','S') as tipo,a.lcaj_dcto as ndoc,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as impo,
+            a.lcaj_deta as deta,a.lcaj_mone as mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,a.lcaj_dola as dola,a.lcaj_deud as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau=0 AND a.lcaj_codt=<<this.ntienda>> and lcaj_mone='<<this.cmoneda>>')
+			as b order by tipo,ndoc,tdoc
+		ENDTEXT
+		this.ante=1
+	Case this.ntienda=1 And this.conusuario=1
+		TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+		    select deta,ndoc,
+			round(case forma when 'E' then if(tipo='I',impo,0) else 0 end,2) as efectivo,
+			round(case forma when 'C' then if(tipo='I',impo,0) else 0 end,2) as credito,
+			round(case forma when 'D' then if(tipo='I',impo,0) else 0 end,2) as deposito,
+			round(case forma when 'H' then if(tipo='I',impo,0) else 0 end,2) as cheque,
+			round(case forma when 'T' then if(tipo='I',impo,0) else 0 end,2) as tarjeta,
+			round(case forma when 'A' then if(tipo='I',impo,0) else 0 end,2) as antic,
+			round(case tipo when 'S' then if(forma='E',impo,0) else 0 end,2) as egresos,
+			usua,fechao,usuavtas,forma,mone,tmon1,dola,nimpo,tipo,tdoc,idcredito,iddeudas,idauto,refe
+			from(
+			SELECT a.lcaj_tdoc as tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I',if(lcaj_acre=0,'I','S')) as tipo,
+		    if(left(lcaj_dcto,1)='0',concat(if(lcaj_tdoc='01','F/.',if(lcaj_tdoc='03','B/.','P/.')),lcaj_dcto),lcaj_dcto) as ndoc,
+			if(lcaj_deud<>0,lcaj_deud,if(lcaj_acre=0,lcaj_deud,lcaj_acre)) as impo,
+            lcaj_deta as deta,lcaj_mone as  mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,lcaj_dola as dola,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau>0 AND a.lcaj_idus=<<this.nidusua>> and lcaj_codt=<<this.ntienda>> and lcaj_mone='<<this.cmoneda>>'
+			union all
+			SELECT a.lcaj_tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I','S') as tipo,a.lcaj_dcto as ndoc,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as impo,
+            a.lcaj_deta as deta,a.lcaj_mone as mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,a.lcaj_dola as dola,a.lcaj_deud as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau=0 AND a.lcaj_idus=<<this.nidusua>> and lcaj_codt=<<this.ntienda>> and lcaj_mone='<<this.cmoneda>>')
+			as b order by tipo,ndoc,tdoc
+		ENDTEXT
+		this.ante=1
+	Case .chktienda1.Value=0 And .chkusuario.Value=0
+	
+		TEXT TO lc NOSHOW TEXTMERGE PRETEXT 7
+		    select deta,ndoc,
+			round(case forma when 'E' then if(tipo='I',impo,0) else 0 end,2) as efectivo,
+			round(case forma when 'C' then if(tipo='I',impo,0) else 0 end,2) as credito,
+			round(case forma when 'D' then if(tipo='I',impo,0) else 0 end,2) as deposito,
+			round(case forma when 'H' then if(tipo='I',impo,0) else 0 end,2) as cheque,
+			round(case forma when 'T' then if(tipo='I',impo,0) else 0 end,2) as tarjeta,
+			round(case forma when 'A' then if(tipo='I',impo,0) else 0 end,2) as antic,
+			round(case tipo when 'S' then if(forma='E',impo,0) else 0 end,2) as egresos,
+			usua,fechao,usuavtas,forma,mone,tmon1,dola,nimpo,tipo,tdoc,idcredito,iddeudas,idauto,refe
+			from(
+			SELECT a.lcaj_tdoc as tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I',if(lcaj_acre=0,'I','S')) as tipo,
+    		if(left(lcaj_dcto,1)='0',concat(if(lcaj_tdoc='01','F/.',if(lcaj_tdoc='03','B/.','P/.')),lcaj_dcto),lcaj_dcto) as ndoc,
+			if(lcaj_deud<>0,lcaj_deud,if(lcaj_acre=0,lcaj_deud,lcaj_acre)) as impo,
+            lcaj_deta as deta,lcaj_mone as  mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,lcaj_dola as dola,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on 	c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau>0 and lcaj_mone='<<this.cmoneda>>'
+			union all
+			SELECT a.lcaj_tdoc,a.lcaj_form as forma,if(lcaj_deud<>0,'I','S') as tipo,a.lcaj_dcto as ndoc,if(a.lcaj_deud<>0,lcaj_deud,lcaj_acre) as impo,
+            a.lcaj_deta as deta,a.lcaj_mone as mone,lcaj_idcr as idcredito,lcaj_idde as iddeudas,lcaj_idau as idauto,
+			c.nomb as usua,a.lcaj_fope as fechao,ifnull(z.nomv,'') as usuavtas,a.lcaj_mone as tmon1,a.lcaj_dola as dola,a.lcaj_deud as nimpo,lcaj_ndoc as refe FROM
+			fe_lcaja as a
+			inner join fe_usua as c on c.idusua=a.lcaj_idus
+			left join rvendedores as p on p.idauto=a.lcaj_idau
+			left join fe_vend as z On z.idven=p.codv
+			WHERE lcaj_fech='<<f>>' and lcaj_acti<>'I' and lcaj_idau=0 and lcaj_mone='<<this.cmoneda>>')
+			as b order by tipo,ndoc,tdoc
+		ENDTEXT
+		this.ante=0
+	Endcase
+	If this.Ejecutaconsulta(lc,"icaja")<1 then
+		RETURN 0
+	ENDIF
+	RETURN 1
+	ENDFUNC 
 Enddefine

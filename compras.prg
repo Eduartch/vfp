@@ -262,7 +262,9 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	Endfunc
 	Function comprasxproducto(nidart, ccursor)
 	Text To lc Noshow Textmerge
-	        SELECT b.razo,c.fech,cant,ROUND(prec*c.vigv,2) as prec,If(mone='D',Round(Prec*g.dola*c.vigv,2),Prec) As precios,c.mone,tdoc,ndoc,MONTH(c.fech) as mes FROM fe_kar as a
+	        SELECT b.razo,c.fech,cant,ROUND(prec*c.vigv,2) as prec,c.mone,If(mone='D',Round(Prec*g.dola*c.vigv,2),ROUND(Prec*c.vigv,2)) As precios,
+	        tdoc,ndoc,MONTH(c.fech) as mes
+	        FROM fe_kar as a
 			INNER JOIN fe_rcom  as c ON(c.idauto=a.idauto)
 			inner join fe_prov as b ON (b.idprov=c.idprov),fe_gene as g
 			WHERE idart=<<nidart>> AND  c.acti<>'I' and a.acti='A' order by c.fech desc;

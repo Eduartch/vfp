@@ -1,21 +1,21 @@
 Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\guiasremision'
 	Function grabarx3()
-    Set DataSession To This.idsesion
+	Set DataSession To This.idsesion
 	If This.validar()<1 Then
 		Return  0
 	Endif
 	If This.iniciaTransaccion()<1 Then
 		Return 0
 	Endif
-	nauto=IngresaResumenDcto('09','E',;
-		this.ndoc ,This.Fecha,This.Fecha,"",this.nvalor,this.nigv,this.ntotal,'','S',;
-		fe_gene.dola,fe_gene.igv,'k',This.Codigo,'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
+	nauto=IngresaResumenDcto('09','E',This.ndoc ,This.Fecha,This.Fecha,"",;
+		this.nvalor,This.nigv,This.ntotal,'','S',fe_gene.dola,fe_gene.igv,'k',This.Codigo,;
+		'V',goapp.nidusua,1,goapp.tienda,0,0,0,0,0)
 	If nauto<1
 		This.DeshacerCambios()
 		Return 0
 	Endif
-	nidg=IngresaGuiasConsignacionx3(This.Fecha,This.ptop,This.ptoll,nauto,This.Fechat,;
-		goapp.nidusua,This.Detalle,this.Idtransportista,This.ndoc,'N',this.ubigeocliente,this.codt)
+	nidg=This.IngresaGuiasConsignacionx3(This.Fecha,This.ptop,This.ptoll,nauto,This.Fechat,;
+		goapp.nidusua,This.Detalle,this.Idtransportista,This.ndoc,'N',this.codigo,this.ubigeocliente,this.codt)
 	If nidg<1 Then
 		This.DeshacerCambios()
 		Return 0
@@ -58,12 +58,12 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 	Endif
 	If This.GrabarCambios()<1 Then
 		Return 0
-	ENDIF
-	select * FROM (this.calias) INTo CURSOR tmpvg READWRITE 
-	this.imprimir()
+	Endif
+	Select * From (This.calias) Into Cursor tmpvg Readwrite
+	This.imprimir('S')
 	Return 1
 	Endfunc
-	Function IngresaGuiasConsignacionx3(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11, np12)
+	Function IngresaGuiasConsignacionx3(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11, np12,np13)
 	Local lc, lp
 	lc			  = "FUNINGRESAGUIASCons"
 	cur			  = "yy"
@@ -79,8 +79,9 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 	goapp.npara10 = np10
 	goapp.npara11 = np11
 	goapp.npara12 = np12
+	goapp.npara12 = np13
 	TEXT To lp Noshow
-     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12)
+     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12,?goapp.npara13)
 	ENDTEXT
 	nidguia=This.EJECUTARF(lc, lp, cur)
 	If nidguia<1 Then
@@ -88,4 +89,5 @@ Define Class guiaremisionxconsignacion As guiaremision Of 'd:\capass\modelos\gui
 	Endif
 	Return nidguia
 	Endfunc
+
 Enddefine

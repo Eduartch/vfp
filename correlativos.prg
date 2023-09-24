@@ -3,6 +3,8 @@ Define Class correlativo As Odata Of 'd:\capass\database\data.prg'
 	ndoc=""
 	nsgte=0
 	idserie=0
+	nserie=0
+	ctdoc=""
 	Function validarserie(cserie, nidtda, ctdoc)
 	Local lc
 *:Global ccursor
@@ -47,5 +49,18 @@ Define Class correlativo As Odata Of 'd:\capass\database\data.prg'
 	Else
 		Return 1
 	Endif
-	Endfunc
+	ENDFUNC
+	FUNCTION sgte()
+	ccursor='c_'+SYS(2015)
+	TEXT TO Lc NOSHOW TEXTMERGE 
+	SELECT nume,items,idserie FROM fe_serie WHERE serie=<<this.nserie>> AND tdoc='<<this.ctdoc>>' limit  1;
+	ENDTEXT 
+	IF this.ejecutaconsulta(lc,ccursor)<1 then
+	   this.ndoc=""
+	   RETURN 0
+	ENDIF 
+	SELECT (ccursor)
+	this.ndoc=ALLTRIM(STR(nume))
+	RETURN 1   
+	ENDFUNC 
 Enddefine
