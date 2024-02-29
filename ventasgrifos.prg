@@ -1,9 +1,9 @@
 #Define MSGTITULO 'SISVEN'
 Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
-    nturno=0
-	Function vtascomparativas(nidt, fi, ff, ccursor)
+	nturno = 0
+	Function vtascomparativas(nidt, fi, ff, Ccursor)
 	If nidt > 0 Then
-		TEXT To lc Noshow Textmerge
+		Text To lC Noshow Textmerge
         SELECT fecha,SUM(ventalectura) AS ventalectura,SUM(ventafacturada) AS ventafacturada FROM(
 		SELECT  lect_fech AS fecha,SUM(lect_mfinal-lect_inim) AS VentaLectura,CAST(0 AS DECIMAL(12,2)) AS VentaFacturada
 		FROM fe_lecturas f WHERE lect_fech BETWEEN '<<fi>>' AND '<<ff>>'  AND lect_acti='A' and lect_idtu=<<nidt>> and lect_mfinal>0 and lect_inim>0 GROUP BY lect_fech
@@ -11,9 +11,9 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		SELECT lcaj_fech AS fecha,CAST(0 AS DECIMAL(12,2)) AS VentaLectura,SUM(lcaj_deud) AS VentaFacturada
 		FROM fe_lcaja WHERE lcaj_fech BETWEEN '<<dfi>>' AND '<<ff>>' AND lcaj_deud<>0 AND lcaj_acti='A'
 		AND lcaj_idau>0 and lcaj_idtu=<<nidt>> GROUP BY lcaj_fech) AS f GROUP BY fecha
-		ENDTEXT
+		Endtext
 	Else
-		TEXT To lc Noshow Textmerge
+		Text To lC Noshow Textmerge
         SELECT fecha,SUM(ventalectura) AS ventalectura,SUM(ventafacturada) AS ventafacturada FROM(
 		SELECT  lect_fech AS fecha,SUM(lect_mfinal-lect_inim) AS VentaLectura,CAST(0 AS DECIMAL(12,2)) AS VentaFacturada
 		FROM fe_lecturas f WHERE lect_fech BETWEEN '<<dfi>>' AND '<<ff>>' AND lect_acti='A' and lect_mfinal>0 and lect_inim>0 GROUP BY lect_fech
@@ -21,9 +21,9 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		SELECT lcaj_fech AS fecha,CAST(0 AS DECIMAL(12,2)) AS VentaLectura,SUM(lcaj_deud) AS VentaFacturada
 		FROM fe_lcaja WHERE lcaj_fech BETWEEN '<<dfi>>' AND '<<ff>>' AND lcaj_deud<>0 AND lcaj_acti='A'
 		AND lcaj_idau>0 GROUP BY lcaj_fech) AS f GROUP BY fecha
-		ENDTEXT
+		Endtext
 	Endif
-	If This.EjecutaConsulta(lc, ccursor) < 1 Then
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return 1
@@ -47,11 +47,25 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		This.DEshacerCambios()
 		Return 0
 	Endif
-	If This.generacorrelativo(This.serie + This.numero, This.Idserie) < 1  Then
+	Sw = 1
+	Select  tmpp
+	Scan All
+		Text To lC Noshow  Textmerge
+	     UPDATE fe_kar SET prec=<<tmpp.prec>> where idkar=<<tmpp.nreg>>
+		Endtext
+		If This.Ejecutarsql(lC) < 1 Then
+			Sw = 0
+			Exit
+		Endif
+	Endscan
+	If Sw = 0 Then
+		Return 0
+	Endif
+	If This.GeneraCorrelativo(This.serie + This.numero, This.Idserie) < 1  Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
-	If  This.GrabarCambios() = 0 Then
+	If  This.GRabarCambios() = 0 Then
 		Return 0
 	Endif
 	ocomp.Version = '2.1'
@@ -62,12 +76,12 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 			Case  This.Tdoc = '01'
 				vdx = ocomp.obtenerdatosfactura(cabecera.idcab, Iif(fe_gene.gene_cpea = 'N', 'SF', .F.))
 			Case This.Tdoc = '03'
-				vdx = ocomp.obtenerdatosboleta(cabecera.idcab, 'SF')
+				vdx = ocomp.obtenerdatosBoleta(cabecera.idcab, 'SF')
 			Endcase
 		Endscan
-	Catch To oerr When oerr.ErrorNo = 1429
+	Catch To oErr When oErr.ErrorNo = 1429
 		Messagebox(MENSAJE1 + MENSAJE2 + MENSAJE3, 16, MSGTITULO)
-	Catch To oerr When oerr.ErrorNo = 1924
+	Catch To oErr When oErr.ErrorNo = 1924
 		Messagebox(MENSAJE1 + MENSAJE2 + MENSAJE3, 16, MSGTITULO)
 	Finally
 	Endtry
@@ -76,7 +90,7 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Return 1
 	Endfunc
 	Function actualizardesdeguias()
-	cform = Left(This.formapago, 1)
+	cform = Left(This.formaPago, 1)
 	ndolar = fe_gene.dola
 	ni = fe_gene.igv
 	nidusua = goApp.nidusua
@@ -90,23 +104,23 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		nidcta2 = 0
 		nidcta3 = 0
 	Endif
-	If This.ActualizaresumentDctoCanjeado(This.Tdoc, cform, This.serie + This.numero, This.fecha, This.fecha, This.detalle, ;
-			This.valor, This.igv, This.Monto, This.nroguia, This.Moneda, ndolar, fe_gene.igv, 'k', This.Codigo, 'V', goApp.nidusua, 1, goApp.Tienda, nidcta1, nidcta2, nidcta3, This.iddire, This.idautoguia, This.idauto) < 1 Then
+	If This.ActualizaresumentDctoCanjeado(This.Tdoc, cform, This.serie + This.numero, This.Fecha, This.Fecha, This.Detalle, ;
+			  This.valor, This.igv, This.Monto, This.nroguia, This.Moneda, ndolar, fe_gene.igv, 'k', This.Codigo, 'V', goApp.nidusua, 1, goApp.Tienda, nidcta1, nidcta2, nidcta3, This.iddire, This.idautoguia, This.Idauto) < 1 Then
 		Return 0
 	Endif
-	If IngresaDatosLCajaEFectivo12(This.fecha, "", This.razon, nidcta3, This.Monto, 0, ;
-			'S', fe_gene.dola, goApp.nidusua, This.Codigo, This.idauto, cform, This.serie + This.numero, This.Tdoc, goApp.Tienda) = 0 Then
+	If IngresaDatosLCajaEFectivo12(This.Fecha, "", This.razon, nidcta3, This.Monto, 0, ;
+			  'S', fe_gene.dola, goApp.nidusua, This.Codigo, This.Idauto, cform, This.serie + This.numero, This.Tdoc, goApp.Tienda) = 0 Then
 		Return 0
 	Endif
 	If cform = 'E' Then
-		If IngresaRvendedores(This.idauto, This.Codigo, goApp.nidusua, cform) = 0 Then
+		If IngresaRvendedores(This.Idauto, This.Codigo, goApp.nidusua, cform) = 0 Then
 			Return 0
 		Endif
 	Endif
 	If cform = 'C' Or cform = 'D' Then
 		Set Procedure To d:\capass\modelos\ctasxcobrar.prg Additive
 		ocre = Createobject("ctasporcobrar")
-		ocre.dFech = This.fecha
+		ocre.dFech = This.Fecha
 		ocre.fechavto = This.fechavto
 		ocre.nimpo = This.Monto
 		ocre.nimpoo = This.Monto
@@ -114,23 +128,23 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		ocre.crefe = "VENTA AL CREDITO"
 		ocre.cndoc = This.serie + This.numero
 		ocre.nidclie = This.Codigo
-		ocre.idauto = This.idauto
+		ocre.Idauto = This.Idauto
 		ocre.codv = goApp.nidusua
 		If ocre.registrar() < 1 Then
 			Return 0
 		Endif
 	Endif
-	Insert Into cabecera(idcab)Values(This.idauto)
+	Insert Into cabecera(idcab)Values(This.Idauto)
 	Return 1
 	Endfunc
 	Function imprimirdctocanjeado()
 	Select * From tmpp Into Cursor tmpv Readwrite
 	Select tmpv
 	Replace All cletras With This.cletras, ;
-		hash With This.hash, archivo With This.ArchivoXml, fech With This.fecha In tmpv
+		hash With This.hash, Archivo With This.ArchivoXml, fech With This.Fecha In tmpv
 	Select tmpv
 	Go Top In tmpv
-	Set Procedure To imprimir Additive
+	Set Procedure To Imprimir Additive
 	obji = Createobject("Imprimir")
 	obji.Tdoc = This.Tdoc
 	obji.ArchivoPdf = This.ArchivoPdf
@@ -143,13 +157,13 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Endfunc
 	Function validarcanjeguias()
 	Do Case
-	Case This.idauto = 0
+	Case This.Idauto = 0
 		This.Cmensaje = "Seleccione un Documento para Canje"
 		Return 0
 	Case  This.idautoguia = 0
 		This.Cmensaje = "Seleccione una Guia de Remisión para Canje"
 		Return 0
-	Case PermiteIngresoVentas(This.serie + This.numero, This.Tdoc, 0, This.fecha) = 0
+	Case PermiteIngresoVentas(This.serie + This.numero, This.Tdoc, 0, This.Fecha) = 0
 		This.Cmensaje = "Número de Documento de Venta Ya Registrado"
 		Return 0
 	Otherwise
@@ -183,9 +197,9 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	goApp.npara23 = np23
 	goApp.npara24 = np24
 	goApp.npara25 = np25
-	TEXT To lparms Noshow
+	Text To lparms Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12,?goapp.npara13,?goapp.npara14,?goapp.npara15,?goapp.npara16,?goapp.npara17,?goapp.npara18,?goapp.npara19,?goapp.npara20,?goapp.npara21,?goapp.npara22,?goapp.npara23,?goapp.npara24,?goapp.npara25)
-	ENDTEXT
+	Endtext
 	If This.EJECUTARP(lsql, lparms, "") < 1 Then
 		Return 0
 	Endif
@@ -199,11 +213,17 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Select (This.temporal)
 	Locate For cant = 0 And !Empty(coda)
 	Do Case
-	Case !esfechaValida(This.fecha) Or Month(This.fecha) <> goApp.mes Or Year(This.fecha) <> Val(goApp.año)
+	Case !esfechaValida(This.Fecha) Or Month(This.Fecha) <> goApp.mes Or Year(This.Fecha) <> Val(goApp.año)
 		This.Cmensaje = "Fecha NO Permitida Por el Sistema"
 		lo = 0
 	Case This.Monto = 0
 		This.Cmensaje = "Ingrese Cantidad y Precio"
+		lo = 0
+	Case This.Monto < 5 And This.Tdoc = '01'
+		This.Cmensaje = "Se Emite Factura a Partir de S/5.00"
+		lo = 0
+	Case This.Monto < 1 And This.Tdoc = '03'
+		This.Cmensaje = "Se Emite Boleta a Partir de S/1.00"
 		lo = 0
 	Case This.sinstock = "S"
 		This.Cmensaje = "Hay Un Item que No tiene Stock Disponible"
@@ -211,7 +231,7 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Case Found()
 		This.Cmensaje = "El producto:" + Alltrim(tmpv.Desc) + " no Tiene Cantidad o Precio"
 		lo = 0
-	Case PermiteIngresox(This.fecha) = 0
+	Case PermiteIngresox(This.Fecha) = 0
 		This.Cmensaje = "NO Es posible Registrar en esta Fecha estan bloqueados Los Ingresos"
 		lo = 0
 	Case This.nroformapago = 2  And This.dias = 0
@@ -225,7 +245,7 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		lo = 0
 	Case This.nroformapago = 2 And  ctasxcobrar.vlineacredito(This.Codigo, This.Monto, This.lineacredito) = 0
 		If goApp.Validarcredito <> 'N' Then
-			Do Form v_verifica With "A" To xv
+			Do Form V_verifica With "A" To xv
 			If !xv
 				This.Cmensaje = "No esta Autorizado a Ingresar Este Documento"
 				lo = 0
@@ -244,8 +264,8 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		Return .F.
 	Endif
 	Endfunc
-	Function listardctonotascredtito(nid, ccursor)
-	TEXT To lc Noshow Textmerge
+	Function listardctonotascredtito(nid, Ccursor)
+	Text To lC Noshow Textmerge
 	    SELECT a.idart,a.descri,a.unid,k.cant,k.prec,
 		ROUND(k.cant*k.prec,2) as importe,k.idauto,r.mone,r.valor,r.igv,r.impo,kar_comi as comi,k.alma,
 		r.fech,r.ndoc,r.tdoc,r.dolar as dola,r.vigv,r.rcom_exon,'K' as tcom,k.idkar,if(k.prec=0,kar_cost,0) as costoref from fe_rcom r
@@ -259,27 +279,27 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		from fe_rcom r
 		inner join fe_detallevta k on k.detv_idau=r.idauto
 		where k.detv_acti='A' and r.acti='A' and r.idauto=<<nid>> order by idkar
-	ENDTEXT
-	If This.EjecutaConsulta(lc, ccursor) < 1 Then
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return  1
 	Endfunc
 	Function GrabarIdjornaly(np1)
-	TEXT To cupdate Noshow Textmerge
+	Text To cupdate Noshow Textmerge
         update venta  set estado=2 where idjournal=<<np1>>
-	ENDTEXT
+	Endtext
 	If This.Ejecutarsql(cupdate) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
-	Function listarvtascreditocantidad(dfi,dff,nidus,nisla,nidl,calias)
-	fi=cfechas(dfi)
-	ff=cfechas(dff)
+	Function listarvtascreditocantidad(dfi, dff, nidus, nisla, nidl, Calias)
+	fi = cfechas(dfi)
+	ff = cfechas(dff)
 *!*		If nisla=0 Then
-		If nidus=0 Then
-			TEXT TO lc NOSHOW TEXTMERGE
+	If nidus = 0 Then
+		Text To lC Noshow Textmerge
 		     SELECT a.ndoc,a.fech,c.razo,d.descri,d.unid,e.cant,e.prec,f.nomb AS usuario,CAST(e.cant*e.prec AS DECIMAL(12,2)) AS impo,
 	         a.deta,a.fusua,kar_idco,a.codt as isla,'credito' as tipo FROM
 	         fe_rcom AS a
@@ -288,9 +308,9 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 			 INNER JOIN fe_art AS d ON d.idart=e.idart
 			 INNER JOIN fe_usua AS f ON f.idusua=a.idusua
 			 WHERE rcom_idis=<<nidl>> AND a.acti='A' AND e.acti='A' AND a.form='C' AND kar_idco>0  AND codt=<<nisla>>
-			ENDTEXT
-		Else
-			TEXT TO lc NOSHOW TEXTMERGE
+		Endtext
+	Else
+		Text To lC Noshow Textmerge
 		     SELECT a.ndoc,a.fech,c.razo,d.descri,d.unid,e.cant,e.prec,f.nomb AS usuario,CAST(e.cant*e.prec AS DECIMAL(12,2)) AS impo,
 	         a.deta,a.fusua,kar_idco,a.codt as isla,'credito' as tipo FROM
 	         fe_rcom AS a
@@ -299,8 +319,8 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 			 INNER JOIN fe_art AS d ON d.idart=e.idart
 			 INNER JOIN fe_usua AS f ON f.idusua=a.idusua
 			 WHERE rcom_idis=<<nidl>> AND a.acti='A' AND e.acti='A' AND a.form='C' AND kar_idco>0  and a.idusua=<<nidus>>  AND codt=<<nisla>>
-			ENDTEXT
-		Endif
+		Endtext
+	Endif
 *!*		Else
 *!*			If nidus=0 Then
 *!*				TEXT TO lc NOSHOW TEXTMERGE
@@ -326,10 +346,12 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 *!*				ENDTEXT
 *!*			Endif
 *!*		Endif
-	If This.EjecutaConsulta(lc,calias)<1 Then
+	If This.EjecutaConsulta(lC, Calias) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
 Enddefine
+
+
 

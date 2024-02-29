@@ -361,10 +361,10 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	If This.Idsesion > 0
 		Set DataSession To This.Idsesion
 	Endif
-	Create Cursor (Calias)(coda N(8), Descri c(150), Unid c(4), cant N(10, 3), Prec N(13, 3), d1 N(7, 4), nreg N(8), ndoc c(10), Nitem N(5), uno N(10, 2), Dos N(10, 2), ;
+	Create Cursor (Calias)(coda N(8), Descri c(150), Unid c(4), cant N(10, 3), Prec N(14, 6), d1 N(7, 4), nreg N(8), ndoc c(10), Nitem N(5), uno N(10, 2), Dos N(10, 2), ;
 		  incluido c(1), razo c(120), aten c(120), Moneda c(20), facturar c(200), despacho c(200), Forma c(100), observa c(200), fech d, ;
 		  tipro c(1), come N(8, 2), Comc N(8, 2), tre N(10, 2), cua N(10, 2), cin N(10, 2), sei N(10, 2), Impo N(12, 2), Valida c(1), Codigo c(20), ;
-		  despacharpor c(100), ructr c(11), direcciont c(100), contactot c(100), telefonot c(20), valor N(12, 2), igv N(12, 2), Total N(12, 2))
+		  despacharpor c(100), ructr c(11), direcciont c(100), contactot c(100), telefonot c(20), valor N(12, 2), igv N(12, 2), Total N(12, 2),usuario c(100))
 	Select (Calias)
 	Index On Descri Tag Descri
 	Index On Nitem Tag Items
@@ -387,47 +387,52 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Return 1
 	Endfunc
 	Function mostrarocompralopez(cndoc, ccursor)
-	If goApp.OrdendeCompra = 'N' Then
-		Text To lc Noshow Textmerge
-	       SELECT `b`.`doco_iddo`  AS `doco_iddo`,	  `b`.`doco_coda`  AS `doco_coda`,
-		  `b`.`doco_cant`  AS `doco_cant`,	  `b`.`doco_prec`  AS `doco_prec`,
-		  `c`.`descri`     AS `descri`,	  `c`.`prod_smin`  AS `prod_smin`,
-		  `c`.`unid`       AS `unid`,c.prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,
-		  `a`.`ocom_valor` AS `ocom_valor`,	  `a`.`ocom_igv`   AS `ocom_igv`,	  `a`.`ocom_impo`  AS `ocom_impo`,	  `a`.`ocom_idroc` AS `ocom_idroc`,
-		  `a`.`ocom_fech`  AS `ocom_fech`,	  `a`.`ocom_idpr`  AS `ocom_idpr`,	  `a`.`ocom_desp`  AS `ocom_desp`,	  `a`.`ocom_form`  AS `ocom_form`,
-		  `a`.`ocom_mone`  AS `ocom_mone`,	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,
-		  `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  AS `ocom_aten`,	  `a`.`ocom_deta`  AS `ocom_deta`,
-		  `a`.`ocom_idus`  AS `ocom_idus`,	  `a`.`ocom_fope`  AS `ocom_fope`,	  `a`.`ocom_idpc`  AS `ocom_idpc`,	  `a`.`ocom_idac`  AS `ocom_idac`,
-		  `a`.`ocom_fact`  AS `ocom_fact`,	  `d`.`razo`       AS `razo`,	  `e`.`nomb`       AS `nomb`
-		     FROM `fe_rocom` `a`
-	     JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
-	     JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`
-	     JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
-	     JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
-	     WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
-		Endtext
-	Else
-		Text To lc Noshow Textmerge
-		  SELECT
-		  `b`.`doco_iddo`  AS `doco_iddo`,	  `b`.`doco_coda`  AS `doco_coda`,
-		  `b`.`doco_cant`  AS `doco_cant`,	  `b`.`doco_prec`  AS `doco_prec`,
-		  `c`.`descri`     AS `descri`,	  `c`.`prod_smin`  AS `prod_smin`,
-		  `c`.`unid`       AS `unid`,c.prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,
-		  `a`.`ocom_valor` AS `ocom_valor`,	  `a`.`ocom_igv`   AS `ocom_igv`,	  `a`.`ocom_impo`  AS `ocom_impo`,	  `a`.`ocom_idroc` AS `ocom_idroc`,
-		  `a`.`ocom_fech`  AS `ocom_fech`,	  `a`.`ocom_idpr`  AS `ocom_idpr`,	  `a`.`ocom_desp`  AS `ocom_desp`,	  `a`.`ocom_form`  AS `ocom_form`,
-		  `a`.`ocom_mone`  AS `ocom_mone`,	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,
-		  `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  AS `ocom_aten`,	  `a`.`ocom_deta`  AS `ocom_deta`,
-		  `a`.`ocom_idus`  AS `ocom_idus`,	  `a`.`ocom_fope`  AS `ocom_fope`,	  `a`.`ocom_idpc`  AS `ocom_idpc`,	  `a`.`ocom_idac`  AS `ocom_idac`,
-		  `a`.`ocom_fact`  AS `ocom_fact`,	  `d`.`razo`       AS `razo`,	  `e`.`nomb`       AS `nomb`,	  `b`.`doco_uno`   AS `doco_uno`,
-		  `b`.`doco_dos`   AS `doco_dos`,	  `b`.`doco_tre`   AS `doco_tre`,	  `b`.`doco_cua`   AS `doco_cua`,	  `b`.`doco_cin`   AS `doco_cin`,	  `b`.`doco_sei`   AS `doco_sei`
-		     FROM `fe_rocom` `a`
-	     JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
-	     JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`
-	     JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
-	     JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
-	     WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
-		Endtext
-	Endif
+	SET TEXTMERGE ON 
+	SET TEXTMERGE TO memvar lc NOSHOW TEXTMERGE 
+	 \ SELECT `b`.`doco_iddo`  AS `doco_iddo`,	  `b`.`doco_coda`  AS `doco_coda`,
+	 \ `b`.`doco_cant`  AS `doco_cant`,	  `b`.`doco_prec`  AS `doco_prec`,
+	 \ `c`.`descri`     AS `descri`,	  `c`.`prod_smin`  AS `prod_smin`,
+	 \ `c`.`unid`       AS `unid`,c.prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,
+	 \ `a`.`ocom_valor` AS `ocom_valor`,	  `a`.`ocom_igv`   AS `ocom_igv`,	  `a`.`ocom_impo`  AS `ocom_impo`,	  `a`.`ocom_idroc` AS `ocom_idroc`,
+	 \ `a`.`ocom_fech`  AS `ocom_fech`,	  `a`.`ocom_idpr`  AS `ocom_idpr`,	  `a`.`ocom_desp`  AS `ocom_desp`,	  `a`.`ocom_form`  AS `ocom_form`,
+	 \ `a`.`ocom_mone`  AS `ocom_mone`,	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,
+	 \ `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  AS `ocom_aten`,	  `a`.`ocom_deta`  AS `ocom_deta`,
+	 \ `a`.`ocom_idus`  AS `ocom_idus`,	  `a`.`ocom_fope`  AS `ocom_fope`,	  `a`.`ocom_idpc`  AS `ocom_idpc`,	  `a`.`ocom_idac`  AS `ocom_idac`,
+	 \ `a`.`ocom_fact`  AS `ocom_fact`,	  `d`.`razo`       AS `razo`,	  `e`.`nomb`       AS `nomb`,c.peso
+	  If goApp.OrdendeCompra <> 'N' Then
+	    \ ,`b`.`doco_uno` , `b`.`doco_dos` ,`b`.`doco_tre`,`b`.`doco_cua` , `b`.`doco_cin`,`b`.`doco_sei`
+	  ENDIF 
+	 \ FROM `fe_rocom` `a`
+	 \JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
+	 \JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`
+	 \JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
+	 \JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
+	 \WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
+	SET TEXTMERGE off
+	SET TEXTMERGE TO 
+	
+*!*		Else
+*!*			Text To lc Noshow Textmerge
+*!*			  SELECT
+*!*			  `b`.`doco_iddo`  AS `doco_iddo`,	  `b`.`doco_coda`  AS `doco_coda`,
+*!*			  `b`.`doco_cant`  AS `doco_cant`,	  `b`.`doco_prec`  AS `doco_prec`,
+*!*			  `c`.`descri`     AS `descri`,	  `c`.`prod_smin`  AS `prod_smin`,
+*!*			  `c`.`unid`       AS `unid`,c.prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,
+*!*			  `a`.`ocom_valor` AS `ocom_valor`,	  `a`.`ocom_igv`   AS `ocom_igv`,	  `a`.`ocom_impo`  AS `ocom_impo`,	  `a`.`ocom_idroc` AS `ocom_idroc`,
+*!*			  `a`.`ocom_fech`  AS `ocom_fech`,	  `a`.`ocom_idpr`  AS `ocom_idpr`,	  `a`.`ocom_desp`  AS `ocom_desp`,	  `a`.`ocom_form`  AS `ocom_form`,
+*!*			  `a`.`ocom_mone`  AS `ocom_mone`,	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,
+*!*			  `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  AS `ocom_aten`,	  `a`.`ocom_deta`  AS `ocom_deta`,c.peso,
+*!*			  `a`.`ocom_idus`  AS `ocom_idus`,	  `a`.`ocom_fope`  AS `ocom_fope`,	  `a`.`ocom_idpc`  AS `ocom_idpc`,	  `a`.`ocom_idac`  AS `ocom_idac`,
+*!*			  `a`.`ocom_fact`  AS `ocom_fact`,	  `d`.`razo`       AS `razo`,	  `e`.`nomb`       AS `nomb`,	 
+*!*			
+*!*			  FROM `fe_rocom` `a`
+*!*		     JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
+*!*		     JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`
+*!*		     JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
+*!*		     JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
+*!*		     WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
+*!*			Endtext
+*!*		Endif
 	If This.EjecutaConsulta(lc, ccursor) < 1 Then
 		Return 0
 	Endif

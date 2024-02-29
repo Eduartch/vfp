@@ -4,9 +4,10 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	dutil3 = 0
 	prec2 = 0
 	crefe = ""
+	cfileprecios=""
 	Function CreaProducto()
 *cdesc,cunid,nprec,ncosto,np1,np2,np3,npeso,ccat,cmar,ctipro,nflete,cm,cidpc,ncome,ncomc,nutil1,nutil2,nutil3,nidusua,nsmax,nsmin,ccodigo1,ndolar
-	lc = 'FuncreaProductos'
+	lC = 'FuncreaProductos'
 	cur = "Xn"
 	np1 = This.cdesc
 	np2 = This.cunid
@@ -39,7 +40,7 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	Text To lp Noshow
      (?np1,?np2,?np3,?np4,?np5,?np6,?np7,?np8,?np9,?np10,?np11,?np12,?np13,?np14,?np15,?np16,?np17,?np18,?np19,?np20,?np21,?np22,?np23,?np24,?np25,?np26,?np27,?np28,?this.crefe)
 	Endtext
-	nid = This.EJECUTARf(lc, lp, cur)
+	nid = This.EJECUTARf(lC, lp, cur)
 	If nid < 1 Then
 		Return 0
 	Else
@@ -49,7 +50,7 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 
 	Function Modificaproducto()
 *cdesc,cunid,ncosto,np1,np2,np3,npeso,ccat,cmar,ctipro,nflete,cm,nprec,nidgrupo,nutil1,nutil2,nutil3,ncome,ncomc,nidusua,ncoda,nsmax,nsmin,ccodigo1,ndolar,ce
-	lc = 'PROACTUALIZAPRODUCTOS'
+	lC = 'PROACTUALIZAPRODUCTOS'
 	cur = ""
 	goApp.npara1 = This.cdesc
 	goApp.npara2 = This.cunid
@@ -87,7 +88,7 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
       ?goapp.npara18,?goapp.npara19,?goapp.npara20,?goapp.npara21,?goapp.npara22,?goapp.npara23,?goapp.npara24,?goapp.npara25,?goapp.npara26,
       ?goapp.npara27,?goapp.npara28,?goapp.npara29,?goapp.npara30,?this.crefe)
 	Endtext
-	If This.EJECUTARP(lc, lp, cur) < 1 Then
+	If This.EJECUTARP(lC, lp, cur) < 1 Then
 		Return 0
 	Else
 		Return 1
@@ -95,7 +96,7 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	Endfunc
 	Function ActualizaCostos10(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10, np11)
 	cur = ""
-	lc = "ProActualizaPreciosProducto1"
+	lC = "ProActualizaPreciosProducto1"
 	goApp.npara1 = np1
 	goApp.npara2 = np2
 	goApp.npara3 = np3
@@ -111,14 +112,14 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,
       ?goapp.npara10,?goapp.npara11)
 	Endtext
-	If This.EJECUTARP(lc, lp, cur) < 1 Then
+	If This.EJECUTARP(lC, lp, cur) < 1 Then
 		Return 0
 	Else
 		Return 1
 	Endif
 	Endfunc
-	Function MuestraProductosDescCod10(np1, np2, np3, np4, np5, ccursor)
-	lc = 'PROMUESTRAPRODUCTOS1'
+	Function MuestraProductosDescCod10(np1, np2, np3, np4, np5, Ccursor)
+	lC = 'PROMUESTRAPRODUCTOS1'
 	goApp.npara1 = np1
 	goApp.npara2 = np2
 	goApp.npara3 = np3
@@ -128,7 +129,7 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	If !Pemstatus(goApp, cpropiedad, 5)
 		goApp.AddProperty("ListaPreciosPorTienda", "")
 	Endif
-	If goApp.Listapreciosportienda = 'S' Then
+	If goApp.ListaPreciosPorTienda = 'S' Then
 		Text To lp Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5)
 		Endtext
@@ -137,10 +138,27 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4)
 		Endtext
 	Endif
-	If This.EJECUTARP(lc, lp, ccursor) < 1 Then
+	If This.EJECUTARP(lC, lp, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
+	Function MuestraProductos1(np1, np2, Ccursor)
+	IF this.idsesion>0 then
+	    SET DATASESSION TO this.idsesion
+	ENDIF     
+	lC = 'PROMUESTRAPRODUCTOS'
+	goApp.npara1 = np1
+	goApp.npara2 = np2
+	Text To lp Noshow
+     (?goapp.npara1,?goapp.npara2)
+	Endtext
+	If This.EJECUTARP(lC, lp, Ccursor) < 1 Then
+		Return 0
+	ENDIF
+	RETURN 1
+	Endfunc
 Enddefine
+
+
 

@@ -36,7 +36,7 @@ Define Class ventasx3 As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Set Textmerge  To Memvar lc Noshow
 	    \Select tdoc, ndoc, r.fech, Razo, Descri, kar_unid As unid, cant, k.Prec, mone, u.nomb As Usuario,
 	    \If(a.tmon = 'S', a.Prec, a.Prec * v.dola) As costo,
-		\Form, cant * k.Prec As Impo, If(mone = 'S', cant * k.Prec, cant * k.Prec * r.dolar) As impo1, p.nruc, ndni,Dire,ciud,g.nomv,k.idart  From fe_rcom r
+		\Form, cant * k.Prec As Impo, If(mone = 'S', cant * k.Prec, cant * k.Prec * r.dolar) As impo1, p.nruc, ndni,Dire,ciud,g.nomv,k.idart,r.vigv  From fe_rcom r
 		\inner Join fe_kar k On k.idauto = r.idauto
 		\inner Join fe_clie p On p.idclie = r.Idcliente
 		\inner Join fe_usua u On u.idusua = r.idusua
