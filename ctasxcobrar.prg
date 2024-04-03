@@ -6,7 +6,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	nidclie = 0
 	npago = 0
 	ndola = 0
-	cmoneda = ""
+	Cmoneda = ""
 	cndoc = ""
 	dFech = Date()
 	cdetalle = ""
@@ -21,6 +21,10 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	sintransaccion = ""
 	concargocaja = ""
 	idcajero = 0
+	idzona = 0
+	cmodo = ""
+	dfi = Date()
+	dff = Date()
 	Function mostrarpendientesxcobrar(nidclie, Ccursor)
 	Text To lC Noshow Textmerge
 		SELECT `x`.`idclie`,		`x`.`razo`      AS `razo`,
@@ -86,7 +90,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		Return nid
 	Endif
 	Endfunc
-	Function estadodecuentaporcliente(nidclie, cmoneda, Ccursor)
+	Function estadodecuentaporcliente(nidclie, Cmoneda, Ccursor)
 	Text To lC Noshow Textmerge
 	    SELECT b.rcre_idcl,a.fech as fepd,a.fevto as fevd,a.ndoc,b.rcre_impc as impc,b.rcre_inic as inic,a.impo as impd,a.acta as actd,a.dola,
 	    a.tipo,a.banc,ifnull(c.ndoc,'0000000000') as docd,a.mone as mond,a.estd,a.idcred as nr,b.rcre_idrc,
@@ -102,7 +106,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	Return 1
 	Endfunc
-	Function estadodecuentaporcliente10(nidclie, cmoneda, Ccursor)
+	Function estadodecuentaporcliente10(nidclie, Cmoneda, Ccursor)
 	If This.Idsesion > 1 Then
 		Set DataSession To This.Idsesion
 	Endif
@@ -170,13 +174,13 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	Return 1
 	Endfunc
-	Function listactasxcobrar(df, Ccursor)
+	Function listactasxcobrar(Df, Ccursor)
 	Set Textmerge On
 	Set Textmerge To Memvar lC Noshow Textmerge
-	\		Select c.nruc,c.razo As proveedor,c.idclie As codp,b.mone,b.tsoles,b.tdolar,c.clie_idzo,ifnull(T.ndoc,a.ndoc) As ndoc,
-	\		ifnull(T.tdoc,'') As tdoc,ifnull(T.fech,a.fech) As fech From
-	\		(Select a.Ncontrol,a.mone,Round(If(a.mone='S',Sum(a.Impo-a.acta),0),2) As tsoles,
-	\		Round(If(a.mone='D',Sum(a.Impo-a.acta),0),2) As tdolar
+	\		Select c.nruc,c.razo As proveedor,c.idclie As codp,a.mone,If(a.mone='S',saldo,0) As tsoles,If(a.mone='D',saldo,0) As tdolar,
+	\       c.clie_idzo,ifnull(T.ndoc,a.ndoc) As ndoc,
+	\		ifnull(T.tdoc,'') As tdoc,ifnull(T.fech,a.fech) As fech,b.fech As fecha,v.nomv As vendedor,a.tipo,s.nomb As Tienda From
+	\		(Select a.Ncontrol,Min(fevto) As fech,Sum(a.Impo-a.acta) As saldo
 	\		From fe_cred As a
 	\		INNER Join fe_rcred As xx  On xx.rcre_idrc=a.cred_idrc
 	\		Where a.fech<='<<df>>'  And  a.Acti<>'I' And xx.rcre_Acti<>'I'
@@ -186,11 +190,17 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	If This.chkTIENDA = 1 Then
 	\ And rcre_codt=<<This.Tienda>>
 	Endif
-	\Group By a.Ncontrol,a.mone Having tsoles<>0 Or tdolar<>0) As b
+	\Group By a.Ncontrol Having saldo<>0) As b
 	\	INNER Join fe_cred As a On a.idcred=b.Ncontrol
 	\	INNER Join fe_rcred As r On r.rcre_idrc=a.cred_idrc
 	\	INNER Join fe_clie As c On c.idclie=r.rcre_idcl
-	\	Left Join (Select Idauto,ndoc,tdoc,fech From fe_rcom Where Acti='A' And idcliente>0) As T On T.Idauto=r.rcre_idau Order By proveedor
+	\   INNER Join fe_vend As v On v.idven=r.rcre_codv
+	\   INNER Join fe_sucu As s On s.idalma=r.rcre_codt
+	\	Left Join (Select Idauto,ndoc,tdoc,fech From fe_rcom Where Acti='A' And idcliente>0) As T On T.Idauto=r.rcre_idau
+	If This.idzona > 0 Then
+	   \ Where clie_idzo=<<This.idzona>>
+	Endif
+	\Order By proveedor
 	Set Textmerge Off
 	Set Textmerge To
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
@@ -236,7 +246,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	Return 1
 	Endfun
-	Function registraanticipos(nidclie, dFech, npago, cndoc, cdetalle, ndolar, cmoneda)
+	Function registraanticipos(nidclie, dFech, npago, cndoc, cdetalle, ndolar, Cmoneda)
 	Set Procedure To d:\capass\modelos\cajae Additive
 	ocaja = Createobject('cajae')
 	If This.sintransaccion <> 'S'
@@ -252,14 +262,14 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		Endif
 		Return 0
 	Endif
-	nidanti = This.CancelaCreditosanticipos(cndoc, npago, 'P', cmoneda, cdetalle, dFech, dFech, 'F', -1, "", ur, Id(), goApp.nidusua, ur)
+	nidanti = This.CancelaCreditosanticipos(cndoc, npago, 'P', Cmoneda, cdetalle, dFech, dFech, 'F', -1, "", ur, Id(), goApp.nidusua, ur)
 	If nidanti < 1 Then
 		If This.contrasaccion = 'S'
 			This.DEshacerCambios()
 		Endif
 		Return 0
 	Endif
-	nmp = Iif(cmoneda = 'D', Round(npago * ndolar, 2), npago)
+	nmp = Iif(Cmoneda = 'D', Round(npago * ndolar, 2), npago)
 	If ocaja.IngresaDatosLCajaEe(dFech, "", cdetalle, fe_gene.gene_idcre, nmp, 0, 'S', fe_gene.dola, This.idcajero, nidanti) < 1 Then
 		If This.CONTRANSACCION = 'S'
 			This.DEshacerCambios()
@@ -528,7 +538,79 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	Return 1
 	Endfunc
+	Function vtosxcliente1(nidclie, Ccursor)
+	If This.Idsesion > 0 Then
+		Set DataSession To This.Idsesion
+	Endif
+	Set Textmerge On
+	Set Textmerge To  Memvar lC Noshow Textmerge
+	\Select `x`.`idclie`,`x`.`razo`      As `razo`,
+	\v.importe,v.fevto,`v`.`rcre_idrc` As `rcre_idrc`,`rr`.`rcre_fech` As `fech`,
+	\`rr`.`rcre_idau` As `Idauto`,rcre_codv As idven,`vv`.`nomv`      As `nomv`,
+	\ ifnull(`cc`.`ndoc`,"") As `docd`, ifnull(`cc`.`tdoc`,'') As `tdoc`, a.`ndoc`,
+	\`a`.`mone`      As `mone`,`a`.`banc`      As `banc`,
+	\`a`.`tipo`      As `tipo`,`a`.`dola`      As `dola`,
+	\`a`.`nrou`      As `nrou`,`a`.`banco`     As `banco`,
+	\`a`.`idcred`    As `idcred`,a.fech As fepd,v.Ncontrol,a.estd,a.ndoc,
+	\v.rcre_idrc,a.Impo As impoo
+	\From (
+	\Select Ncontrol,rcre_idrc,rcre_idcl,Max(`c`.`fevto`) As `fevto`,Round(Sum((`c`.`Impo` - `c`.`acta`)),2) As `importe` From
+	\fe_rcred As r
+	\INNER Join fe_cred As c On c.`cred_idrc`=r.`rcre_idrc` Where r.`rcre_Acti`='A' And c.`Acti`='A' And r.rcre_idcl=<<nidclie>>
+	If This.chkTIENDA > 0 Then
+	   \ And rcre_codt=<<This.Tienda>>
+	Endif
+	If Len(Alltrim(This.cformapago)) > 0 Then
+	   \ And rcre_form='<<this.cformapago>>'
+	Endif
+		\Group By `c`.`Ncontrol`,r.rcre_idrc,r.rcre_idcl  Having (Round(Sum((`c`.`Impo` - `c`.`acta`)),2) <> 0)) As v
+		\INNER Join fe_clie As `x` On `x`.`idclie`=v.rcre_idcl
+		\INNER Join fe_rcred As rr On rr.`rcre_idrc`=v.rcre_idrc
+		\INNER Join fe_vend As vv On vv.`idven`=rr.`rcre_codv`
+		\Left Join  (Select tdoc,ndoc,Idauto From fe_rcom Where idcliente>0 And Acti='A') As cc On cc.Idauto=rr.`rcre_idau`
+		\INNER Join fe_cred As a On a.idcred=v.Ncontrol
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function listardetallectasxcobrar(Ccursor)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\Select  a.razo, ifnull(b.tdoc, "SD") As tdoc, ifnull(b.ndoc, c.ndoc) As ndoc, p.rcre_fech As fech, c.fevto, ifnull(b.mone, 'S') As mone,
+	\c.Impo, s.acta, s.saldo, ifnull(b.Idauto, 0) As Idauto, e.nomv, c.tipo, p.rcre_codv, a.idclie  From
+	\(Select xx.rcre_idcl As idclie, a.Ncontrol, Round(Sum(a.Impo - a.acta), 2) As saldo, Sum(acta) As acta
+	\From fe_cred As a
+	\INNER Join fe_rcred As xx  On xx.rcre_idrc = a.cred_idrc
+	\Where a.fech <= '<<f2>>' And a.Acti <> 'I' And xx.rcre_Acti <> 'I'
+	If This.Tienda > 0 Then
+	\  And xx.rcre_codt =<<This.Tienda>>
+	Endif
+	If This.Codv > 0 Then
+	\  And xx.rcre_codv =<<This.Codv>>
+	Endif
+	\  Group By xx.rcre_idcl, a.Ncontrol, a.mone
+	\Having saldo <> 0) As s
+	\INNER Join fe_clie As a On a.idclie = s.idclie
+	\INNER Join fe_cred As c On c.idcred = s.Ncontrol
+	\INNER Join fe_rcred As p On p.rcre_idrc = c.cred_idrc
+	\INNER Join fe_vend As e On e.idven = p.rcre_codv
+	\Left Join fe_rcom As b On b.Idauto = p.rcre_idau Order By razo
+	Set Textmerge Off
+	Set Textmerge To
+	If This.ejecutaconsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine
+
+
+
+
 
 
 

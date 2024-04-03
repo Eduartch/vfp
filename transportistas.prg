@@ -1,8 +1,8 @@
 Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 	Placa = ""
 	nombre = ""
-	direccion = ""
-	ruc = ""
+	Direccion = ""
+	Ruc = ""
 	chofer = ""
 	brevete = ""
 	marca = ""
@@ -14,25 +14,25 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 	npropio = 0
 	activofijo = ""
 	Function listarTransportistax(np1, np2, ccur)
-	Local lc, lp
-	m.lc		 = 'ProMuestraTransportista'
+	Local lC, lp
+	m.lC		 = 'ProMuestraTransportista'
 	goApp.npara1 = m.np1
 	goApp.npara2 = m.np2
 	Text To m.lp Noshow
      (?goapp.npara1,?goapp.npara2)
 	Endtext
-	If This.EJECUTARP(m.lc, m.lp, m.ccur) < 1 Then
+	If This.EJECUTARP(m.lC, m.lp, m.ccur) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
 **********************************
-	Function Validar()
+	Function VAlidar()
 	Do Case
 	Case Len(Alltrim(This.nombre)) = 0
 		This.Cmensaje = "Ingrese Nombre de Transportista"
 		Return 0
-	Case !ValidaRuc(This.ruc)
+	Case !ValidaRuc(This.Ruc)
 		This.Cmensaje = "Ruc NO Válido"
 		Return 0
 	Otherwise
@@ -41,10 +41,10 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 	Endfunc
 ************
 	Function  crear()
-	If This.Validar() < 1 Then
+	If This.VAlidar() < 1 Then
 		Return 0
 	Endif
-	m.lc		 = 'FUNCREATRANSPORTISTA'
+	m.lC		 = 'FUNCREATRANSPORTISTA'
 	If This.activofijo = 'S' Then
 		Text To lp Noshow Textmerge
     ('<<this.placa>>','<<this.nombre>>','<<this.direccion>>','<<this.ruc>>','<<this.chofer>>','<<this.brevete>>','<<this.marca>>','<<this.registromtc>>',<<goapp.nidusua>>,'<<this.placa1>>','<<this.tipot>>','<<this.constancia>>',<<this.npropio>>)
@@ -54,17 +54,17 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
     ('<<this.placa>>','<<this.nombre>>','<<this.direccion>>','<<this.ruc>>','<<this.chofer>>','<<this.brevete>>','<<this.marca>>','<<this.registromtc>>',<<goapp.nidusua>>,'<<this.placa1>>','<<this.tipot>>','<<this.constancia>>')
 		Endtext
 	Endif
-	nidt = This.EJECUTARf(lc, lp, 'trax')
+	nidt = This.EJECUTARf(lC, lp, 'trax')
 	If nidt < 1 Then
 		Return 0
 	Endif
 	Return nidt
 	Endfunc
-	Function actualizar()
-	If This.Validar() < 1 Then
+	Function Actualizar()
+	If This.VAlidar() < 1 Then
 		Return 0
 	Endif
-	m.lc		 = 'PROACTUALIZATRANSPORTISTA'
+	m.lC		 = 'PROACTUALIZATRANSPORTISTA'
 	If This.activofijo = 'S' Then
 		Text To lp Noshow Textmerge
     ('<<this.placa>>','<<this.nombre>>','<<this.direccion>>','<<this.ruc>>','<<this.chofer>>','<<this.brevete>>','<<this.marca>>','<<this.registromtc>>',<<this.idtr>>,'<<this.placa1>>','<<this.tipot>>','<<this.constancia>>',<<this.npropio>>)
@@ -74,7 +74,7 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
     ('<<this.placa>>','<<this.nombre>>','<<this.direccion>>','<<this.ruc>>','<<this.chofer>>','<<this.brevete>>','<<this.marca>>','<<this.registromtc>>',<<this.idtr>>,'<<this.placa1>>','<<this.tipot>>','<<this.constancia>>')
 		Endtext
 	Endif
-	If This.EJECUTARP(lc, lp) < 1 Then
+	If This.EJECUTARP(lC, lp) < 1 Then
 		Return 0
 	Endif
 	Return 1
@@ -82,14 +82,14 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 	Function ProcesaTransportista(Cruc, crazo, cdire, cbreve, ccons, cmarca, cplaca, idtr, optt, cchofer, nidus, cplaca1)
 	If optt = 0 Then
 		If SQLExec(goApp.bdConn, "SELECT FUNCREATRANSPORTISTA(?cplaca,?crazo,?cdire,?cruc,?cchofer,?cbreve,?cmarca,?ccons,?nidus,?cplaca1) as nid", "yy") < 1 Then
-			errorbd(ERRORPROC + 'Ingresando Transportista')
+			Errorbd(ERRORPROC + 'Ingresando Transportista')
 			Return 0
 		Else
 			Return yy.nid
 		Endif
 	Else
 		If SQLExec(goApp.bdConn, "CALL PROACTUALIZATRANSPORTISTA(?cplaca,?crazo,?cdire,?cruc,?cchofer,?cbreve,?cmarca,?ccons,?idtr,?cplaca1)") < 1 Then
-			errorbd(ERRORPROC + 'Actualizando Transportista')
+			Errorbd(ERRORPROC + 'Actualizando Transportista')
 			Return 0
 		Else
 			Return idtr
@@ -100,36 +100,55 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 	Function ProcesaTransportista1(Cruc, crazo, cdire, cbreve, ccons, cmarca, cplaca, idtr, optt, cchofer, nidus, cplaca1, cfono, cContacto)
 	If optt = 0 Then
 		If SQLExec(goApp.bdConn, "SELECT FUNCREATRANSPORTISTA1(?cplaca,?crazo,?cdire,?cruc,?cchofer,?cbreve,?cmarca,?ccons,?nidus,?cplaca1,?cfono,?ccontacto) as nid", "yy") < 1 Then
-			errorbd(ERRORPROC + ' Ingresando Transportista')
+			Errorbd(ERRORPROC + ' Ingresando Transportista')
 			Return 0
 		Else
 			Return yy.nid
 		Endif
 	Else
 		If SQLExec(goApp.bdConn, "CALL PROACTUALIZATRANSPORTISTA1(?cplaca,?crazo,?cdire,?cruc,?cchofer,?cbreve,?cmarca,?ccons,?idtr,?cplaca1,?cfono,?ccontacto)") < 1 Then
-			errorbd(ERRORPROC + ' Actualizando Transportista')
+			Errorbd(ERRORPROC + ' Actualizando Transportista')
 			Return 0
 		Else
 			Return 1
 		Endif
 	Endif
 	Endfunc
-	Function quitar(idtran, opt)
+	Function quitar(Idtran, opt)
 	If opt = 0 Then
-		Text To lc Noshow Textmerge
+		Text To lC Noshow Textmerge
 	        UPDATE fe_tra SET tran_acti='I'  WHERE idtra=<<idtran>>
 		Endtext
 	Else
-		Text To lc Noshow Textmerge
+		Text To lC Noshow Textmerge
 	        UPDATE fe_tra SET tran_acti='A'  WHERE idtra=<<idtran>>
 		Endtext
 	Endif
-	If This.Ejecutarsql(lc) < 1 Then
+	If This.Ejecutarsql(lC) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function buscarplaca()
+	cplaca = This.Placa
+	Ccursor = 'c_' + Sys(2015)
+	Text To lC Noshow Textmerge
+        select placa FROM fe_tra WHERE placa='<<cplaca>>' limit 1
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1
+		Return 0
+	Endif
+	Select (Ccursor)
+	If Reccount() > 0
+		This.Cmensaje = "NÚMERO  de Placa Ya Registrada"
 		Return 0
 	Endif
 	Return 1
 	Endfunc
 Enddefine
+
+
+
 
 
 

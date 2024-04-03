@@ -40,6 +40,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	m.constock =  ""
 	m.Cestado = ""
 	m.codt = 0
+	m.cdetalle = ""
 ************************************
 	Function MuestraProductosJ1(np1, np2, np3, np4, Ccursor)
 	lC = 'PROMUESTRAPRODUCTOSJx'
@@ -56,61 +57,38 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Return 1
 	Endfunc
 	Function listapreciosporlineaunidades(nidcat, Ccursor)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow  Textmerge
+	\ Select idart,Descri,unid,prod_unid1,
+	\	 Cast(If(uno>0,If(Mod(uno,prod_equi2)=0,uno/prod_equi2,If(Mod(uno,prod_equi2)=0,uno DIV prod_equi2,Truncate(uno/prod_equi2,0))),0.00) As Decimal(12,2)) As prod_unim,
+	\	 Cast(If(uno>0,If(Mod(uno,prod_equi2)=0,0.00,Mod(uno,prod_equi2)),uno) As Decimal(12,2)) As prod_unin,
+	\	 Cast(If(Dos>0,If(Mod(Dos,prod_equi2)=0,Dos/prod_equi2,If(Mod(Dos,prod_equi2)=0,Dos DIV prod_equi2,Truncate(Dos/prod_equi2,0))),0.00) As Decimal(12,2)) As prod_dunim,
+	\	 Cast(If(Dos>0,If(Mod(Dos,prod_equi2)=0,0.00,Mod(Dos,prod_equi2)),Dos) As Decimal(12,2)) As prod_dunin,
+	\	 Cast(If(tre>0,If(Mod(tre,prod_equi1)=0,tre/prod_equi1,If(Mod(tre,prod_equi1)=0,tre DIV prod_equi1,Truncate(tre/prod_equi1,0))),0.00) As Decimal(12,2)) As prod_tunim,
+	\	 Cast(If(tre>0,If(Mod(tre,prod_equi1)=0,0.00,Mod(tre,prod_equi1)),tre) As Decimal(12,2)) As prod_tunin,
+	\	 Cast(If(cua>0,If(Mod(cua,prod_equi1)=0,cua/prod_equi1,If(Mod(cua,prod_equi1)=0,cua DIV prod_equi1,Truncate(cua/prod_equi1,0))),0.00) As  Decimal(12,2)) As prod_cunim,
+	\	 Cast(If(cua>0,If(Mod(cua,prod_equi1)=0,0.00,Mod(cua,prod_equi1)),cua) As Decimal(12,2)) As prod_cunin,
+	\	 Round(If(tmon='S',(a.Prec*prod_tigv)+b.Prec,(a.Prec*prod_tigv*v.dola)+b.Prec),2) As costo,c.idgrupo,c.dcat,
+	\	 IFNULL(Round(If(tmon='S',premay,((a.Prec*prod_tigv*v.dola)+b.Prec)*prod_uti3),2),0) As pre1,
+	\	 IFNULL(Round(If(tmon='S',premen,((a.Prec*prod_tigv*v.dola)+b.Prec)*prod_uti2),2),0) As pre2,
+	\	 IFNULL(Round(If(tmon='S',pre3,((a.Prec*prod_tigv*v.dola)+b.Prec)*prod_uti1),2),0) As pre3,prod_tigv,
+	\	 Round(If(tmon='S',(a.Prec*prod_tigv),(a.Prec*prod_tigv*v.dola)),2) As costosf,b.Prec As flete,ulfc,uno,Dos,tre,cua,
+	\	 Cast(0 As Decimal(12,2)) As costor,Cast(0 As Decimal(10,2)) As precr,''  As moner,
+	\    Cast(0 As UNSIGNED) As cost_idco,Cast(0 As Decimal(5,2))  As fleter,Cast(0 As Decimal(5,2)) As dolar,
+	\    peso,a.Prec,tipro,idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,prod_idus,prod_equi1,prod_equi2,
+	\     prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,IFNULL(o.razo,'') As proveedor,
+	\     IFNULL(yy.ndoc,'') As ndoc,IFNULL(yy.fech,'') As fech, prod_idpc,prod_idpm,prod_cod1,prod_acti,prod_alma  From fe_art  As a
+	\     INNER Join fe_fletes As b On(b.idflete=a.idflete)
+	\     INNER Join fe_cat As c On(c.idcat=a.idcat)
+	\     Left Join fe_rcom As yy On (yy.idauto=a.prod_idau)
+	\     Left Join fe_prov As o On (o.idprov=yy.idprov) ,fe_gene As v
+	\     Where prod_acti<>'I'
 	If nidcat > 0 Then
-		Text To lC Noshow Textmerge
-		 SELECT idart,descri,unid,prod_unid1,
-		 CAST(IF(uno>0,IF(MOD(uno,prod_equi2)=0,uno/prod_equi2,IF(MOD(uno,prod_equi2)=0,uno DIV prod_equi2,TRUNCATE(uno/prod_equi2,0))),0.00) AS DECIMAL(12,2)) AS prod_unim,
-		 CAST(IF(uno>0,IF(MOD(uno,prod_equi2)=0,0.00,MOD(uno,prod_equi2)),uno) AS DECIMAL(12,2)) AS prod_unin,
-		 CAST(IF(dos>0,IF(MOD(dos,prod_equi2)=0,dos/prod_equi2,IF(MOD(dos,prod_equi2)=0,dos DIV prod_equi2,TRUNCATE(dos/prod_equi2,0))),0.00) AS DECIMAL(12,2)) AS prod_dunim,
-		 CAST(IF(dos>0,IF(MOD(dos,prod_equi2)=0,0.00,MOD(dos,prod_equi2)),dos) AS DECIMAL(12,2)) AS prod_dunin,
-		 CAST(IF(tre>0,IF(MOD(tre,prod_equi1)=0,tre/prod_equi1,IF(MOD(tre,prod_equi1)=0,tre DIV prod_equi1,TRUNCATE(tre/prod_equi1,0))),0.00) AS DECIMAL(12,2)) AS prod_tunim,
-		 CAST(IF(tre>0,IF(MOD(tre,prod_equi1)=0,0.00,MOD(tre,prod_equi1)),tre) AS DECIMAL(12,2)) AS prod_tunin,
-		 CAST(IF(cua>0,IF(MOD(cua,prod_equi1)=0,cua/prod_equi1,IF(MOD(cua,prod_equi1)=0,cua DIV prod_equi1,TRUNCATE(cua/prod_equi1,0))),0.00) AS  DECIMAL(12,2)) AS prod_cunim,
-		 CAST(IF(cua>0,IF(MOD(cua,prod_equi1)=0,0.00,MOD(cua,prod_equi1)),cua) AS DECIMAL(12,2)) AS prod_cunin,
-		 ROUND(IF(tmon='S',(a.prec*prod_tigv)+b.prec,(a.prec*prod_tigv*v.dola)+b.prec),2) AS costo,c.idgrupo,c.dcat,
-		 IFNULL(ROUND(IF(tmon='S',premay,((a.prec*prod_tigv*v.dola)+b.prec)*prod_uti3),2),0) AS pre1,
-		 IFNULL(ROUND(IF(tmon='S',premen,((a.prec*prod_tigv*v.dola)+b.prec)*prod_uti2),2),0) AS pre2,
-		 IFNULL(ROUND(IF(tmon='S',pre3,((a.prec*prod_tigv*v.dola)+b.prec)*prod_uti1),2),0) AS pre3,prod_tigv,
-		 ROUND(IF(tmon='S',(a.prec*prod_tigv),(a.prec*prod_tigv*v.dola)),2) AS costosf,b.prec AS flete,ulfc,uno,dos,tre,cua,
-		 CAST(0 AS DECIMAL(12,2)) AS costor,CAST(0 AS DECIMAL(10,2)) AS precr,''  AS moner,
-	     CAST(0 AS UNSIGNED) AS cost_idco,CAST(0 AS DECIMAL(5,2))  AS fleter,CAST(0 AS DECIMAL(5,2)) AS dolar,
-	     peso,a.prec,tipro,idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,prod_idus,prod_equi1,prod_equi2,
-	     prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,IFNULL(o.razo,'') AS proveedor,
-	     IFNULL(yy.ndoc,'') AS ndoc,IFNULL(yy.fech,'') AS fech, prod_idpc,prod_idpm,prod_cod1,prod_acti,prod_alma  FROM fe_art  AS a
-	     INNER JOIN fe_fletes AS b ON(b.idflete=a.idflete)
-	     INNER JOIN fe_cat AS c ON(c.idcat=a.idcat)
-	     LEFT JOIN fe_rcom AS yy ON (yy.idauto=a.prod_idau)
-	     LEFT JOIN fe_prov AS o ON (o.idprov=yy.idprov) ,fe_gene as v
-	     WHERE a.idcat=<<nidcat>>  AND prod_acti<>'I' ORDER BY DESCRI;
-		Endtext
-	Else
-		Text To lC Noshow Textmerge
-		 SELECT idart,descri,unid,prod_unid1,
-		 CAST(IF(uno>0,IF(MOD(uno,prod_equi2)=0,uno/prod_equi2,IF(MOD(uno,prod_equi2)=0,uno DIV prod_equi2,TRUNCATE(uno/prod_equi2,0))),0.00) AS DECIMAL(12,2)) AS prod_unim,
-		 CAST(IF(uno>0,IF(MOD(uno,prod_equi2)=0,0.00,MOD(uno,prod_equi2)),uno) AS DECIMAL(12,2)) AS prod_unin,
-		 CAST(IF(dos>0,IF(MOD(dos,prod_equi2)=0,dos/prod_equi2,IF(MOD(dos,prod_equi2)=0,dos DIV prod_equi2,TRUNCATE(dos/prod_equi2,0))),0.00) AS DECIMAL(12,2)) AS prod_dunim,
-		 CAST(IF(dos>0,IF(MOD(dos,prod_equi2)=0,0.00,MOD(dos,prod_equi2)),dos) AS DECIMAL(12,2)) AS prod_dunin,
-		 CAST(IF(tre>0,IF(MOD(tre,prod_equi1)=0,tre/prod_equi1,IF(MOD(tre,prod_equi1)=0,tre DIV prod_equi1,TRUNCATE(tre/prod_equi1,0))),0.00) AS DECIMAL(12,2)) AS prod_tunim,
-		 CAST(IF(tre>0,IF(MOD(tre,prod_equi1)=0,0.00,MOD(tre,prod_equi1)),tre) AS DECIMAL(12,2)) AS prod_tunin,
-		 CAST(IF(cua>0,IF(MOD(cua,prod_equi1)=0,cua/prod_equi1,IF(MOD(cua,prod_equi1)=0,cua DIV prod_equi1,TRUNCATE(cua/prod_equi1,0))),0.00) AS  DECIMAL(12,2)) AS prod_cunim,
-		 CAST(IF(cua>0,IF(MOD(cua,prod_equi1)=0,0.00,MOD(cua,prod_equi1)),cua) AS DECIMAL(12,2)) AS prod_cunin,
-		 ROUND(IF(tmon='S',(a.prec*prod_tigv)+b.prec,(a.prec*prod_tigv*v.dola)+b.prec),2) AS costo,c.idgrupo,c.dcat,
-		 IFNULL(ROUND(IF(tmon='S',premay,((a.prec*prod_tigv*v.dola)+b.prec)*prod_uti3),2),0) AS pre1,
-		 IFNULL(ROUND(IF(tmon='S',premen,((a.prec*prod_tigv*v.dola)+b.prec)*prod_uti2),2),0) AS pre2,
-		 IFNULL(ROUND(IF(tmon='S',pre3,((a.prec*prod_tigv*v.dola)+b.prec)*prod_uti1),2),0) AS pre3,prod_tigv,
-		 ROUND(IF(tmon='S',(a.prec*prod_tigv),(a.prec*prod_tigv*v.dola)),2) AS costosf,b.prec AS flete,ulfc,uno,dos,tre,cua,
-		 CAST(0 AS DECIMAL(12,2)) AS costor,CAST(0 AS DECIMAL(10,2)) AS precr,''  AS moner,
-	     CAST(0 AS UNSIGNED) AS cost_idco,CAST(0 AS DECIMAL(5,2))  AS fleter,CAST(0 AS DECIMAL(5,2)) AS dolar,
-	     peso,a.prec,tipro,idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,prod_idus,prod_equi1,prod_equi2,
-	     prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,IFNULL(o.razo,'') AS proveedor,
-	     IFNULL(yy.ndoc,'') AS ndoc,IFNULL(yy.fech,'') AS fech, prod_idpc,prod_idpm,prod_cod1,prod_acti,prod_alma  FROM fe_art  AS a
-	     INNER JOIN fe_fletes AS b ON(b.idflete=a.idflete)
-	     INNER JOIN fe_cat AS c ON(c.idcat=a.idcat)
-	     LEFT JOIN fe_rcom AS yy ON (yy.idauto=a.prod_idau)
-	     LEFT JOIN fe_prov AS o ON (o.idprov=yy.idprov) ,fe_gene as v
-	     WHERE  prod_acti<>'I' ORDER BY DESCRI;
-		Endtext
+	  \ And a.idcat=<<nidcat>>
 	Endif
+	\Order By Descri;
+		Set Textmerge Off
+	Set Textmerge To
 	If  This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
@@ -612,7 +590,7 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Endif
 	Return 1
 	Endfunc
-	Function Validar()
+	Function VAlidar()
 	Do Case
 	Case  Empty(This.cdesc)
 		This.Cmensaje = 'Ingrese Nombre de producto'
@@ -849,33 +827,26 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Endfunc
 	Function listarinactivos(np1, opt, Calias)
 	cbuscar = '%' + Alltrim(np1) + '%'
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\   Select idart,Descri,unid,uno,Dos,tre,cua,cero,c.idgrupo,c.dcat,prod_dola,m.dmar,
+	\	prod_cod1, peso,a.Prec,tipro,a.idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,
+    \	prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,
+	\	ulfc,prod_ent1,prod_ent2,prod_icbper,g.idgrupo,g.desgrupo As grupo,prod_acti
+	\	From fe_art  As a
+	\	INNER Join fe_fletes As b On(b.idflete=a.idflete)
+	\	INNER Join fe_mar As m On m.idmar=a.idmar
+	\	INNER Join fe_cat As c On(c.idcat=a.idcat)
+	\	INNER Join fe_grupo As g On g.idgrupo=c.idgrupo,fe_gene As v
+	\   Where prod_acti='I'
 	If opt = 1 Then
-		Text To lC Noshow Textmerge
-		   SELECT idart,descri,unid,uno,dos,tre,cua,cero,c.idgrupo,c.dcat,prod_dola,m.dmar,
-		   prod_cod1, peso,a.prec,tipro,a.idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,
-		   prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,
-		   ulfc,prod_ent1,prod_ent2,prod_icbper,g.idgrupo,g.desgrupo AS grupo,prod_acti
-		   FROM fe_art  AS a
-		   INNER JOIN fe_fletes AS b ON(b.idflete=a.idflete)
-		   INNER JOIN fe_mar AS m ON m.idmar=a.idmar
-		   INNER JOIN fe_cat AS c ON(c.idcat=a.idcat)
-		   INNER JOIN fe_grupo AS g ON g.idgrupo=c.idgrupo,fe_gene AS v
-		   WHERE descri LIKE '<<cbuscar>>' AND prod_acti='I' ORDER BY DESCRI;
-		Endtext
+		\	And Descri Like '<<cbuscar>>'
 	Else
-		Text To lC Noshow Textmerge
-		   SELECT idart,descri,unid,uno,dos,tre,cua,cero,c.idgrupo,c.dcat,prod_dola,m.dmar,
-		   prod_cod1, peso,a.prec,tipro,a.idmar,a.idcat,cost,tmon,a.idflete,prod_uti1,prod_uti2,prod_uti3,
-		   prod_come,prod_comc,ulpc,prod_idus,prod_uact,prod_fact,fechc,prod_smax,prod_smin,
-		   ulfc,prod_ent1,prod_ent2,prod_icbper,g.idgrupo,g.desgrupo AS grupo,prod_acti
-		   FROM fe_art  AS a
-		   INNER JOIN fe_fletes AS b ON(b.idflete=a.idflete)
-		   INNER JOIN fe_mar AS m ON m.idmar=a.idmar
-		   INNER JOIN fe_cat AS c ON(c.idcat=a.idcat)
-		   INNER JOIN fe_grupo AS g ON g.idgrupo=c.idgrupo,fe_gene AS v
-		   WHERE prod_cod1 LIKE '<<cbuscar>>' AND prod_acti='I' ORDER BY DESCRI;
-		Endtext
+		\   And prod_cod1 Like '<<cbuscar>>'
 	Endif
+	\	Order By Descri;
+		Set Textmerge Off
+	Set Textmerge To
 	This.conconexion = 1
 	If This.EjecutaConsulta(lC, Calias) < 1 Then
 		Return 0
@@ -983,7 +954,97 @@ Define Class Producto As Odata Of 'd:\capass\database\data'
 	Endif
 	Return 1
 	Endfunc
+	Function listarstockminmax(Ccursor)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow  Textmerge
+	\Select  idart, prod_cod1 As codigo, Descri, unid, m.dmar As marca, c.dcat As categoria,
+	\g.desgrupo As grupo, uno, Dos, tre, cua, uno + Dos + tre + cua As Tstock
+	If 	This.nsmin	   = 1 Then
+	    \,prod_smin, prod_smin - (uno + Dos + tre + cua) As Dife1
+	Endif
+	If This.nsmax = 1  Then
+	   \,prod_smax, prod_smax - (uno + Dos + tre + cua) As Dife2
+	Endif
+	If This.cdetalle = 'S' Then
+	  \ ,prod_deta,prod_ubi1,prod_ubi2,prod_ubi3,prod_ubi4,prod_ubi5,prod_codb
+	Endif
+	\ From fe_art As a
+	\INNER Join fe_mar As m On m.idmar = a.idmar
+	\INNER Join fe_cat As c On c.idcat = a.idcat
+	\INNER Join fe_grupo As g On g.idgrupo = c.idgrupo
+	\Where prod_acti <> 'I'
+	If This.cmar > 0 Then
+	    \ And a.idmar=<<This.cmar>>
+	Endif
+	If This.ccat > 0 Then
+	    \ And a.idcat=<<This.ccat>>
+	Endif
+	If 	This.nsmin	   = 1 Then
+	    \ And prod_smin - (uno + Dos + tre + cua)>0
+	Endif
+	If This.nsmax = 1  Then
+	    \ And prod_smax - (uno + Dos + tre + cua)>0
+	Endif
+	\ Order By Descri
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function Actualizadetalleyotros(Ccursor)
+	Ab = 1
+	If This.IniciaTransaccion() < 1 Then
+		Return 0
+	Endif
+	Select (Ccursor)
+	Go Top
+	Do While !Eof()
+		nidart = xlpr.idart
+		cdeta = xlpr.prod_deta
+		Text To lC Noshow Textmerge
+		    UPDATE fe_art SET prod_deta='<<cdeta>>',prod_ubi1='<<xlpr.prod_ubi1>>',prod_ubi2='<<xlpr.prod_ubi2>>',prod_ubi3='<<xlpr.prod_ubi3>>',
+		    prod_ubi4='<<xlpr.prod_ubi4>>',prod_ubi5='<<xlpr.prod_ubi5>>',prod_codb='<<xlpr.prod_codb>>' WHERE idart=<<nidart>>
+		Endtext
+		If This.Ejecutarsql(lC) < 1 Then
+			Ab = 0
+			Exit
+		Endif
+		Select xlpr
+		Skip
+	Enddo
+	If Ab = 0 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If This.GRabarCambios() < 1 Then
+		Return 0
+	Endif
+	Return  1
+	Endfunc
+	Function Actualizadetalleyotrosxproducto(nidart)
+	cdeta = lpr.prod_deta
+	Text To lC Noshow Textmerge
+		    UPDATE fe_art SET prod_deta='<<cdeta>>',prod_ubi1='<<lpr.prod_ubi1>>',prod_ubi2='<<lpr.prod_ubi2>>',prod_ubi3='<<lpr.prod_ubi3>>',
+		    prod_ubi4='<<lpr.prod_ubi4>>',prod_ubi5='<<lpr.prod_ubi5>>',prod_codb='<<lpr.prod_codb>>' WHERE idart=<<nidart>>
+	Endtext
+	If This.Ejecutarsql(lC) < 1 Then
+		Return 0
+	Endif
+	Return  1
+	Endfunc
 Enddefine
+
+
+
+
+
+
+
+
+
+
 
 
 

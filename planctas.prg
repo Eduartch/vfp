@@ -1,35 +1,49 @@
 Define Class planctas As Odata Of 'd:\capass\database\data.prg'
-	Function MuestraPlanCuentasX(np1,cur)
-	lc="PROMUESTRAPLANCUENTAS"
-	goapp.npara1=np1
-	goapp.npara2=Val(goapp.año)
-	TEXT to lp noshow
+	Function MuestraPlanCuentasx(np1, cur)
+	lC = "PROMUESTRAPLANCUENTAS"
+	goApp.npara1 = np1
+	goApp.npara2 = Val(goApp.año)
+	Text To lp Noshow
        (?goapp.npara1,?goapp.npara2)
-	ENDTEXT
-	If This.EJECUTARP(lc,lp,cur)<1 Then
+	Endtext
+	If This.EJECUTARP(lC, lp, cur) < 1 Then
 		Return 0
 	Else
 		Return 1
 	Endif
 	Endfunc
 	Function listarctasrcompras()
-	If !Pemstatus(goapp,'ctasmp',5 ) Then
-		AddProperty(goapp,'ctasmp','')
+	If !Pemstatus(goApp, 'ctasmp', 5 ) Then
+		AddProperty(goApp, 'ctasmp', '')
 	Endif
-	If goapp.ctasmp='S' Then
-		TEXT TO lc NOSHOW TEXTMERGE
+	If goApp.Ctasmp = 'S' Then
+		Text To lC Noshow Textmerge
          SELECT ncta,idctacv AS idcta  FROM fe_gene  AS g INNER JOIN fe_plan AS p ON p.idcta=g.idctacv  WHERE idgene=1
 		 UNION ALL
 		 SELECT ncta,gene_ctamp AS idcta FROM fe_gene AS g INNER JOIN fe_plan AS p ON p.idcta=g.gene_ctamp   WHERE idgene=1
-		ENDTEXT
+		Endtext
 	Else
-		TEXT TO lc NOSHOW TEXTMERGE
+		Text To lC Noshow Textmerge
          SELECT ncta,idctacv AS idcta  FROM fe_gene  AS g INNER JOIN fe_plan AS p ON p.idcta=g.idctacv  WHERE idgene=1
-		ENDTEXT
+		Endtext
 	Endif
-	If ejecutaconsulta(lc,'ctascompras')<1 Then
+	If EjecutaConsulta(lC, 'ctascompras') < 1 Then
 		Return  0
 	Endif
 	Return  1
 	Endfunc
+*************************
+	Function MuestraPlanCuentas(np1, cur)
+	cb = '%' + Alltrim(np1) + '%'
+	Text To lC Noshow Textmerge
+      SELECT ncta,idcta,nomb,cdestinod,cdestinoh,tipocta,plan_oper FROM fe_plan WHERE ncta LIKE '<<cb>>'  AND plan_acti='A'  ORDER BY ncta;
+	Endtext
+	If This.EjecutaConsulta(lC, cur) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine
+
+
+

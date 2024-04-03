@@ -71,26 +71,6 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 		\AS y GROUP BY resu_fech ORDER BY resu_fech) AS zz  WHERE resumen-enviados>=1
 	   SET TEXTMERGE OFF 
 	   SET TEXTMERGE to
-	   
-*!*		Else
-*!*			Text To lC Noshow Textmerge
-*!*		    SELECT resu_fech,enviados,resumen,resumen-enviados,enviados-resumen
-*!*			FROM(SELECT resu_fech,CAST(SUM(enviados) AS DECIMAL(12,2)) AS enviados,CAST(SUM(resumen) AS DECIMAL(12,2))AS resumen FROM(
-*!*			SELECT resu_fech,CASE tipo WHEN 1 THEN resu_impo ELSE 0 END AS enviados,
-*!*			CASE tipo WHEN 2 THEN resu_impo ELSE 0 END AS Resumen,resu_mens,tipo FROM (
-*!*			SELECT resu_fech,resu_impo AS resu_impo,resu_mens,1 AS Tipo FROM fe_resboletas f
-*!*			WHERE  f.resu_acti='A' AND LEFT(resu_mens,1)='0'
-*!*			UNION ALL
-*!*			SELECT fech AS resu_fech,IF(mone='S',impo,impo*dolar) AS resu_impo,' ' AS resu_mens,2 AS Tipo FROM fe_rcom f
-*!*			WHERE   f.acti='A' AND tdoc='03' AND LEFT(ndoc,1)='B' AND f.idcliente>0
-*!*			UNION ALL
-*!*			SELECT f.fech AS resu_fech,IF(f.mone='S',ABS(f.impo),ABS(f.impo*f.dolar)) AS resu_impo,' ' AS resu_mens,2 AS Tipo FROM fe_rcom f
-*!*			INNER JOIN fe_ncven g ON g.ncre_idan=f.idauto
-*!*			INNER JOIN fe_rcom AS w ON w.idauto=g.ncre_idau
-*!*			WHERE f.acti='A' AND f.tdoc IN ('07','08') AND LEFT(f.ndoc,1) in('F','B') AND w.tdoc='03' AND f.idcliente>0 ) AS x)
-*!*			AS y GROUP BY resu_fech ORDER BY resu_fech) AS zz  WHERE resumen-enviados>=1
-*!*			Endtext
-*!*		Endif
 	If This.EjecutaConsulta(lC, 'rbolne') < 1 Then
 		Return 0
 	Endif
@@ -1567,6 +1547,35 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 		Return 1
 	Endif
 	Return 2
+	ENDFUNC
+	Function ConsultaBoletasyNotasporenviarpsys(dfi,dff,ccursor)
+	f1=cfechas(dfi)
+	f2=cfechas(dff)
+	Local lC
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\    Select resu_fech,enviados,resumen,resumen-enviados,enviados-resumen
+	\	From(Select resu_fech,Cast(Sum(enviados) As Decimal(12,2)) As enviados,Cast(Sum(resumen) As Decimal(12,2))As resumen From(
+	\	Select resu_fech,Case tipo When 1 Then resu_impo Else 0 End As enviados,
+	\	Case tipo When 2 Then resu_impo Else 0 End As resumen,resu_mens,tipo From (
+	\	Select resu_fech,resu_impo As resu_impo,resu_mens,1 As tipo From fe_resboletas F
+	\	Where  F.resu_acti='A' And Left(resu_mens,1)='0' and resu_fech between '<<f1>>' and '<<f2>>'
+	 \	Union All
+	\	Select fech As resu_fech,If(mone='S',Impo,Impo*dolar) As resu_impo,' ' As resu_mens,2 As tipo From fe_rcom F
+	\	Where   F.Acti='A' And Tdoc='03' And Left(ndoc,1)='B' And F.idcliente>0 and fech between '<<f1>>' and '<<f2>>'
+	\	Union All
+	\	Select F.fech As resu_fech,If(F.mone='S',Abs(F.Impo),Abs(F.Impo*F.dolar)) As resu_impo,' ' As resu_mens,2 As tipo From fe_rcom F
+	\	inner join fe_refe g on g.idrven=F.idauto 
+	\	INNER Join fe_rcom As w On w.Idauto=g.idrven
+	\	Where F.Acti='A' And F.Tdoc In ('07','08') And Left(F.ndoc,1)='F' And w.Tdoc='03' And F.idcliente>0 and F.fech  between '<<f1>>' and '<<f2>>'
+	\) As x)
+	\ As Y Group By resu_fech Order By resu_fech) As zz  Where resumen-enviados>=1
+	Set Textmerge Off
+	Set Textmerge  To
+	If This.EjecutaConsulta(lC, ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
 	Endfunc
 Enddefine
 

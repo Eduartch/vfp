@@ -3,9 +3,9 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	TEXT TO lc NOSHOW TEXTMERGE
            select a.idauto,a.idkar,a.idart AS coda,a.saldo AS cant,r.fech,r.form,r.idcliente AS idclie,
 	       c.razo,c.nruc,c.dire,c.ciud,c.ndni,r.tdoc,r.ndoc,e.descri,e.unid,e.peso,a.saldo
-	       FROM (SELECT SUM(IFNULL(`f`.`entr_cant`,0)) AS `entregado`, (`b`.`cant` - SUM(IFNULL(`f`.`entr_cant`,0))) AS `saldo`, `a`.`idauto` AS `idauto`, `b`.`idkar`  AS `idkar`, `b`.`idart`  AS `idart`
+	       FROM (SELECT SUM(IFNULL(`f`.`entr_cant`,0)) AS `entregado`, (`b`.`cant` - SUM(IFNULL(`f`.`entr_cant`,CAST(0 as decimal(12,2))))) AS `saldo`, `a`.`idauto` AS `idauto`, `b`.`idkar`  AS `idkar`, `b`.`idart`  AS `idart`
 	       FROM `fe_kar` `b`
-	       JOIN `fe_rcom` `a`   ON `a`.`idauto` = `b`.`idauto`
+	       INNER JOIN `fe_rcom` `a`   ON `a`.`idauto` = `b`.`idauto`
 	       LEFT JOIN (SELECT SUM(entr_cant) AS entr_cant,guia_idau,entr_idkar FROM fe_guias AS g
 	       INNER JOIN fe_ent AS e ON e.`entr_idgu`=g.`guia_idgui`
 	       WHERE g.`guia_idau`=<<nids>> AND g.guia_acti='A' AND e.`entr_acti`='A' GROUP BY entr_idkar,entr_idgu) AS f   ON f.entr_idkar=b.`idkar`
@@ -23,9 +23,9 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	Function listaritemsparaguiaunidades(nid,calias)
 	TEXT TO lc NOSHOW TEXTMERGE
            select a.idauto,a.idkar,a.idart AS coda,a.saldo AS cant,r.fech,r.form,r.idcliente AS idclie,
-	       c.razo,c.nruc,c.dire,c.ciud,c.ndni,r.tdoc,r.ndoc,e.descri,a.kar_unid as unid,e.peso,a.saldo
+	       c.razo,c.nruc,c.dire,c.ciud,c.ndni,r.tdoc,r.ndoc,e.descri,a.kar_unid as unid,e.peso,a.saldo,fvto,lote
 	       FROM (SELECT SUM(IFNULL(`f`.`entr_cant`,0)) AS `entregado`, (`b`.`cant` - SUM(IFNULL(`f`.`entr_cant`,0))) AS `saldo`,
-	        `a`.`idauto` AS `idauto`, `b`.`idkar`  AS `idkar`, `b`.`idart`  AS `idart`,b.kar_unid
+	        `a`.`idauto` AS `idauto`, `b`.`idkar`  AS `idkar`, `b`.`idart`  AS `idart`,b.kar_unid,MAX(kar_fvto) as fvto,MAX(kar_lote) As lote
 	       FROM `fe_kar` `b`
 	       JOIN `fe_rcom` `a`   ON `a`.`idauto` = `b`.`idauto`
 	       LEFT JOIN (SELECT SUM(entr_cant) AS entr_cant,guia_idau,entr_idkar FROM fe_guias AS g
@@ -35,8 +35,7 @@ Define Class guiaremisionxvtas As guiaremision Of 'd:\capass\modelos\guiasremisi
 	       INNER JOIN fe_rcom AS r ON r.idauto=a.idauto
 	       INNER JOIN fe_clie AS c  ON c.idclie=r.idcliente
 	       INNER JOIN fe_art AS e ON e.idart=a.idart
-	       where saldo>0
-	       ORDER BY a.idkar
+	       where saldo>0  ORDER BY a.idkar
 	ENDTEXT
 	If This.ejecutaconsulta(lc,calias)<1 Then
 		Return 0

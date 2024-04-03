@@ -1,28 +1,21 @@
-#Define MSGTITULO 'SISVEN'
 Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	nturno = 0
 	Function vtascomparativas(nidt, fi, ff, Ccursor)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+        \Select Fecha,Sum(ventalectura) As ventalectura,Sum(ventafacturada) As ventafacturada From(
+		\Select  lect_fech As Fecha,Sum(lect_mfinal-lect_inim) As ventalectura,Cast(0 As Decimal(12,2)) As ventafacturada
+		\From fe_lecturas F Where lect_fech Between '<<fi>>' And '<<ff>>'  And lect_acti='A' And lect_idtu=<<nidt>> And lect_mfinal>0 And lect_inim>0 Group By lect_fech
+		\Union All
+		\Select lcaj_fech As Fecha,Cast(0 As Decimal(12,2)) As ventalectura,Sum(lcaj_deud) As ventafacturada
+		\From fe_lcaja Where lcaj_fech Between '<<dfi>>' And '<<ff>>' And lcaj_deud<>0 And lcaj_acti='A'
+		\And lcaj_idau>0
 	If nidt > 0 Then
-		Text To lC Noshow Textmerge
-        SELECT fecha,SUM(ventalectura) AS ventalectura,SUM(ventafacturada) AS ventafacturada FROM(
-		SELECT  lect_fech AS fecha,SUM(lect_mfinal-lect_inim) AS VentaLectura,CAST(0 AS DECIMAL(12,2)) AS VentaFacturada
-		FROM fe_lecturas f WHERE lect_fech BETWEEN '<<fi>>' AND '<<ff>>'  AND lect_acti='A' and lect_idtu=<<nidt>> and lect_mfinal>0 and lect_inim>0 GROUP BY lect_fech
-		UNION ALL
-		SELECT lcaj_fech AS fecha,CAST(0 AS DECIMAL(12,2)) AS VentaLectura,SUM(lcaj_deud) AS VentaFacturada
-		FROM fe_lcaja WHERE lcaj_fech BETWEEN '<<dfi>>' AND '<<ff>>' AND lcaj_deud<>0 AND lcaj_acti='A'
-		AND lcaj_idau>0 and lcaj_idtu=<<nidt>> GROUP BY lcaj_fech) AS f GROUP BY fecha
-		Endtext
-	Else
-		Text To lC Noshow Textmerge
-        SELECT fecha,SUM(ventalectura) AS ventalectura,SUM(ventafacturada) AS ventafacturada FROM(
-		SELECT  lect_fech AS fecha,SUM(lect_mfinal-lect_inim) AS VentaLectura,CAST(0 AS DECIMAL(12,2)) AS VentaFacturada
-		FROM fe_lecturas f WHERE lect_fech BETWEEN '<<dfi>>' AND '<<ff>>' AND lect_acti='A' and lect_mfinal>0 and lect_inim>0 GROUP BY lect_fech
-		UNION ALL
-		SELECT lcaj_fech AS fecha,CAST(0 AS DECIMAL(12,2)) AS VentaLectura,SUM(lcaj_deud) AS VentaFacturada
-		FROM fe_lcaja WHERE lcaj_fech BETWEEN '<<dfi>>' AND '<<ff>>' AND lcaj_deud<>0 AND lcaj_acti='A'
-		AND lcaj_idau>0 GROUP BY lcaj_fech) AS f GROUP BY fecha
-		Endtext
+		\And lcaj_idtu=<<nidt>>
 	Endif
+		\ Group By lcaj_fech) As F Group By Fecha
+	Set Textmerge Off
+	Set Textmerge To
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
@@ -61,7 +54,7 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	If Sw = 0 Then
 		Return 0
 	Endif
-	If This.GeneraCorrelativo(This.serie + This.numero, This.Idserie) < 1  Then
+	If This.GeneraCorrelativo(This.Serie + This.numero, This.Idserie) < 1  Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
@@ -104,12 +97,12 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		nidcta2 = 0
 		nidcta3 = 0
 	Endif
-	If This.ActualizaresumentDctoCanjeado(This.Tdoc, cform, This.serie + This.numero, This.Fecha, This.Fecha, This.Detalle, ;
-			  This.valor, This.igv, This.Monto, This.nroguia, This.Moneda, ndolar, fe_gene.igv, 'k', This.Codigo, 'V', goApp.nidusua, 1, goApp.Tienda, nidcta1, nidcta2, nidcta3, This.iddire, This.idautoguia, This.Idauto) < 1 Then
+	If This.ActualizaresumentDctoCanjeado(This.Tdoc, cform, This.Serie + This.numero, This.Fecha, This.Fecha, This.Detalle, ;
+			  This.valor, This.igv, This.Monto, This.nroguia, This.Moneda, ndolar, fe_gene.igv, 'k', This.Codigo, 'V', goApp.nidusua, 1, goApp.Tienda, nidcta1, nidcta2, nidcta3, This.Iddire, This.idautoguia, This.Idauto) < 1 Then
 		Return 0
 	Endif
 	If IngresaDatosLCajaEFectivo12(This.Fecha, "", This.razon, nidcta3, This.Monto, 0, ;
-			  'S', fe_gene.dola, goApp.nidusua, This.Codigo, This.Idauto, cform, This.serie + This.numero, This.Tdoc, goApp.Tienda) = 0 Then
+			  'S', fe_gene.dola, goApp.nidusua, This.Codigo, This.Idauto, cform, This.Serie + This.numero, This.Tdoc, goApp.Tienda) = 0 Then
 		Return 0
 	Endif
 	If cform = 'E' Then
@@ -121,15 +114,15 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		Set Procedure To d:\capass\modelos\ctasxcobrar.prg Additive
 		ocre = Createobject("ctasporcobrar")
 		ocre.dFech = This.Fecha
-		ocre.fechavto = This.fechavto
+		ocre.Fechavto = This.Fechavto
 		ocre.nimpo = This.Monto
 		ocre.nimpoo = This.Monto
 		ocre.tipodcto = 'F'
 		ocre.crefe = "VENTA AL CREDITO"
-		ocre.cndoc = This.serie + This.numero
+		ocre.cndoc = This.Serie + This.numero
 		ocre.nidclie = This.Codigo
 		ocre.Idauto = This.Idauto
-		ocre.codv = goApp.nidusua
+		ocre.Codv = goApp.nidusua
 		If ocre.registrar() < 1 Then
 			Return 0
 		Endif
@@ -163,7 +156,7 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Case  This.idautoguia = 0
 		This.Cmensaje = "Seleccione una Guia de Remisión para Canje"
 		Return 0
-	Case PermiteIngresoVentas(This.serie + This.numero, This.Tdoc, 0, This.Fecha) = 0
+	Case PermiteIngresoVentas(This.Serie + This.numero, This.Tdoc, 0, This.Fecha) = 0
 		This.Cmensaje = "Número de Documento de Venta Ya Registrado"
 		Return 0
 	Otherwise
@@ -237,7 +230,7 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Case This.nroformapago = 2  And This.dias = 0
 		This.Cmensaje = "Ingrese Los días de Vencimiento de Crédito"
 		lo = 0
-	Case  !esfechavalidafvto(This.fechavto)
+	Case  !esFechaValidafvto(This.Fechavto)
 		This.Cmensaje = "Fecha de Vencimiento no Válida"
 		lo = 0
 	Case This.nroformapago = 4 And  ctasxcobrar.verificasaldocliente(This.Codigo, This.Monto) = 0
@@ -297,61 +290,203 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Function listarvtascreditocantidad(dfi, dff, nidus, nisla, nidl, Calias)
 	fi = cfechas(dfi)
 	ff = cfechas(dff)
-*!*		If nisla=0 Then
-	If nidus = 0 Then
-		Text To lC Noshow Textmerge
-		     SELECT a.ndoc,a.fech,c.razo,d.descri,d.unid,e.cant,e.prec,f.nomb AS usuario,CAST(e.cant*e.prec AS DECIMAL(12,2)) AS impo,
-	         a.deta,a.fusua,kar_idco,a.codt as isla,'credito' as tipo FROM
-	         fe_rcom AS a
-	         INNER JOIN fe_clie AS c ON c.idclie=a.idcliente
-			 INNER JOIN fe_kar AS e ON e.idauto=a.idauto
-			 INNER JOIN fe_art AS d ON d.idart=e.idart
-			 INNER JOIN fe_usua AS f ON f.idusua=a.idusua
-			 WHERE rcom_idis=<<nidl>> AND a.acti='A' AND e.acti='A' AND a.form='C' AND kar_idco>0  AND codt=<<nisla>>
-		Endtext
-	Else
-		Text To lC Noshow Textmerge
-		     SELECT a.ndoc,a.fech,c.razo,d.descri,d.unid,e.cant,e.prec,f.nomb AS usuario,CAST(e.cant*e.prec AS DECIMAL(12,2)) AS impo,
-	         a.deta,a.fusua,kar_idco,a.codt as isla,'credito' as tipo FROM
-	         fe_rcom AS a
-	         INNER JOIN fe_clie AS c ON c.idclie=a.idcliente
-			 INNER JOIN fe_kar AS e ON e.idauto=a.idauto
-			 INNER JOIN fe_art AS d ON d.idart=e.idart
-			 INNER JOIN fe_usua AS f ON f.idusua=a.idusua
-			 WHERE rcom_idis=<<nidl>> AND a.acti='A' AND e.acti='A' AND a.form='C' AND kar_idco>0  and a.idusua=<<nidus>>  AND codt=<<nisla>>
-		Endtext
+	Set Textmerge On
+	Set  Textmerge To Memvar lC Nosho Textmerge
+		\   Select a.Ndoc,a.fech,c.razo,d.Descri,d.unid,e.cant,e.Prec,F.nomb As usuario,Cast(e.cant*e.Prec As Decimal(12,2)) As Impo,
+	    \   a.Deta,a.fusua,kar_idco,a.codt As Isla,'credito' As tipo From
+	    \   fe_rcom As a
+	    \   inner Join fe_clie As c On c.idclie=a.idcliente
+	    \ 	inner Join fe_kar As e On e.Idauto=a.Idauto
+		\	inner Join fe_art As d On d.idart=e.idart
+	    \	inner Join fe_usua As F On F.idusua=a.idusua
+	    \	Where rcom_idis=<<nidl>> And a.Acti='A' And e.Acti='A' And a.Form='C' And kar_idco>0  And codt=<<nisla>>
+	If nidus >0 Then
+	       \And a.idusua=<<nidus>>
 	Endif
-*!*		Else
-*!*			If nidus=0 Then
-*!*				TEXT TO lc NOSHOW TEXTMERGE
-*!*		     SELECT a.ndoc,a.fech,c.razo,d.descri,d.unid,e.cant,e.prec,f.nomb AS usuario,CAST(e.cant*e.prec AS DECIMAL(12,2)) AS impo,
-*!*	         a.deta,a.fusua,kar_idco,a.codt as isla,'credito' as tipo FROM
-*!*	         fe_rcom AS a
-*!*	         INNER JOIN fe_clie AS c ON c.idclie=a.idcliente
-*!*			 INNER JOIN fe_kar AS e ON e.idauto=a.idauto
-*!*			 INNER JOIN fe_art AS d ON d.idart=e.idart
-*!*			 INNER JOIN fe_usua AS f ON f.idusua=a.idusua
-*!*			 WHERE a.fech BETWEEN '<<fi>>' AND '<<ff>>' AND a.acti='A' AND e.acti='A' AND a.form='C' AND kar_idco>0 and a.codt=<<nisla>> and rcom_idtr=<<this.nturno>>
-*!*				ENDTEXT
-*!*			Else
-*!*				TEXT TO lc NOSHOW TEXTMERGE
-*!*		     SELECT a.ndoc,a.fech,c.razo,d.descri,d.unid,e.cant,e.prec,f.nomb AS usuario,CAST(e.cant*e.prec AS DECIMAL(12,2)) AS impo,
-*!*	         a.deta,a.fusua,kar_idco,a.codt as isla,'credito' as tipo FROM
-*!*	         fe_rcom AS a
-*!*	         INNER JOIN fe_clie AS c ON c.idclie=a.idcliente
-*!*			 INNER JOIN fe_kar AS e ON e.idauto=a.idauto
-*!*			 INNER JOIN fe_art AS d ON d.idart=e.idart
-*!*			 INNER JOIN fe_usua AS f ON f.idusua=a.idusua
-*!*			 WHERE a.fech BETWEEN '<<fi>>' AND '<<ff>>' AND a.acti='A' AND e.acti='A' AND a.form='C' AND kar_idco>0  and a.idusua=<<nidus>> and a.codt=<<nisla>> and rcom_idtr=<<this.nturno>>
-*!*				ENDTEXT
-*!*			Endif
-*!*		Endif
+	Set Textmerge Off
+	Set Textmerge To
 	If This.EjecutaConsulta(lC, Calias) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
+	Function grabarvtacombustibles()
+	dATOSGLOBALES()
+	nrot = Iif(Vartype("goapp.nroturnos") = 'C', Val(goApp.Nroturnos), goApp.Nroturnos)
+	Do Case
+	Case  nrot = 2
+		If Hour(Datetime()) = 0 Or Hour(Datetime()) = 1 Or Hour(Datetime()) = 2 Or Hour(Datetime()) = 3 Or Hour(Datetime()) = 4 Or Hour(Datetime()) = 5  Then
+			If Hour(Datetime()) <= 4
+				dfe1 = This.Fecha - 1
+			Else
+				dfe1 = This.Fecha
+			Endif
+		Else
+			If Hour(Datetime()) = 6  And fe_gene.alma_Sepa = 3 Then
+				dfe1 = This.Fecha - 1
+			Else
+				dfe1 = This.Fecha
+			Endif
+		Endif
+	Case nrot = 3
+		If Hour(Datetime()) = 0 Or Hour(Datetime()) = 1 Or Hour(Datetime()) = 2 Or Hour(Datetime()) = 3 Or Hour(Datetime()) = 4 Or Hour(Datetime()) = 5 Or Hour(Datetime()) = 6  Then
+			If Hour(Datetime()) <= 5
+				dfe1 = This.Fecha - 1
+			Else
+				dfe1 = This.Fecha
+			Endif
+		Else
+			If Hour(Datetime()) = 6  And fe_gene.alma_Sepa = 3 Then
+				dfe1 = This.Fecha - 1
+			Else
+				dfe1 = This.Fecha
+			Endif
+		Endif
+	Case nrot = 4
+		dfe1 = This.Fecha
+	Otherwise
+		If Hour(Datetime()) = 0 Or Hour(Datetime()) = 1 Or Hour(Datetime()) = 2 Or Hour(Datetime()) = 3 Or Hour(Datetime()) = 4 Or Hour(Datetime()) = 5 Or Hour(Datetime()) = 6  Then
+			If Hour(Datetime()) <= 6
+				dfe1 = This.Fecha - 1
+			Else
+				dfe1 = This.Fecha
+			Endif
+		Else
+			If Hour(Datetime()) = 7  And fe_gene.tama = 2 Then
+				dfe1 = This.Fecha - 1
+			Else
+				dfe1 = This.Fecha
+			Endif
+		Endif
+	Endcase
+	dfe1 = This.Fecha
+	dFecha = This.Fecha
+	.Swcreditos = 1
+	.NAuto = 0
+	If .Tdoc = '01' Or .Tdoc = '03' Then
+		nidcta1 = fe_gene.idctav
+		nidcta2 = fe_gene.idctai
+		nidcta3 = fe_gene.idctat
+	Else
+		nidcta1 = 0
+		nidcta2 = 0
+		nidcta3 = 0
+	Endif
+	If This.Etarjeta > 0 Then
+		necaja = This.Impo - This.Etarjeta
+	Else
+		necaja = This.Impo
+	Endif
+	Select tmpv
+	Set Filter To coda <> 0
+	Go Top
+	calma = tmpv.Isla
+	If oconecta.consucursales = 'S' Then
+		ncodt = goApp.Tienda
+	Else
+		ncodt = goApp.Isla
+	Endif
+	Set Procedure To CapaDatos, rngrifo, ple5 Additive
+	If This.IniciaTransaccion() < 1 Then
+		Return 0
+	Endif
+	If This.tipoventa = 'E' Then
+		If goApp.Direcciones = 'S' Then
+			NAuto = This.ovtas.IngresaDocumentoElectronicocondirecciones(.Tdoc, .Forma, .Ndoc, .Fecha, .Detalle, 0, 0, .Impo, .Guia, ;
+				  .Moneda, .dolar, 1, 'k', .Codigo, goApp.IDturno, goApp.nidusua, goApp.Tienda, nidcta1, nidcta2, nidcta3, .tgratuitas, 0, .valor, This.Tdscto, This.Iddire)
+		Else
+			NAuto = IngresaDocumentoElectronico(.Tdoc, .Forma, .Ndoc, .Fecha, .Detalle, 0, 0, .Impo, .Guia, .Moneda, .dolar, 1, 'k', .Codigo, goApp.IDturno, goApp.nidusua, ncodt, nidcta1, nidcta2, nidcta3, .tgratuitas, This.Idlectura, .valor, This.Tdscto)
+		Endif
+	Else
+		If goApp.Direcciones = 'S' Then
+			NAuto = This.ovtas.IngresaDocumentoElectronicocondirecciones(.Tdoc, .Forma, .Ndoc, .Fecha, .Detalle, .valor, .igv, .Impo, .Guia, ;
+				  .Moneda, .dolar, fe_gene.igv, 'k', .Codigo, goApp.IDturno, goApp.nidusua, goApp.Tienda, nidcta1, nidcta2, nidcta3, .tgratuitas, 0, 0, This.Tdscto, This.Iddire)
+		Else
+			NAuto = IngresaDocumentoElectronico(.Tdoc, .Forma, .Ndoc, .Fecha, .Detalle, .valor, .igv, .Impo, .Guia, .Moneda, .dolar, fe_gene.igv, 'k', .Codigo, goApp.IDturno, goApp.nidusua, ncodt, nidcta1, nidcta2, nidcta3, .tgratuitas, This.Idlectura, 0, This.Tdscto)
+		Endif
+	Endif
+	If NAuto < 1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If This.Tdscto > 0 Then
+		If IngresaDatosLCajaEFectivoCturnos20(dfe1, "", .razon, nidcta3, necaja, 0, 'S', fe_gene.dola, goApp.nidusua, .Codigo, .NAuto, Left(.Forma, 1), .Ndoc, .Tdoc, ncodt, goApp.IDturno, This.Tdscto, This.Creferencia, This.Ctarjeta, This.CtarjetaBanco) = 0 Then
+			This.DEshacerCambios()
+			Return 0
+		Endif
+	Else
+		If IngresaDatosLCajaEFectivoCturnosTarjetas(dfe1, "", .razon, nidcta3, necaja, 0, 'S', fe_gene.dola, goApp.nidusua, .Codigo, .NAuto, Left(.Forma, 1), .Ndoc, .Tdoc, ncodt, goApp.IDturno, This.Creferencia, This.Ctarjeta, This.CtarjetaBanco) = 0 Then
+			This.DEshacerCambios()
+			Return 0
+		Endif
+	Endif
+	If This.Etarjeta > 0 Then
+		If IngresaDatosLCajaEFectivoCturnos(dfe1, "", .razon, nidcta3, .Etarjeta, 0, 'S', fe_gene.dola, goApp.nidusua, .Codigo, .NAuto, 'E', .Ndoc, .Tdoc, ncodt, goApp.IDturno) = 0 Then
+			This.DEshacerCambios()
+			Return 0
+		Endif
+	Endif
+	If this.Forma = "C" Or this.Forma = "D" Or This.Forma = 'A' Then
+		If This.grabacreditos() = 0 Then
+			This.DEshacerCambios()
+			Return 0
+		Endif
+	Endif
+	na = NAuto
+	If goApp.Promopuntos = 'S' Then
+		_Screen.opromo.nidauto = na
+		_Screen.opromo.nidclie = This.Codigo
+		_Screen.opromo.npunto = This.puntos
+		_Screen.opromo.ndscto = 0
+		_Screen.opromo.dFecha = This.Fecha
+		_Screen.opromo.nidprom = _Screen.idpromo
+		If _Screen.opromo.registrarpuntos() < 1 Then
+			this.DEshacerCambios()
+			Return 0
+		Endif
+	Endif
+	swk = 1
+	Select tmpv
+	Go Top
+	Do While !Eof()
+		If IngresaKardexGrifo(na, tmpv.coda, 'V', tmpv.Prec, tmpv.cant, 'I', 'K', .Codv, goApp.Tienda, tmpv.nidcontometro, tmpv.costo / fe_gene.igv, tmpv.pre1) < 1
+			swk = 0
+			Exit
+		Endif
+		If goApp.ConectaControlador = 'Y' Then
+			If tmpv.Idjournal > 0 Then
+				If _Screen.oventasg.GrabarIdjornaly(tmpv.Idjournal) < 1 Then
+					swk = 0
+					Exit
+				Endif
+			Endif
+		Endif
+		Select tmpv
+		Skip
+	Enddo
+	If swk = 0 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	If swk = 1 And .GeneraNumero() = 1  Then
+		IF this.GRabarCambios()<1 then
+		   RETURN 0
+		ENDIF    
+		If goApp.ConectaControlador = 'S'   Then
+			GrabarIdjornal(This.Idjornal)
+		Endif
+		Return This.NAuto
+	Endif
+	Endfunc
 Enddefine
+
+
+
+
+
+
+
+
 
 
 

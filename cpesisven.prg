@@ -14,6 +14,10 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	nidauto = 0
 	cmemsaje = ""
 	dfenvio = Date()
+	dfi = Date()
+	dff = Date()
+	confechas = 0
+	cTdoc = ""
 	Function HayInternet()
 	Declare Long InternetGetConnectedState In "wininet.dll" Long lpdwFlags, Long dwReserved
 	If InternetGetConnectedState(0, 0) <> 1
@@ -25,7 +29,7 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	Function consultarcdr(cTdoc, cnumero, nidauto)
 	Text To cdata Noshow Textmerge
 	{
-	 "entidad": "<<this.centidad>>",
+	 "entidad": "<<this.cose>>",
 	 "ruc": "<<this.nruc>>",
 	 "usol": "<<this.usol>>",
 	 "csol": "<<this.csol>>",
@@ -62,11 +66,11 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 				Return 0
 			Endif
 			If Type('oempresa') = 'U' Then
-				crutaxmlcdr	= Addbs(Sys(5) + Sys(2003) + '\SunatXML') + "R-" + fe_gene.nruc + '-' + cTdoc + '-' + Left(cnumero, 4) + '-' + Substr(cnumero, 5, 8) + '.xml'
-				carpetacdr = Addbs(Sys(5) + Sys(2003) + '\SunatXML')
+				crutaxmlcdr	= Addbs(Addbs(Sys(5) + Sys(2003)) + 'SunatXML') + "R-" + fe_gene.nruc + '-' + cTdoc + '-' + Left(cnumero, 4) + '-' + Substr(cnumero, 5, 8) + '.xml'
+				carpetacdr = Addbs(Addbs(Sys(5) + Sys(2003)) + 'SunatXML')
 			Else
-				crutaxmlcdr	= Addbs(Sys(5) + Sys(2003) + '\SunatXML\' + Alltrim(Oempresa.nruc)) + "R-" + Oempresa.nruc + '-' + cTdoc + '-' + Left(cnumero, 4) + '-' + Substr(cnumero, 5, 8) + '.xml'
-				carpetacdr = Addbs(Sys(5) + Sys(2003) + '\SunatXML' + Alltrim(Oempresa.nruc))
+				crutaxmlcdr	= Addbs(Addbs(Addbs(Sys(5) + Sys(2003)) + 'sunatXML') + Alltrim(Oempresa.nruc)) + "R-" + Oempresa.nruc + '-' + cTdoc + '-' + Left(cnumero, 4) + '-' + Substr(cnumero, 5, 8) + '.xml'
+				carpetacdr = Addbs(Addbs(Addbs(Sys(5) + Sys(2003)) + 'sunatXML') + Alltrim(Oempresa.nruc))
 			Endif
 			If !Directory(carpetacdr) Then
 				Md (carpetacdr)
@@ -112,11 +116,9 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	Endfunc
 	Function ConsultaBoletasyNotasporenviarsinfechas()
 	Local lC
-*:Global cpropiedad
 	If !Pemstatus(goApp, "cdatos", 5)
 		goApp.AddProperty("cdatos", "")
 	Endif
-
 	Set Textmerge On
 	Set Textmerge To Memvar lC Noshow Textmerge
 	\    Select resu_fech,enviados,resumen,resumen-enviados,enviados-resumen
@@ -349,9 +351,11 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 			ls_user		  = ls_ruc_emisor + 'MODDATOS'
 		Case goApp.tipoh = 'P'
 			lsURL		  =  "https://ose.nubefact.com/ol-ti-itcpe/billService"
-			ls_ruc_emisor = Iif(Type('oempresa') = 'U', fe_gene.nruc, Oempresa.nruc)
-			ls_pwd_sol	  = Iif(Type('oempresa') = 'U', Alltrim(fe_gene.gene_csol), Alltrim(Oempresa.gene_csol))
-			ls_user		  = ls_ruc_emisor + Iif(Type('oempresa') = 'U', Alltrim(fe_gene.Gene_usol), Alltrim(Oempresa.Gene_usol))
+			ls_ruc_emisor = LcRucEmisor
+			ls_pwd_sol	  = lcPswd_Sol
+*!*				ls_user		  = ls_ruc_emisor + Iif(Type('oempresa') = 'U', Alltrim(fe_gene.Gene_usol), Alltrim(Oempresa.Gene_usol))
+			ls_user		  = LcRucEmisor + lcUser_Sol
+
 		Endcase
 		Text To lcEnvioXML Textmerge Noshow Flags 1 Pretext 1 + 2 + 4 + 8
 		   <soapenv:Envelope xmlns:ser="http://service.sunat.gob.pe" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
@@ -642,12 +646,8 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 			Long pdwSkip, Long pdwFlags
 
 		#Define SXH_SERVER_CERT_IGNORE_ALL_SERVER_ERRORS    13056
-
-
 		loXmlHttp = Createobject("MSXML2.ServerXMLHTTP.6.0")
 		loXMLBody = Createobject("MSXML2.DOMDocument.6.0")
-
-
 		lcUserName = LcRucEmisor + lcUser_Sol
 		lcURL	   = "https://e-factura.sunat.gob.pe/ol-it-wsconscpegem/billConsultService"
 
@@ -819,9 +819,142 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	    join fe_usua u on u.idusua=a.idusua
 	    inner join fe_ncven g on g.ncre_idan=a.idauto
 	    inner join fe_rcom as w on w.idauto=g.ncre_idau
-        where a.acti='A' AND LEFT(a.ndoc,1) in ('F') and left(a.rcom_mens,1)<>'0'
-	    and a.impo<>0  and w.tdoc='01' and a.tdoc in("07","08") order by fech,ndoc
+        where a.acti='A' AND LEFT(a.ndoc,1) in ('F') and left(a.rcom_mens,1)<>'0'  and a.impo<>0  and w.tdoc='01' and a.tdoc in("07","08") order by fech,ndoc
 	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function consultarcpexenviarpsysw(Ccursor)
+	f1 = cfechas(This.dfi)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\Select a.ndoc As dcto, a.fech, b.razo, a.valor, a.rcom_exon, rcom_otro,
+	\a.igv, a.Impo, rcom_hash, u.nomb, a.fusua, rcom_mens, rcom_arch, mone, a.Tdoc, a.ndoc, dolar, Idauto, b.ndni, a.idcliente, b.clie_corr,
+	\ndo2, b.fono, nruc, Concat(Trim(b.Dire), ' ', Trim(b.ciud)) As Direccion, tcom, Tdoc, a.vigv
+	\From fe_rcom As a
+	\Join fe_clie As b On (a.idcliente = b.idclie)
+	\Join fe_usua u On u.idusua = a.idusua
+	\Where a.Acti <> 'I' And Left(ndoc, 1) In ('F') And Left(rcom_mens, 1) <> '0'  And  (Impo <> 0 Or rcom_otro <> 0) And a.Tdoc = '01'
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\Union All
+	\Select a.ndoc As dcto, a.fech, b.razo, a.valor, a.rcom_exon, a.rcom_otro,
+	\a.igv, a.Impo, a.rcom_hash, u.nomb, a.fusua, a.rcom_mens, a.rcom_arch, a.mone, a.Tdoc, a.ndoc, a.dolar, a.Idauto, b.ndni, a.idcliente, b.clie_corr,
+	\a.ndo2, b.fono, nruc, Concat(Trim(b.Dire), ' ', Trim(b.ciud)) As Direccion, a.tcom, w.Tdoc, a.vigv
+	\From fe_rcom As a
+	\INNER Join fe_clie As b On (a.idcliente = b.idclie)
+	\INNER Join fe_usua u On u.idusua = a.idusua
+	\INNER Join fe_ncven g On g.ncre_idan = a.Idauto
+	\INNER Join fe_rcom As w On w.Idauto = g.ncre_idau
+	\Where a.Acti <> 'I' And Left(a.ndoc, 1) In ('F') And Left(a.rcom_mens, 1) <> '0' And (a.Impo <> 0 Or a.rcom_otro <> 0)  And w.Tdoc = '01' And a.Tdoc In("07", "08")
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\Order By fech, ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function consultarcpexenviarpsys(Ccursor)
+	f1 = cfechas(This.dfi)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\    Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,rcom_otro,
+	\    a.igv,a.Impo,rcom_hash,rcom_mens,rcom_arch,mone,a.Tdoc,a.ndoc,dolar,Idauto,b.ndni,a.idcliente,b.clie_corr,
+	\    ndo2,b.fono,nruc,a.tcom
+	\    From fe_rcom As a
+	\    INNER Join fe_clie As b On (a.idcliente=b.idclie)
+	\    Where  a.Acti<>'I' And Left(ndoc,1) In ('F') And Left(rcom_mens,1)<>'0' And (Impo<>0 Or rcom_otro>0) And a.Tdoc='01' And  b.nruc<>"***********"
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\    Union All
+	\    Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,rcom_otro,
+	\    a.igv,a.Impo,a.rcom_hash,a.rcom_mens,a.rcom_arch,a.mone,a.Tdoc,a.ndoc,a.dolar,a.Idauto,b.ndni,a.idcliente,b.clie_corr,
+	\    ndo2,b.fono,nruc,a.tcom
+	\    From fe_rcom As a
+	\    INNER Join fe_clie As b On (a.idcliente=b.idclie)
+	\    INNER Join fe_rven As rv On rv.Idauto=a.Idauto
+	\    INNER Join fe_refe F On F.idrven=rv.idrven
+	\    INNER Join fe_tdoc As w On w.idtdoc=F.idtdoc
+	\    Where  a.Acti<>'I'  And Left(a.ndoc,1) In ('F') And Left(a.rcom_mens,1)<>'0' And  b.nruc<>"***********"   And w.Tdoc='01'
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\ Order By fech,ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function consultarcpexenviarxsysg(Ccursor)
+	If !Pemstatus(goApp, 'periodo', 5) Then
+		AddProperty(goApp, 'periodo', 0)
+	Endif
+	f1 = cfechas(This.dfi)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\ Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,Cast(0 As Decimal(12,2)) As inafecto,
+	\    a.igv,a.Impo,rcom_hash,u.nomb,a.fusua,If(mone='S','Soles','Dólares') As moneda,a.Tdoc,a.ndoc,Idauto,a.idcliente,b.clie_corr,
+	\    ndo2,b.fono,nruc,tcom,Tdoc,a.vigv,a.mone,a.rcom_arch
+	\    From fe_rcom As a
+	\    Join fe_clie As b On (a.idcliente=b.idclie)
+	\    Join fe_usua u On u.idusua=a.idusua
+	\    Where a.Acti='A' And Left(ndoc,1) In ('F') And Left(rcom_mens,1)<>'0' And  Impo<>0 And a.Tdoc='01'
+	If goApp.Periodo > 0 Then
+	   \ And Year(a.fech)>=<<goApp.Periodo>>
+	Endif
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\    Union All
+	\    Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,Cast(0 As Decimal(12,2)) As inafecto,
+	\    a.igv,a.Impo,a.rcom_hash,u.nomb,a.fusua,If(a.mone='S','Soles','Dólares') As moneda,a.Tdoc,a.ndoc,a.Idauto,a.idcliente,b.clie_corr,
+	\    a.ndo2,b.fono,nruc,a.tcom,w.Tdoc,a.vigv,a.mone,a.rcom_arch
+	\    From fe_rcom As a
+	\    Join fe_clie As b On (a.idcliente=b.idclie)
+	\    Join fe_usua u On u.idusua=a.idusua
+	\    INNER Join fe_ncven g On g.ncre_idan=a.Idauto
+	\    INNER Join fe_rcom As w On w.Idauto=g.ncre_idau
+    \    Where a.Acti='A' And Left(a.ndoc,1) In ('F') And Left(a.rcom_mens,1)<>'0' And a.Impo<>0  And w.Tdoc='01' And a.Tdoc In("07","08")
+	If goApp.Periodo > 0 Then
+	   \ And Year(a.fech)>=<<goApp.Periodo>>
+	Endif
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+    \ Order By fech,ndoc
+	Set Textmerge Off
+	Set Textmerge To
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
@@ -837,8 +970,6 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	Select rmvtos
 	Go Top
 	Do While !Eof()
-
-*!*	            IF this.ConsultarCPE(fe_gene.nruc,Alltrim(fe_gene.Gene_usol),Alltrim(fe_gene.gene_csol),rmvtos.tdoc,Left(rmvtos.dcto,4),Alltrim(Str(Val(Substr(rmvtos.dcto,5)))),rmvtos.idauto)
 		If enviado <> 'S' Then
 			ocomp.Version = "2.1"
 			ocomp.Condetraccion = goApp.vtascondetraccion
@@ -848,20 +979,20 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 					If rmvtos.tcom = 'S' Then
 						vdne = ocomp.obtenerdatosfacturaexoneradaotros(rmvtos.Idauto)
 					Else
-						ocomp.gironegocio = "Grifo"
+						ocomp.Gironegocio = "Grifo"
 						vdne = ocomp.obtenerdatosfacturaexonerada(rmvtos.Idauto)
 					Endif
 				Else
 					If rmvtos.tcom = 'S' Then
 						vdne = ocomp.obtenerdatosfacturaotros(rmvtos.Idauto)
 					Else
-						ocomp.gironegocio = "Grifo"
+						ocomp.Gironegocio = "Grifo"
 						vdne = ocomp.obtenerdatosfactura(rmvtos.Idauto)
 					Endif
 				Endif
 			Case rmvtos.Tdoc = '07'
 				If rmvtos.vigv = 1 Then
-					vdne = ocomp.obtenerdatosnotecreditoexonerada(rmvtos.Idauto, 'E')
+					vdne = ocomp.Obtenerdatosnotecreditoexonerada(rmvtos.Idauto, 'E')
 				Else
 					vdne = ocomp.obtenerdatosnotascredito(rmvtos.Idauto, 'E')
 				Endif
@@ -887,7 +1018,65 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	This.Cmensaje = Test.empresa
 	Return 1
 	Endfunc
+	Function consultarcpexenviarpsysn(Ccursor)
+	f1 = cfechas(This.dfi)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	 \   Select a.ndoc As dcto,a.fech,b.razo,If(a.mone="S","Soles","Dólares") As moneda,a.valor,a.rcom_exon,Cast(0 As Decimal(12,2)) As inafecto,
+	 \   a.igv,a.Impo,rcom_mens,rcom_arch,mone,a.Tdoc,a.ndoc,dolar,Idauto,b.ndni,a.idcliente,b.clie_corr,
+	 \   ndo2,b.fono,nruc,Concat(Trim(b.Dire),' ',Trim(b.ciud)) As Direccion,tcom,Tdoc,rcom_hash
+	 \   From fe_rcom As a
+	 \   INNER Join fe_clie As b On (a.idcliente=b.idclie)
+	 \   Where Year(a.fech)>=2018  And
+	 \   a.Acti<>'I' And Left(ndoc,1) In ('F') And Left(rcom_mens,1)<>'0' And  Impo<>0 And a.Tdoc='01'
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	 \   Union All
+	  \  Select a.ndoc As dcto,a.fech,b.razo,If(a.mone="S","Soles","Dólares") As moneda,a.valor,a.rcom_exon,Cast(0 As Decimal(12,2)) As inafecto,
+	  \  a.igv,a.Impo,a.rcom_mens,a.rcom_arch,a.mone,a.Tdoc,a.ndoc,a.dolar,a.Idauto,b.ndni,a.idcliente,b.clie_corr,
+	  \  a.ndo2,b.fono,nruc,Concat(Trim(b.Dire),' ',Trim(b.ciud)) As Direccion,a.tcom,w.Tdoc,a.rcom_hash
+	  \  From fe_rcom As a
+	  \  INNER Join fe_clie As b On (a.idcliente=b.idclie)
+	  \  INNER Join fe_ncven g On g.ncre_idan=a.Idauto
+	  \  INNER Join fe_rcom As w On w.Idauto=g.ncre_idau
+      \  Where a.Acti<>'I' And Left(a.ndoc,1) In ('F') And Left(a.rcom_mens,1)<>'0'
+      \  And a.Impo<>0  And w.Tdoc='01' And a.Tdoc In("07","08")
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\ Order By fech,ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

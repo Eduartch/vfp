@@ -2,7 +2,52 @@
 Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	Function mostrarusuarios(Ccursor)
 	Text To lC Noshow Textmerge
-      SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S"  ORDER BY nomb
+      SELECT idusua,nomb,clave,activo,tipo,idalma FROM fe_usua WHERE activo="S"  ORDER BY nomb
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function mostrarusuariospsystr(Ccursor)
+	Text To lC Noshow Textmerge
+      SELECT idusua,nomb,clave,activo,tipo,idalma,usua_idven FROM fe_usua WHERE activo="S"  ORDER BY nomb
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	ENDFUNC
+	Function mostrarusuariospsystrlyg(Ccursor)
+	Text To lC Noshow Textmerge
+      SELECT idusua,nomb,clave,activo,tipo,idalma,usua_idven,usua_serp FROM fe_usua WHERE activo="S"  ORDER BY nomb
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function mostrarusuariospsysl(Ccursor)
+	Text To lC Noshow Textmerge
+        select  nomb,tipo,activo,idusua,clave,idalma,usua_tran,usua_scre FROM fe_usua WHERE activo='S' ORDER BY nomb
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function mostrarusuariosxsysg(Ccursor)
+	Text To lC Noshow Textmerge
+        select idusua,nomb,clave,activo,tipo,idalma,usua_prin,usua_cont FROM fe_usua WHERE activo="S"  ORDER BY nomb
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function mostrarusuariosNuematicos(Ccursor)
+	Text To lC Noshow Textmerge
+      SELECT  idusua,nomb,clave,activo,tipo,idalma FROM fe_usua WHERE activo="S" ORDER BY nomb
 	Endtext
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
@@ -22,7 +67,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	If This.EjecutaConsulta(lC, 'ya') < 1
 		Return 0
 	Endif
-	If ya.idusua > 0 Then
+	If ya.Idusua > 0 Then
 		This.Cmensaje = "Nombre de Usuario Ya Registrado"
 		Return 0
 	Else
@@ -371,7 +416,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
      select idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_reim=1 ORDER BY nomb
 		Endtext
 	Endcase
-	If this.EjecutaConsulta(lC, Ccursor) < 1
+	If This.EjecutaConsulta(lC, Ccursor) < 1
 		Return 0
 	Endif
 	Return 1
@@ -379,44 +424,47 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	Function autorizarpsysr(ctipo, Ccursor)
 	Do Case
 	Case ctipo = "A"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND LEFT(tipo,2)='Ad' ORDER BY nomb
 		Endtext
 	Case ctipo = "C"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_acre=1 ORDER BY nomb
 		Endtext
 	Case ctipo = "G"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND (LEFT(tipo,1)='G' OR LEFT(tipo,2)='Ad') ORDER BY nomb
 		Endtext
 	Case ctipo = "D"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND LEFT(tipo,1)='D'  ORDER BY nomb
 		Endtext
 	Case ctipo = "V"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S"  ORDER BY nomb
 		Endtext
 	Case ctipo = "p"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_prec=1 ORDER BY nomb
 		Endtext
 	Case ctipo = "g"
-		Text To lc Noshow TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_guia=1 ORDER BY nomb
 		Endtext
 	Case ctipo = "t"
-		Text To lc NOSHOW TEXTMERGE 
+		Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_cont=1 ORDER BY nomb
 		Endtext
 	Endcase
-	If this.EjecutaConsulta(lC, Ccursor) < 1
+	If This.EjecutaConsulta(lC, Ccursor) < 1
 		Return 0
 	Endif
 	Return 1
 	Endfunc
 Enddefine
+
+
+
 
 
 

@@ -770,6 +770,73 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	Sw = 1
+	Cmensajex = ""
+	Select tmpv
+	Go Top
+	Do While !Eof()
+		cdescri = tmpv.Desc
+*!*			If ovstock.ejecutar(tmpv.coda, tmpv.cant, This.sucursal1) <= 0 Then
+*!*				Cmensajex = "Stock no Disponible "+ALLTRIM(cdescri)
+*!*				Sw = 0
+*!*				Exit
+*!*			Endif
+		If This.registradetalletraspaso(NAuto, tmpv.coda, 'V', tmpv.Prec, tmpv.cant, 'I', 'T', This.Detalletraspaso, nidg) < 1 Then
+			Sw = 0
+			Cmensajex = This.Cmensaje
+			Exit
+		Endif
+		If ActualizaStock(tmpv.coda, This.sucursal1, tmpv.cant, "V") < 1 Then
+			Sw = 0
+			Cmensajex = "Al Actualizar Stock "+ALLTRIM(cdescri)
+			Exit
+		Endif
+		Select tmpv
+		Skip
+	Enddo
+	If Sw = 1 And This.generacorrelativo() = 1  Then
+		If This.GRabarCambios() < 1 Then
+			Return
+		Endif
+		If This.Tdoc = '09'  Then
+			Select * From tmpv Into Cursor tmpvg Readwrite
+			This.Imprimir('S')
+			Return 1
+		Else
+			Replace All almacen1 With This.calmacen1, almacen2 With This.calmacen2, fech With This.fecha, ;
+				ndoc With This.ndoc, Detalle With This.Detalle  In tmpv
+			Do Form ka_ldctos1 To verdad
+			Select tmpv
+			Go Top In tmpv
+			Report Form (This.Archivointerno) To Printer Prompt Noconsole
+			Return  1
+		Endif
+	Else
+		This.DEshacerCambios()
+		This.cmenesaje = Alltrim(Cmensajex) 
+		Return 0
+	Endif
+	ENDFUNC
+	Function GrabarNorplast()
+	If This.validartraspasolopez() < 1 Then
+		Return 0
+	Endif
+	Set Classlib To 'd:\librerias\clasesvisuales' Additive
+	ovstock = Createobject("verificastockproducto")
+	If This.IniciaTransaccion() < 1
+		Return 0
+	Endif
+	NAuto = IngresaResumenTraspasosNorplast(This.Tdoc, 'E', This.ndoc, This.fecha, This.fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
+		  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
+	If NAuto < 1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	nidg = This.IngresaGuiasXTraspaso(This.fecha, This.ptop, This.ptoll, NAuto, This.fechat, goApp.nidusua, This.Detalle, This.Idtransportista, This.ndoc, goApp.Tienda)
+	If nidg < 1 Then
+		This.DEshacerCambios()
+		Return 0
+	Endif
+	Sw = 1
 	Cmensaje = ""
 	Select tmpv
 	Go Top
@@ -797,7 +864,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		If This.GRabarCambios() < 1 Then
 			Return
 		Endif
-		If This.Tdoc = '09'  Then
+		If This.Tdoc = '09' And goApp.Emisorguiasremisionelectronica = 'S' Then
 			Select * From tmpv Into Cursor tmpvg Readwrite
 			This.Imprimir('S')
 			Return 1
