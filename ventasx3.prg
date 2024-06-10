@@ -55,7 +55,8 @@ Define Class ventasx3 As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		Return 0
 	Endif
 	Return 1
-	Endfunc
+	ENDFUNC
+	
 Enddefine
 
 

@@ -109,7 +109,7 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	goApp.npara10 = np10
 	goApp.npara11 = np11
 	Text To lp Noshow
-	     (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,
+	  (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,
       ?goapp.npara10,?goapp.npara11)
 	Endtext
 	If This.EJECUTARP(lC, lp, cur) < 1 Then

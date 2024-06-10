@@ -102,9 +102,9 @@ Define Class guiaremisionxcompras As GuiaRemision Of 'd:\capass\modelos\guiasrem
 	Case  This.idprov < 1
 		This.Cmensaje = "Ingrese El Proveedor"
 		Return 0
-	Case This.nruc = Cruc
-		This.Cmensaje = "El Remitente no puede Ser la misma Empresa"
-		Return 0
+*!*		Case This.nruc = Cruc
+*!*			This.Cmensaje = "El Remitente no puede Ser la misma Empresa"
+*!*			Return 0
 	Endcase
 	If This.Validar() < 1 Then
 		Return 0

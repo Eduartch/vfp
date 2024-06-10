@@ -122,7 +122,7 @@ Define Class bancos As Odata Of  'd:\capass\database\data.prg'
 	Return  nidb
 	Endfunc
 	Function listardepositosencuenta(Ccursor)
-	If This.Idsesion > 0 Then
+	If This.Idsesion > 1 Then
 		Set DataSession To This.Idsesion
 	Endif
 	Calias = 'c_' + Sys(2015)

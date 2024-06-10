@@ -343,7 +343,7 @@ Define Class lecturas As Odata Of 'd:\capass\database\data.prg'
 			Exit
 		Endif
 		Select liq
-	ENDSCAN
+	Endscan
 	If xq=0 Then
 		This.DeshacerCambios()
 		Return 0
@@ -412,50 +412,55 @@ Define Class lecturas As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	This.conconexion = 0
 	Return 1
-	ENDFUNC
-	FUNCTION obteneractiva(dfecha,nturno,nisla)
+	Endfunc
+	Function obteneractiva(dfecha,nturno,nisla)
 	df=cfechas(dfecha)
-	ccursor='c_'+SYS(2015)
-	DO case
-	CASE nisla=1
-	TEXT TO lc NOSHOW TEXTMERGE 
-	    SELECT lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_esta='A' AND lect_idco IN(1,2) GROUP BY lect_idin
-	ENDTEXT 
-	CASE nisla=2
-	TEXT TO lc NOSHOW TEXTMERGE 
-	    SELECT lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_esta='A' AND lect_idco IN(3,4) GROUP BY lect_idin
-	ENDTEXT 
-	CASE nisla=3
-	TEXT TO lc NOSHOW TEXTMERGE 
-	    SELECT lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_esta='A' AND lect_idco IN(5,6,7,8) GROUP BY lect_idin
-	ENDTEXT 
-	ENDCASE 
-	IF this.ejecutaconsulta(lc,ccursor)<1 then
-	    RETURN -1
-	ENDIF 
-	SELECT (ccursor)
-	RETURN idin   
-	ENDFUNC 
-	FUNCTION obtenerlecturas(dfecha,nturno,nisla,ccursor)
+	ccursor='c_'+Sys(2015)
+	Do Case
+	Case nisla=1
+		TEXT TO lc NOSHOW TEXTMERGE
+	    SELECT lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_esta='A' AND lect_idco IN(1,2) GROUP BY lect_idin limit 1
+		ENDTEXT
+	Case nisla=2
+		TEXT TO lc NOSHOW TEXTMERGE
+	    SELECT lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_esta='A' AND lect_idco IN(3,4) GROUP BY lect_idin limit 1
+		ENDTEXT
+	Case nisla=3
+		TEXT TO lc NOSHOW TEXTMERGE
+	    SELECT lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_esta='A' AND lect_idco IN(5,6,7,8) GROUP BY lect_idin limit 1
+		ENDTEXT
+	Endcase
+	If This.EjecutaConsulta(lc,ccursor)<1 Then
+		Return -1
+	Endif
+	Select (ccursor)
+	If idin>0 Then
+		Return idin
+	Else
+		This.cmensaje="No hay Lecturas Registradas"
+		Return 0
+	Endif
+	Endfunc
+	Function obtenerlecturas(dfecha,nturno,nisla,ccursor)
 	df=cfechas(dfecha)
-	DO case
-	CASE nisla=1
-	TEXT TO lc NOSHOW TEXTMERGE 
+	Do Case
+	Case nisla=1
+		TEXT TO lc NOSHOW TEXTMERGE
 	    SELECT  CONCAT(CAST(lect_idtu AS CHAR),'-',CAST(lect_idin AS CHAR)) as lectura,lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_acti='A' AND lect_idco IN(1,2) GROUP BY lect_idin
-	ENDTEXT 
-	CASE nisla=2
-	TEXT TO lc NOSHOW TEXTMERGE 
+		ENDTEXT
+	Case nisla=2
+		TEXT TO lc NOSHOW TEXTMERGE
 	    SELECT  CONCAT(CAST(lect_idtu AS CHAR),'-',CAST(lect_idin AS CHAR)) as lectura,lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_acti='A' AND lect_idco IN(3,4) GROUP BY lect_idin
-	ENDTEXT 
-	CASE nisla=3
-	TEXT TO lc NOSHOW TEXTMERGE 
+		ENDTEXT
+	Case nisla=3
+		TEXT TO lc NOSHOW TEXTMERGE
 	    SELECT  CONCAT(CAST(lect_idtu AS CHAR),'-',CAST(lect_idin AS CHAR)) as lectura,lect_idin as idin FROM fe_lecturas WHERE lect_fech='<<df>>' AND lect_acti='A' AND lect_idco IN(5,6,7,8) GROUP BY lect_idin
-	ENDTEXT 
-	ENDCASE 
-	IF this.ejecutaconsulta(lc,ccursor)<1 then
-	    RETURN 0
-	ENDIF 
-	SELECT (ccursor)
-	RETURN 1
-	ENDFUNC 
+		ENDTEXT
+	Endcase
+	If This.EjecutaConsulta(lc,ccursor)<1 Then
+		Return 0
+	Endif
+	Select (ccursor)
+	Return 1
+	Endfunc
 Enddefine

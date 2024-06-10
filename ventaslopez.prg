@@ -431,7 +431,7 @@ Define Class ventaslopez As Ventas Of d:\capass\modelos\Ventas
 	If NAuto < 1 Then
 		Return 0
 	Endif
-	If IngresaDatosLCajaEFectivo11(This.fecha, "", "", fe_gene.idctat, nt, 0, 'S', fe_gene.dola, 0, This.Codigo, NAuto, cform, cndoc, This.Tdoc) < 1 Then
+	If IngresaDatosLCajaEFectivo11(This.fecha, "", this.razon, fe_gene.idctat, nt, 0, 'S', fe_gene.dola, 0, This.Codigo, NAuto, cform, cndoc, This.Tdoc) < 1 Then
 		Return 0
 	Endif
 	If IngresaRvendedores(NAuto, This.Codigo, 4, cform) < 1 Then

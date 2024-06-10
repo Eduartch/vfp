@@ -12,7 +12,6 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	csol = ""
 	mostrarmensaje = ""
 	nidauto = 0
-	cmemsaje = ""
 	dfenvio = Date()
 	dfi = Date()
 	dff = Date()
@@ -47,6 +46,7 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 		Return 0
 	Endif
 	lcHTML = oHTTP.responseText
+*!*		MESSAGEBOX(lcHtml)
 	Set Procedure To d:\Librerias\nfJsonRead.prg Additive
 	orpta = nfJsonRead(lcHTML)
 	If  Vartype(orpta.estado) <> 'U'
@@ -55,11 +55,11 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 			crpta = orpta.Mensaje
 			If goApp.Grabarxmlbd = 'S' Then
 				Text To lC Noshow Textmerge
-		         update fe_rcom set rcom_fecd=curdate(),rcom_cdr='<<cdr>>',rcom_mens='<<crpta>>' where idauto=<<nidauto>>
+		         update fe_rcom set rcom_fecd=curdate(),rcom_cdr=?cdr,rcom_mens=?crpta where idauto=<<nidauto>>
 				Endtext
 			Else
 				Text To lC Noshow Textmerge
-		         update fe_rcom set rcom_fecd=curdate(),rcom_mens='<<crpta>>' where idauto=<<nidauto>>
+		         update fe_rcom set rcom_fecd=curdate(),rcom_mens=?crpta where idauto=<<nidauto>>
 				Endtext
 			Endif
 			If This.Ejecutarsql(lC) < 1 Then
@@ -272,7 +272,7 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 			cdrxml = filess.rcom_cdr
 			Strtofile(cdrxml, crutaxmlcdr)
 		Else
-			This.cmeensaje = "No se puede Obtener el Archivo CDR"
+			This.cmensaje = "No se puede Obtener el Archivo CDR"
 		Endif
 	Endif
 
@@ -831,7 +831,7 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	f2 = cfechas(This.dff)
 	Set Textmerge On
 	Set Textmerge To Memvar lC Noshow Textmerge
-	\Select a.ndoc As dcto, a.fech, b.razo, a.valor, a.rcom_exon, rcom_otro,
+	\Select a.ndoc As dcto, a.fech, b.razo,If(a.mone='S','Soles','Dólares') As moneda, a.valor, a.rcom_exon, rcom_otro,
 	\a.igv, a.Impo, rcom_hash, u.nomb, a.fusua, rcom_mens, rcom_arch, mone, a.Tdoc, a.ndoc, dolar, Idauto, b.ndni, a.idcliente, b.clie_corr,
 	\ndo2, b.fono, nruc, Concat(Trim(b.Dire), ' ', Trim(b.ciud)) As Direccion, tcom, Tdoc, a.vigv
 	\From fe_rcom As a
@@ -845,7 +845,7 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	 \ And a.Tdoc='<<this.ctdoc>>'
 	Endif
 	\Union All
-	\Select a.ndoc As dcto, a.fech, b.razo, a.valor, a.rcom_exon, a.rcom_otro,
+	\Select a.ndoc As dcto, a.fech, b.razo,If(a.mone='S','Soles','Dólares') As moneda, a.valor, a.rcom_exon, a.rcom_otro,
 	\a.igv, a.Impo, a.rcom_hash, u.nomb, a.fusua, a.rcom_mens, a.rcom_arch, a.mone, a.Tdoc, a.ndoc, a.dolar, a.Idauto, b.ndni, a.idcliente, b.clie_corr,
 	\a.ndo2, b.fono, nruc, Concat(Trim(b.Dire), ' ', Trim(b.ciud)) As Direccion, a.tcom, w.Tdoc, a.vigv
 	\From fe_rcom As a
@@ -1060,7 +1060,134 @@ Define Class cpesisven As Odata Of 'd:\capass\database\data'
 	Endif
 	Return 1
 	Endfunc
+	Function consultarcpexenviarpsysl(Ccursor)
+	f1 = cfechas(This.dfi)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\    Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,rcom_otro,
+	\    a.igv,a.Impo,rcom_hash,rcom_mens,rcom_arch,mone,a.Tdoc,a.ndoc,dolar,Idauto,b.ndni,a.idcliente,b.clie_corr,
+	\    ndo2,b.fono,nruc,Concat(Trim(b.Dire),' ',Trim(b.ciud)) As Direccion,tcom,Tdoc
+	\    From fe_rcom As a
+	\    INNER Join fe_clie As b On (a.idcliente=b.idclie)
+	\    Where  a.Acti<>'I' And Left(ndoc,1) In ('F') And Left(rcom_mens,1)<>'0'  And  (Impo<>0 Or rcom_otro>0)   And a.Tdoc='01'
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\    Union All
+	\    Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,a.rcom_otro,
+	\    a.igv,a.Impo,a.rcom_hash,a.rcom_mens,a.rcom_arch,a.mone,a.Tdoc,a.ndoc,a.dolar,a.Idauto,b.ndni,a.idcliente,b.clie_corr,
+	\    a.ndo2,b.fono,nruc,Concat(Trim(b.Dire),' ',Trim(b.ciud)) As Direccion,a.tcom,w.Tdoc
+	\    From fe_rcom As a
+	\    INNER Join fe_clie As b On (a.idcliente=b.idclie)
+	\    INNER Join fe_ncven g On g.ncre_idan=a.Idauto
+	\    INNER Join fe_rcom As w On w.Idauto=g.ncre_idau
+    \   Where a.Acti<>'I' And Left(a.ndoc,1) In ('F') And Left(a.rcom_mens,1)<>'0'
+	\    And w.Tdoc='01' And a.Tdoc In("07","08")
+	If This.confechas = 1 Then
+	  \ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	 \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\Order By fech,ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function consultarcpexreimprimir()
+	Endfunc
+	Function consultarcpexenviarpsystr(Ccursor)
+	f1 = cfechas(This.dfi)
+	f2 = cfechas(This.dff)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	\Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,Cast(0 As Decimal(12,2)) As inafecto,rcom_otro,
+	\a.igv,a.Impo,rcom_mens,rcom_arch,mone,a.Tdoc,a.ndoc,dolar,Idauto,b.ndni,a.idcliente,b.clie_corr,
+    \ndo2,b.fono,nruc,tcom,a.vigv,Tdoc,rcom_hash
+    \From fe_rcom As a
+	\Join fe_clie As b On (a.idcliente=b.idclie)
+	\Where  a.Acti<>'I' And Left(ndoc,1) In ('F') And Left(rcom_mens,1)<>'0'   And a.Tdoc='01'  And  (Impo<>0 Or rcom_otro>0)
+	If goApp.Cdatos = 'S' Then
+	   \And  a.codt=<<This.codt>>
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	   \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\Union All
+	\Select a.ndoc As dcto,a.fech,b.razo,a.valor,a.rcom_exon,Cast(0 As Decimal(12,2)) As inafecto,a.rcom_otro,
+	\a.igv,a.Impo,a.rcom_mens,a.rcom_arch,a.mone,a.Tdoc,a.ndoc,a.dolar,a.Idauto,b.ndni,a.idcliente,b.clie_corr,
+	\a.ndo2,b.fono,nruc,a.tcom,a.vigv,w.Tdoc,a.rcom_hash
+	\From fe_rcom As a
+	\Join fe_clie As b On (a.idcliente=b.idclie)
+	\INNER Join fe_ncven g On g.ncre_idan=a.Idauto
+	\INNER Join fe_rcom As w On w.Idauto=g.ncre_idau
+	\Where a.Acti<>'I' And Left(a.ndoc,1) In ('F') And Left(a.rcom_mens,1)<>'0'  And w.Tdoc='01' And a.Tdoc In("07","08") And nruc<>'***********'
+	If goApp.Cdatos = 'S' Then
+	  \ And  a.codt=<<This.codt>>
+	Endif
+	If This.confechas = 1 Then
+		\ And  a.fech Between '<<f1>>' And '<<f2>>'
+	Endif
+	If Len(Alltrim(This.cTdoc)) > 0 Then
+	   \ And a.Tdoc='<<this.ctdoc>>'
+	Endif
+	\ Order By fech,ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function descargarxmlguiadesdedata(carfile, nid)
+	Text To lC Noshow Textmerge
+       select CAST(guia_xml AS CHAR) AS guia_xml,CAST(guia_cdr AS CHAR) AS guia_cdr FROM fe_guias WHERE guia_idgui=<<nid>>
+	Endtext
+	If This.EjecutaConsulta(lC, 'filess') < 1 Then
+		Return 0
+	Endif
+	cdr = "R-" + carfile
+	If Type('oempresa') = 'U' Then
+		crutaxml	= Addbs(Addbs(Sys(5) + Sys(2003)) + 'Firmaxml') + carfile
+		crutaxmlcdr	= Addbs(Addbs(Sys(5) + Sys(2003)) + 'SunatXML') + cdr
+	Else
+		crutaxml	= Addbs(Addbs(Addbs(Sys(5) + Sys(2003)) + 'Firmaxml') + Alltrim(Oempresa.nruc)) + carfile
+		crutaxmlcdr	= Addbs(Addbs(Addbs(Sys(5) + Sys(2003)) + 'SunatXML') + Alltrim(Oempresa.nruc)) + cdr
+	Endif
+    this.cmensaje=""
+	If File(crutaxml) Then
+     *ocomx.ArchivoXml=Addbs(Sys(5)+Sys(2003)+'\FirmaXML\')+carfile
+	Else
+		If !Isnull(filess.guia_xml) Then
+			cxml = filess.guia_xml
+			Strtofile(cxml, crutaxml)
+		Else
+			this.cmemsaje="No se puede Obtener el Archivo XML de Envío"
+		Endif
+	Endif
+	cdr = "R-" + carfile
+	If File(crutaxmlcdr) Then
+
+	Else
+		If !Isnull(filess.guia_cdr) Then
+    		cdrxml = filess.guia_cdr
+			Strtofile(cdrxml, crutaxmlcdr)
+		ELSE
+		    this.cmemsaje="No se puede Obtener el Archivo XML de Envío"
+		Endif
+	Endif
+    RETURN 1
+	Endfunc
 Enddefine
+
+
 
 
 

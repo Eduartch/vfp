@@ -4,7 +4,7 @@ Define Class vendedores As Odata Of 'd:\capass\database\data.prg'
 	dff = Date()
 	Function MuestraVendedores(np1, Ccursor)
 	Local lC, lp
-	If This.Idsesion > 0 Then
+	If This.Idsesion > 1 Then
 		Set DataSession To This.Idsesion
 	Endif
 	If Alltrim(goApp.datosvend) <> 'S' Then
@@ -20,11 +20,11 @@ Define Class vendedores As Odata Of 'd:\capass\database\data.prg'
 		nCount = Afields(cfieldsfevend)
 		Select * From (Ccursor) Into Cursor a_vend
 		cdata = nfcursortojson(.T.)
-		cfilejson = Addbs(Sys(5) + Sys(2003)) + 'v.json'
+		cfilejson = Addbs(Sys(5) + Sys(2003)) + 'v'+ALLTRIM(STR(goapp.xopcion))+'.json'
 		If File(cfilejson) Then
 			Delete File (cfilejson)
 		Endif
-		rutajson = Addbs(Sys(5) + Sys(2003)) + 'v.json'
+		rutajson = Addbs(Sys(5) + Sys(2003)) + 'v'+ALLTRIM(STR(goapp.xopcion))+'.json'
 		Strtofile (cdata, rutajson)
 		goApp.datosvend = 'S'
 	Else
@@ -32,7 +32,7 @@ Define Class vendedores As Odata Of 'd:\capass\database\data.prg'
 *!*		       wait WINDOW cfieldsfevend[1,1]
 		Endif
 		Create Cursor b_vend From Array cfieldsfevend
-		responseType1 = Addbs(Sys(5) + Sys(2003)) + 'v.json'
+		responseType1 = Addbs(Sys(5) + Sys(2003)) +  'v'+ALLTRIM(STR(goapp.xopcion))+'.json'
 		oResponse = nfJsonRead( m.responseType1 )
 		For Each oRow In  oResponse.Array
 			Insert Into b_vend From Name oRow
@@ -46,12 +46,19 @@ Define Class vendedores As Odata Of 'd:\capass\database\data.prg'
 	If This.Idsesion > 0 Then
 		Set DataSession To This.Idsesion
 	Endif
-	Text To lC Noshow Textmerge
-	     Select a.razo,a.nruc,a.dire,a.ciud,a.fono,a.fax,a.clie_rpm,ifnull(x.zona_nomb,'') as zona,a.refe as Referencia
-        from fe_clie as a 
-        left join fe_zona as x on x.zona_idzo=a.clie_idzo 
-        where a.clie_acti='A' and a.clie_codv=<<this.nidv>>  order by zona,a.razo 
-	Endtext
+	SET TEXTMERGE on
+	SET TEXTMERGE TO memvar lc NOSHOW TEXTMERGE 
+	\    Select a.razo,a.nruc,a.dire,a.ciud,a.fono,a.fax,a.clie_rpm,ifnull(x.zona_nomb,'') as zona,a.refe as Referencia,ifnull(v.nomv,'') As vendedor
+    \    from fe_clie as a 
+    \    left join fe_zona as x on x.zona_idzo=a.clie_idzo 
+    \    left join fe_vend as v on v.idven=a.clie_codv
+    \    where a.clie_acti='A' 
+        IF this.nidv>0 then
+        \ and a.clie_codv=<<this.nidv>>
+        ENDIF 
+        \ order by zona,a.razo 
+	SET TEXTMERGE OFF 
+	SET TEXTMERGE to
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif

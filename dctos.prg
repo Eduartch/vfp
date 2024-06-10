@@ -48,7 +48,7 @@ Define Class dctos As Odata Of "d:\capass\database\data.prg"
 	Function MuestraDctos(cb, Ccursor)
 	If This.Idsesion > 0 Then
 		Set DataSession To This.Idsesion
-	Endif
+	ENDIF
 	If Alltrim(goApp.datosdctos) <> 'S' Then
 		lC = "PROMUESTRADCTOS"
 		Text To lp Noshow Textmerge
@@ -61,11 +61,9 @@ Define Class dctos As Odata Of "d:\capass\database\data.prg"
 		nCount = Afields(cfieldsfetdoc)
 		Select * From (Ccursor) Into Cursor a_dctos
 		cdata = nfcursortojson(.T.)
-		rutajson = Addbs(Sys(5) + Sys(2003)) + 'd.json'
-		cfilejson = Addbs(Sys(5) + Sys(2003)) + 'd.json'
-		If File(cfilejson) Then
-			Delete File cfilejson
-		Endif
+		rutajson = Addbs(Sys(5) + Sys(2003)) + 'd'+ALLTRIM(STR(goapp.xopcion))+'.json'
+		cfilejson = Addbs(Sys(5) + Sys(2003)) + goapp.rucempresa+'d.json'
+		Delete File cfilejson
 		Strtofile (cdata, rutajson)
 		goApp.datosdctos = 'S'
 	Else
@@ -73,7 +71,7 @@ Define Class dctos As Odata Of "d:\capass\database\data.prg"
 *!*		       wait WINDOW cfieldsfesucu[1,1]
 		Endif
 		Create Cursor b_dctos From Array cfieldsfetdoc
-		responseType1 = Addbs(Sys(5) + Sys(2003)) + 'd.json'
+		responseType1 = Addbs(Sys(5) + Sys(2003)) +'d'+ALLTRIM(STR(goapp.xopcion))+'.json'
 		oResponse = nfJsonRead( m.responseType1 )
 		For Each oRow In  oResponse.Array
 			Insert Into b_dctos From Name oRow

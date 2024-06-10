@@ -67,7 +67,7 @@ Define Class Correlativo As Odata Of 'd:\capass\database\data.prg'
 	If Serie > 0 Then
 		Return 1
 	Else
-		This.Cmensaje = 'La Serie No Pertenece a esta Punto de Venta'
+		This.Cmensaje = 'La Serie '+ALLTRIM(STR(lista.nserie))+ 'No Pertenece a esta Punto de Venta '+ALLTRIM(STR(m.nidtda))
 		Return 0
 	Endif
 	Endfunc
@@ -148,11 +148,11 @@ Define Class Correlativo As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	If This.conletras = 'S' Then
 		Text To lC Noshow Textmerge
-          SELECT nume,items,idserie FROM fe_serie WHERE serie=<<ns>> AND tdoc='<<ctdoc>>' AND TRIM(letra)='<<this.letras>>'
+          SELECT nume,items,idserie FROM fe_serie WHERE serie=<<ns>> AND tdoc='<<ctdoc>>' AND TRIM(letra)='<<this.letras>>' limit 1
 		Endtext
 	Else
 		Text To lC Noshow Textmerge
-         SELECT nume,items,idserie FROM fe_serie WHERE serie=<<ns>> AND tdoc='<<ctdoc>>'
+         SELECT nume,items,idserie FROM fe_serie WHERE serie=<<ns>> AND tdoc='<<ctdoc>>' limit 1
 		Endtext
 	Endif
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
@@ -293,21 +293,20 @@ Define Class Correlativo As Odata Of 'd:\capass\database\data.prg'
 	Return 1
 	Endfunc
 	Function MostrarSeries(Ccursor)
-	lp = ""
 	lC = "PROMUESTRASERIES"
-	If This.EJECUTARP(lC, lp, Ccursor) < 1  Then
+	If This.EJECUTARP(lC, "", Ccursor) < 1  Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
-*******************
-	Function MostrarSeries(Ccursor)
-	lC = "PROMUESTRASERIES"
-    If This.EJECUTARP(lC, "", Ccursor) < 1  Then
-		Return 0
-	Endif
-	Return 1
-	Endfunc
+*!*	*******************
+*!*		Function MostrarSeries(Ccursor)
+*!*		lC = "PROMUESTRASERIES"
+*!*	    If This.EJECUTARP(lC, "", Ccursor) < 1  Then
+*!*			Return 0
+*!*		Endif
+*!*		Return 1
+*!*		Endfunc
 Enddefine
 
 

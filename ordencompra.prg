@@ -251,7 +251,6 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Enddo
 	Endproc
 	Function Grabar()
-	This.CONTRANSACCION = 'S'
 	If This.IniciaTransaccion() < 1 Then
 		Return 0
 	Endif
@@ -343,10 +342,9 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Function GeneraCorrelativo(np1, np2)
 	Set Procedure To d:\capass\modelos\correlativos Additive
 	ocorr = Createobject("correlativo")
-	ocorr.Ndoc = This.cndoc
-	ocorr.Idserie = This.Idserie
+    ocorr.Idserie = This.Idserie
 	ocorr.Nsgte = This.Nsgte
-	If ocorr.GeneraCorrelativo() < 1 Then
+	If ocorr.GeneraCorrelativo1() < 1 Then
 		This.Cmensaje = ocorr.Cmensaje
 		Return 0
 	Endif
@@ -439,8 +437,7 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Text To lC Noshow Textmerge
 	  SELECT
 	  `b`.`doco_iddo`  AS `doco_iddo`,	  `b`.`doco_coda` ,	  `b`.`doco_cant` ,	  `b`.`doco_prec` ,
-	  `c`.`descri` ,	  `c`.`prod_smin`  AS `prod_smin`,
-	  `c`.`unid`       AS `unid`,c.prod_ccai as prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,	  `a`.`ocom_valor` AS `ocom_valor`,
+	  `c`.`descri` ,	  `c`.`prod_smin`, `c`.`unid`,c.prod_ccai as prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,	  `a`.`ocom_valor` AS `ocom_valor`,
 	  `a`.`ocom_igv`   AS `ocom_igv`,	  `a`.`ocom_impo`  AS `ocom_impo`,	  `a`.`ocom_idroc` AS `ocom_idroc`,	  `a`.`ocom_fech` ,
 	  `a`.`ocom_idpr`  AS `ocom_idpr`,	  `a`.`ocom_desp`  AS `ocom_desp`,	  `a`.`ocom_form`  AS `ocom_form`,	  `a`.`ocom_mone` ,
 	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,	  `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  ,

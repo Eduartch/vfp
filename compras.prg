@@ -1,4 +1,4 @@
-Define Class compras As Odata Of "d:\capass\Database\Data.prg"
+DEFINE CLASS compras As Odata Of 'd:\capass\database\data.prg'
 	cTdoc	 = ""
 	cforma	 = ""
 	cndoc	 = ""
@@ -627,7 +627,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	f2 = cfechas(This.fechaf)
 	Set Textmerge On
 	Set Textmerge To Memvar lC Noshow
-	\Select Form,fecr,fech,Tdoc,If(Length(Trim(a.Ndoc))<=10,Left(a.Ndoc,3),Left(a.Ndoc,4)) As Serie,
+	\Select a.idauto As Auto,Form,fecr,fech,Tdoc,If(Length(Trim(a.Ndoc))<=10,Left(a.Ndoc,3),Left(a.Ndoc,4)) As Serie,
 	\			If(Length(Trim(a.Ndoc))<=10,Substr(a.Ndoc,4),Substr(a.Ndoc,5)) As Ndoc,nruc,Razo,
 	\			Round(v1+v2+v3+v4,2) As valorg,c.Exon,c.igv As igvg,c.otros,Round(If(Tdoc<>'41',v1+v2+v3+v4+c.Exon+c.igv+otros,0),2) As Importe,
 	\			Round(If(Tdoc='41',If(Mone="D",c.Impo*a.dolar,c.Impo),If(Mone="D",pimpo*a.dolar,pimpo)),2) As pimpo,
@@ -635,7 +635,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	\			If(Tdoc='07',fech,If(Tdoc='08',fech,Cast("0001-01-01" As Date))) As fechn,
 	\			If(Tdoc='07','01',If(Tdoc='08','01',' ')) As tref,
 	\			If(Tdoc='07',a.Ndoc,If(Tdoc='08',a.Ndoc,' ')) As Refe,
-	\			a.idauto As Auto,ndni,Cast('0' As unsigned) As T,
+	\			ndni,Cast('0' As unsigned) As T,
 	\			ifnull(rcom_detr,'')  As detra,rcom_fecd As fechad,
 	\			vigv,tipom As Tipo,fech As fevto,a.rcom_icbper As icbper,'M002' As cuo From fe_rcom As a INNER Join
 	\			(Select a.idauto,
@@ -679,9 +679,9 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	If This.EjecutaConsulta(lg, 'xnotas') < 1 Then
 		Return 0
 	Endif
-	Create Cursor registro(Form c(1) Null, fecr d Null, fech d Null, Tdoc c(2) Null, Serie c(4), Ndoc c(8), nruc c(11)Null, Razo c(120)Null, valorg N(14, 2), Exon N(12, 2), ;
+	Create Cursor registro(Auto N(15),Form c(1) Null, fecr d Null, fech d Null, Tdoc c(2) Null, Serie c(4), Ndoc c(8), nruc c(11)Null, Razo c(120)Null, valorg N(14, 2), Exon N(12, 2), ;
 		  igvg N(10, 2), otros N(12, 2), Importe N(14, 2), pimpo N(8, 2), Deta c(80), dola N(5, 3), detra c(24), fechad d, Mone c(1), Codigo N(5), fechn d, tref c(2), Refe c(12), fevto d, ;
-		  Auto N(15), ndni c(8), T N(1), Tipo c(1), icbper N(8, 2), vigv N(5, 3))
+		   ndni c(8), T N(1), Tipo c(1), icbper N(8, 2), vigv N(5, 3))
 	x = 1
 	notas = 0
 	Select registro1
@@ -750,12 +750,15 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	\	Left Join fe_refe As e On(e.idrcon = a.idrcon)
 	\	Left Join fe_sucu As z On z.idalma = a.idalma
 	\	Left Join fe_tdoc As w On w.idtdoc = e.idtdoc
-	\Where a.rcon_acti = 'A'  And a.idalma = <<This.codt>>
+	\Where a.rcon_acti = 'A'  
 	If This.nmes > 0 Then
 	\ And Month(fecr) = <<This.nmes>> And Year(fecr) = <<This.Naño>>
 	Else
 		\And fecr Between '<<f1>>' And '<<f2>>'
-	Endif
+	ENDIF
+	IF this.nidt>0 then
+	   \ And a.idalma = <<This.codt>>
+	ENDIF 
 	If Len(Alltrim(This.ctipo)) > 0 Then
 	\ And a.Tipo='<<this.ctipo>>'
 	Endif
@@ -766,7 +769,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 		Return 0
 	Endif
 	Return 1
-	Endfunc
+	ENDFUNC
 	Function registrocompras1(Ccursor)
 	f1 = cfechas(This.fechai)
 	f2 = cfechas(This.fechaf)
@@ -1268,7 +1271,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	Do While !Eof()
 		If Deleted()
 			If utmpc.nreg > 0 Then
-				If Actualizakardex1(This.nreg, utmpc.coda, 'C', 0, utmpc.cant, cincl, 'K', 0, TAlma, 0, utmpc.nreg, 0, 0) = 0 Then
+				If Actualizakardex1(This.nreg, utmpc.coda, 'C', 0, utmpc.cant, this.cincluido, 'K', 0, this.codt, 0, utmpc.nreg, 0, 0) = 0 Then
 					Sw = 0
 					Exit
 				Endif
@@ -1295,7 +1298,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 				Endif
 			Endif
 			If utmpc.nreg = 0  Or Empty(utmpc.nreg) Then
-				nidcosto = NuevoCosto(utmpc.costoact, This.nreg, utmpc.coda, utmpc.gast, xprec, cm, This.ndolar, This.dFecha)
+				nidcosto = NuevoCosto(utmpc.costoact, This.nreg, utmpc.coda, utmpc.gast, xprec,this.Cmoneda, This.ndolar, This.dFecha)
 				If nidcosto = 0 Then
 					Sw = 0
 					Exit
@@ -1358,7 +1361,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 	Do While !Eof()
 		If Deleted()
 			If utmpc.nreg > 0 Then
-				If Actualizakardex1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, cincl, 'K', 0, This.codt, 0, utmpc.nreg, 0, 0) = 0 Then
+				If Actualizakardex1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, this.cincluido, 'K', 0, This.codt, 0, utmpc.nreg, 0, 0) = 0 Then
 					Sw = 0
 					Exit
 				Endif
@@ -1385,7 +1388,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 				Endif
 			Endif
 			If utmpc.nreg = 0  Or Empty(utmpc.nreg) Then
-				nidk = INGRESAKARDEX1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, cincl, 'K', 0, This.codt, 0, 0)
+				nidk = INGRESAKARDEX1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, this.cincluido, 'K', 0, This.codt, 0, 0)
 				If nidk = 0 Then
 					Sw = 0
 					Exit
@@ -1393,7 +1396,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 			Else
 				nidcosto = utmpc.idcosto
 				nidk = utmpc.nreg
-				If Actualizakardex1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, cincl, 'K', 0, This.codt, 0, utmpc.nreg, 1, 0) = 0 Then
+				If Actualizakardex1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, this.cincluido, 'K', 0, This.codt, 0, utmpc.nreg, 1, 0) = 0 Then
 					Sw = 0
 					Exit
 				Endif
@@ -1513,12 +1516,12 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 				Endif
 			Endif
 			If utmpc.nreg = 0  Or Empty(utmpc.nreg) Then
-				nidcosto = NuevoCosto(utmpc.costoact, This.nreg, utmpc.coda, utmpc.gast, xprec, cm, fe_gene.dola, This.dFecha)
+				nidcosto = NuevoCosto(utmpc.costoact, This.nreg, utmpc.coda, utmpc.gast, xprec, this.Cmoneda, fe_gene.dola, This.dFecha)
 				If nidcosto = 0
 					Sw = 0
 					Exit
 				Endif
-				nidk = INGRESAKARDEX1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, cincl, 'K', 0, This.codt, nidcosto, 0)
+				nidk = INGRESAKARDEX1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, this.cincluido, 'K', 0, This.codt, nidcosto, 0)
 				If nidk = 0 Then
 					Sw = 0
 					Exit
@@ -1526,7 +1529,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 			Else
 				nidcosto = utmpc.idcosto
 				nidk = utmpc.nreg
-				If Actualizakardex1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, cincl, 'K', 0, This.codt, 0, utmpc.nreg, 1, 0) = 0 Then
+				If Actualizakardex1(This.nreg, utmpc.coda, 'C', xprec, utmpc.cant, this.cincluido, 'K', 0, This.codt, 0, utmpc.nreg, 1, 0) = 0 Then
 					Sw = 0
 					Exit
 				Endif
@@ -1544,7 +1547,7 @@ Define Class compras As Odata Of "d:\capass\Database\Data.prg"
 				Endif
 			Endif
 			If utmpc.swcosto = 1 And This.cgrabaprecios = 6 Then
-				If ActualizaCostos(utmpc.coda, This.dFecha, xprec, This.nreg, This.nidprov, cm, This.vigv, This.ndolar, nidcosto) = 0 Then
+				If ActualizaCostos(utmpc.coda, This.dFecha, xprec, This.nreg, This.nidprov, this.Cmoneda, This.vigv, This.ndolar, nidcosto) = 0 Then
 					Sw = 0
 					Exit
 				Endif

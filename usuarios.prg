@@ -3,8 +3,8 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	Function mostrarusuarios(Ccursor)
 	Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo,idalma FROM fe_usua WHERE activo="S"  ORDER BY nomb
-	Endtext
-	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+	ENDTEXT
+ 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return 1
@@ -273,7 +273,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 		Endtext
 	Case ctipo = "X"
 		Text To lC Noshow Textmerge
-      select  idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND LEFT(tipo,2)='Ad'  and usua_cont>1 ORDER BY nomb
+         select  idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND LEFT(tipo,2)='Ad'  and usua_cont>1 ORDER BY nomb
 		Endtext
 	Endcase
 	If This.EjecutaConsulta( lC, Ccursor) < 1

@@ -84,7 +84,7 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 	Endif
 	Return Iif(Isnull(iniciocaja.si), 0, iniciocaja.si)
 	Endfunc
-	Function IngresaDatosLCajaEe(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10)
+    FUNCTION IngresaDatosLCajaEe(np1, np2, np3, np4, np5, np6, np7, np8, np9, np10)  
 	lC = "FunIngresaDatosLcajaEe"
 	cur = "Ca"
 	goApp.npara1 = np1

@@ -25,6 +25,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	cmodo = ""
 	dfi = Date()
 	dff = Date()
+	tipopago = ""
 	Function mostrarpendientesxcobrar(nidclie, Ccursor)
 	Text To lC Noshow Textmerge
 		SELECT `x`.`idclie`,		`x`.`razo`      AS `razo`,
@@ -255,7 +256,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		Endif
 		This.CONTRANSACCION = 'S'
 	Endif
-	ur = This.IngresaCabeceraAnticipo(0, nidclie, dFech, This.Codv, npago, goApp.nidusua, goApp.Tienda, 0, Id())
+	ur = This.IngresaCabeceraAnticipo(This.Idauto, nidclie, dFech, This.Codv, npago, goApp.nidusua, goApp.Tienda, 0, Id())
 	If ur < 1
 		If This.CONTRANSACCION = 'S'
 			This.DEshacerCambios()
@@ -263,14 +264,29 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	nidanti = This.CancelaCreditosanticipos(cndoc, npago, 'P', Cmoneda, cdetalle, dFech, dFech, 'F', -1, "", ur, Id(), goApp.nidusua, ur)
-	If nidanti < 1 Then
+   If nidanti < 1 Then
 		If This.contrasaccion = 'S'
 			This.DEshacerCambios()
 		Endif
 		Return 0
 	Endif
 	nmp = Iif(Cmoneda = 'D', Round(npago * ndolar, 2), npago)
-	If ocaja.IngresaDatosLCajaEe(dFech, "", cdetalle, fe_gene.gene_idcre, nmp, 0, 'S', fe_gene.dola, This.idcajero, nidanti) < 1 Then
+	conerrorcaja = ''
+	If This.tipopago = 'N' Then
+*!*			If ocaja.IngresaDatosLCajaEe(dFech, "", cdetalle, fe_gene.gene_idcre, nmp, 0, 'S', fe_gene.dola, This.idcajero, nidanti) < 1 Then
+*!*				conerrorcaja = 'S'
+*!*			Endif
+*!*			If ocaja.IngresaDatosLCajaEFectivo11(dFech,'',cdetalle,fe_gene.gene_idcre, nmp, 0, 'S', fe_gene.dola, 0, nidclie, this.Idauto,'S','E') < 1 Then
+*!*			IngresaDatosLCajaEFectivo12(dfvta, "", .lblRAZON.Value, fe_gene.idctat, Nt, 0,  'S', fe_gene.dola, goApp.idcajero, .txtCodigo.Value, .NAuto, Left(.cmbFORMA.Value, 1), cndcto, cTdoc, goApp.Tienda) = 0 Then
+*!*			DEshacerCambios()
+*!*				conerrorcaja = 'S'
+*!*			Endif
+	Else
+		If ocaja.IngresaDatosLCajaEe(dFech, "", cdetalle, fe_gene.gene_idcre, nmp, 0, 'S', fe_gene.dola, This.idcajero, nidanti) < 1 Then
+			conerrorcaja = 'S'
+		Endif
+	Endif
+	If   conerrorcaja = 'S' Then
 		If This.CONTRANSACCION = 'S'
 			This.DEshacerCambios()
 		Endif
@@ -601,12 +617,13 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	\Left Join fe_rcom As b On b.Idauto = p.rcre_idau Order By razo
 	Set Textmerge Off
 	Set Textmerge To
-	If This.ejecutaconsulta(lC, Ccursor) < 1 Then
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
 Enddefine
+
 
 
 
