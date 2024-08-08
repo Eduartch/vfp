@@ -1,6 +1,7 @@
 Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Fecha = Date()
 	Fechavto = Date()
+	foperacion = Datetime()
 	temporal = ""
 	Codigo = 0
 	sinserie = ""
@@ -10,7 +11,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Encontrado = ""
 	Serie = ""
 	numero = ""
-	almacen = 0
+	Almacen = 0
 	nroformapago = 0
 	formaPago = ""
 	igv = 0
@@ -59,6 +60,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	fechai = Date()
 	fechaf = Date()
 	nmarca = 0
+	nlinea = 0
 	bancarizada = ""
 	nmes = 0
 	Naño = 0
@@ -73,8 +75,18 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	tipodcto = ""
 	Condetraccion = ""  && para Ventas con detracción
 	Concaja = 0
-	ctipovta = ""
+	Ctipovta = ""
+	etarjata = 0
 	idanticipo = 0
+	idanticipo2 = 0
+	Tdscto = 0
+	Creferencia = ""
+	Ctarjeta = ""
+	CtarjetaBanco = ""
+	puntos = 0
+	nacta = 0
+	Etarjeta = 0
+	AgrupadaGanancia = ''
 	Function mostraroventasservicios(np1, Ccursor)
 	TEXT To lC Noshow Textmerge
 	        SELECT b.nruc,b.razo,b.dire,b.ciud,a.dolar,a.fech,a.fecr,a.mone,a.idauto,a.vigv,a.valor,a.igv,
@@ -135,6 +147,19 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 		    SELECT a.idauto,b.nruc FROM fe_rcom as a
 		    inner JOIN fe_clie as b  on(b.idcliE=a.idcliente)
 		    where a.ndoc='<<np1>>' and a.tdoc='<<np2>>' and acti<>'I'
+	ENDTEXT
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function obteneranticipo2(Ccursor)
+	TEXT To lC Noshow Textmerge
+		    SELECT ifnull(z.Ndoc,'') As dctoanticipo,ifnull(z.Impo,Cast(0 As Decimal(10,2))) As totalanticipo,
+		    ifnull(If(z.rcom_exon>0,z.rcom_exon,z.valor),Cast(0 As Decimal(10,2))) As valorganticipo
+		    from fe_rcom as r
+		    inner join fe_rcom as z on z.idauto=r.rcom_idan2
+		    where r.idauto=<<this.Idauto>>
 	ENDTEXT
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
@@ -207,7 +232,6 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Return 1
 	Endfunc
 	Function RentabilidadAgrupadaporproducto(fi, ff, Ccursor)
-
 	TEXT To lC Noshow Textmerge
 	    SELECT k.idart,p.descri,p.unid,cant,costototal,ventatotal,renta,c.dcat AS linea  FROM
        (SELECT k.idart,SUM(cant) AS cant,
@@ -294,7 +318,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 			Or Len(Alltrim(This.numero)) < 8
 		This.Cmensaje = "Ingrese Un Número de Documento Válido"
 		Return .F.
-	Case Empty(This.almacen)
+	Case Empty(This.Almacen)
 		This.Cmensaje = "Seleccione Un Almacen"
 		Return .F.
 	Case Month(This.Fecha) <> goApp.mes Or Year(This.Fecha) <> Val(goApp.año) Or !esfechaValida(This.Fecha)
@@ -352,7 +376,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 			Or Len(Alltrim(This.numero)) < 8
 		This.Cmensaje = "Ingrese Un Número de Documento Válido"
 		Return .F.
-	Case Empty(This.almacen)
+	Case Empty(This.Almacen)
 		This.Cmensaje = "Seleccione Un Almacen"
 		Return .F.
 	Case Month(This.Fecha) <> goApp.mes Or Year(This.Fecha) <> Val(goApp.año) Or !esfechaValida(This.Fecha)
@@ -437,9 +461,6 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Case This.Tdoc = "03" And This.Monto >= 700 And Len(Alltrim(This.dni)) <> 8
 		This.Cmensaje = "Ingrese DNI del Cliente "
 		Return .F.
-	Case This.Monto = 0
-		This.Cmensaje = "Ingrese Cantidad y Precio"
-		Return .F.
 	Case This.Serie = "0000" Or Val(This.numero) = 0 Or Len(Alltrim(This.Serie)) < 3Or Len(Alltrim(This.numero)) < 8
 		This.Cmensaje = "Ingrese Un Número de Documento Válido"
 		Return .F.
@@ -454,6 +475,9 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 		Return .F.
 	Case This.chkdetraccion = 1 And Len(Alltrim(This.coddetraccion)) <> 3
 		This.Cmensaje = "Ingrese Código de Detracción Válido"
+		Return .F.
+	Case This.Monto = 0 And This.idanticipo = 0
+		This.Cmensaje = "Ingrese Cantidad y Precio"
 		Return .F.
 	Case This.verificarsiesta() < 1
 		This.Cmensaje = "Número de Documento de Venta Ya Registrado"
@@ -543,8 +567,12 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Select tmpn
 	Scan All
 		If tdevol.tdevo > 0 Then
-			If (tmpn.devo * tmpn.dsct) = 0  Then
-				This.Cmensaje = "Los Importes del Item " + Alltrim(tmpn.Descri) + " No son Válidos"
+			If (tmpn.devo * tmpn.dsct) = 0 And (tmpn.dsct > 0 Or tmpn.devo > 0)  Then
+				If Fsize("descri") > 0 Then
+					This.Cmensaje = "Los Importes del Item " + Alltrim(tmpn.Descri) + " No son Válidos"
+				Else
+					This.Cmensaje = "Los Importes del Item " + Alltrim(tmpn.Desc) + " No son Válidos"
+				Endif
 				Sw = 0
 				Exit
 			Endif
@@ -655,7 +683,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Endfunc
 	Function imprimirenbloque(Calias)
 	Create Cursor tmpv(Desc c(100), Unid c(20), Prec N(13, 8), cant N(10, 3), ;
-		Ndoc c(10), coda N(8), Nitem N(3), cletras c(120), duni c(20), Tdoc c(2), razon c(100), Direccion c(100), ndni c(8), fech d, Impo N(8, 2), copia c(1), Importe N(12, 2))
+		Ndoc c(10), Coda N(8), Nitem N(3), cletras c(120), duni c(20), Tdoc c(2), razon c(100), Direccion c(100), ndni c(8), fech d, Impo N(8, 2), copia c(1), Importe N(12, 2))
 	Select rid
 	Go Top
 	Sw = 1
@@ -701,6 +729,16 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Else
 		Return 1
 	Endif
+	Endfunc
+	Function GeneraCorrelativovtas()
+	Set Procedure To d:\capass\modelos\correlativos Additive
+	ocorr = Createobject("correlativo")
+	ocorr.Nsgte = This.Nsgte
+	ocorr.Idserie = This.Idserie
+	If ocorr.GeneraCorrelativo1() < 1  Then
+		Return 0
+	Endif
+	Return 1
 	Endfunc
 	Function GeneraCorrelativo(cndoc, nIdserie)
 	Local cn As Integer
@@ -1076,7 +1114,34 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
-
+	Return 1
+	Endfunc
+	Function ventasxusuario(Ccursor)
+	f1 = cfechas(This.fechai)
+	f2 = cfechas(This.fechaf)
+	If This.Idsesion > 0 Then
+		Set DataSession To This.Idsesion
+	Endif
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow
+	\Select  a.kar_comi As comi, a.Idauto, e.Tdoc, e.Ndoc, e.fech, b.idart, a.cant, a.Prec, Round(a.cant * a.Prec, 2) As timporte,
+	\e.Mone, a.alma, a.idart, b.idmar, c.nomb, e.Form,
+	\e.vigv As igv, e.idusua As codv, e.dolar As dola, b.Descri, b.Unid, d.Razo, m.dmar As marca, d.nruc, d.ndni, b.prod_cod1 From fe_rcom As e
+	\inner Join fe_clie As d  On d.idclie = e.idcliente
+	\Left Join fe_kar As a On a.Idauto = e.Idauto
+	\Left Join fe_usua As c On c.idusua = e.idusua
+	\Left Join fe_art As  b On b.idart = a.idart
+	\Left Join fe_mar As m On m.idmar = b.idmar
+	\Where e.Acti <> 'I' And a.Acti <> 'I'  And e.fech  Between '<<f1>>' And '<<f2>>'
+	If This.Vendedor > 0 Then
+	      \ And e.idusua=<<This.Vendedor>>
+	Endif
+	      \Order By e.idusua,a.Idauto,e.Mone
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
 	Return 1
 	Endfunc
 	Function registroventasx5(Ccursor)
@@ -1142,7 +1207,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 		Iif(Mone = "D", Round(Round(Importe * dola, 2) - Round((Importe * dola) / vigv, 2), 2), igv)As igvg, ;
 		Iif(Mone = "D", Round((Exon * dola) / vigv, 2), Exon) As Exon, ;
 		Iif(Mone = "D", Round(Importe * dola, 2), Importe) As Importe, ;
-		Iif(Mone = 'D', Round(grati * dola, 2), grati) As tgrati, pimpo, Detalle, Mone, dola, Codigo, ndni, Idauto, vigv, icbper, Mensaje From registro Into Cursor registro1 Order By fech, Serie, Ndoc, Tdoc
+		Iif(Mone = 'D', Round(grati * dola, 2), grati) As tgrati, pimpo, Detalle, Mone, dola, Codigo, ndni, Idauto, vigv, icbper, Mensaje From registro Into Cursor registro1 Order By Serie, fech, Ndoc
 
 	Create Cursor registro(Form c(1) Null, fech d Null, fvto d, Tdoc c(2) Null, Serie c(4), Ndoc c(8), nruc c(11)Null, Razo c(40)Null, valorg N(14, 2), Exon N(12, 2), ;
 		igvg N(10, 2), Importe N(14, 2), tgrati N(12, 2), igvgr N(12, 2), Detalle c(50), icbper N(12, 2), tref c(2), Refe c(12), dola N(5, 3), Mensaje c(100), Mone c(1), Codigo N(5), fechn d, fevto d, ;
@@ -1510,7 +1575,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
       \r.rcom_exon As exoneradas,'10' As tigv,r.vigv,v.rucfirmad,v.razonfirmad,r.ndo2,v.nruc As rucempresa,v.empresa,v.ubigeo,
       \Cast(0 As Decimal(5,2)) As costoref,r.Deta,ifnull(s.codigoestab,'0000') As codigoestab,
       \v.ptop,v.ciudad,v.distrito,c.nruc,'6' As tipodoc,c.Razo,Concat(Trim(c.Dire),' ',Trim(c.ciud)) As Direccion,c.ndni,
-      \'PE' As pais,r.igv,Cast(0 As Decimal(12,2)) As tdscto,Cast(0 As Decimal(12,2)) As Tisc,r.Impo,Cast(0 As Decimal(12,2)) As montoper,'I' As Incl,
+      \'PE' As pais,r.igv,Cast(0 As Decimal(12,2)) As Tdscto,Cast(0 As Decimal(12,2)) As Tisc,r.Impo,Cast(0 As Decimal(12,2)) As montoper,'I' As Incl,
       \Cast(0 As Decimal(12,2)) As totalpercepcion,k.detv_cant As cant,k.detv_prec As Prec,
       \Left(r.Ndoc,4) As Serie,Substr(r.Ndoc,5) As numero,ifnull(unid_codu,'NIU')As Unid,detv_unid As unid1,detv_desc As Descri,detv_ite2 As coda,r.Form,r.rcom_detr,k.detv_prec As precioo
 	If goApp.Vtasconanticipo = 'S' Then
@@ -1548,7 +1613,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	\Select r.Idauto,r.Ndoc,r.Tdoc,r.fech As dFecha,r.Mone,valor,Cast(0 As Decimal(12,2)) As inafectas,Cast(0 As Decimal(12,2)) As gratificaciones,
 	\      Cast(0 As Decimal(12,2)) As exoneradas,'10' As tigv,vigv,v.rucfirmad,v.razonfirmad,ndo2,v.nruc As rucempresa,v.empresa,v.ubigeo,
 	\      v.ptop,v.ciudad,v.distrito,c.nruc,'6' As tipodoc,c.Razo,Concat(Trim(c.Dire),' ',Trim(c.ciud)) As Direccion,c.ndni,rcom_otro,kar_cost As costoref,Deta,
-	\      'PE' As pais,r.igv,Cast(0 As Decimal(12,2)) As tdscto,Cast(0 As Decimal(12,2)) As Tisc,Impo,Cast(0 As Decimal(12,2)) As montoper,k.Incl,
+	\      'PE' As pais,r.igv,Cast(0 As Decimal(12,2)) As Tdscto,Cast(0 As Decimal(12,2)) As Tisc,Impo,Cast(0 As Decimal(12,2)) As montoper,k.Incl,
 	\     Cast(0 As Decimal(12,2)) As totalpercepcion,k.cant,k.Prec,Left(r.Ndoc,4) As Serie,Substr(r.Ndoc,5) As numero,a.Unid,a.Descri,k.idart As coda,
 	\      ifnull(unid_codu,'NIU')As unid1,s.codigoestab,r.Form
 	If This.Conretencion = 'S' Then
@@ -1847,7 +1912,7 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	 \      inner Join fe_clie As d On(d.idclie=a.idclie)
 	 \      Left Join fe_refe As e On(e.idrven=a.idrven)
 	 \      Left Join fe_tdoc As w On w.idtdoc=e.idtdoc
-	 \      Where fecr Between '<<f1>>' And '<<f2>>' And a.Acti<>'I'
+	 \      Where fecr Between '<<f1>>' And '<<f2>>' And a.Acti<>'I' And b.Tdoc In("01","03","07","08")
 	If Len(Alltrim(This.Serie)) > 0 Then
 	   \And Left(a.Ndoc,4)='<<this.serie>>'
 	Endif
@@ -1862,12 +1927,16 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Function registrarxserviciosconanticipo()
 	Set Procedure To d:\capass\modelos\correlativos Additive
 	ocorr = Createobject("correlativo")
+	cguia = ""
+	If fe_gene.nruc = '20439488736' Then
+		cguia = This.idanticipo2
+	Endif
 	If This.IniciaTransaccion() < 1  Then
 		Return 0
 	Endif
 	If goApp.vtascondetraccion = 'S' Then
 		NAuto = IngresaResumenDctovtascondetraccion(This.Tdoc, Left(This.formaPago, 1), This.Serie + This.numero, This.Fecha, This.Fecha, ;
-			This.Detalle, This.valor, This.igv, This.Monto, '', Left(This.Moneda, 1), ;
+			This.Detalle, This.valor, This.igv, This.Monto, cguia, Left(This.Moneda, 1), ;
 			This.ndolar, This.vigv, 'S', This.Codigo, This.idanticipo, goApp.nidusua, This.Vendedor, This.codt, This.cta1, This.cta2, This.cta3, This.exonerado, This.detraccion, This.coddetraccion)
 	Else
 		NAuto = IngresaDocumentoElectronico(This.Tdoc, Left(This.formaPago, 1), This.Serie + This.numero, This.Fecha, This.Detalle, This.valor, This.igv, This.Monto, "", ;
@@ -1913,11 +1982,15 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Endfunc
 	Function actualizarxserviciosconanticipo()
 	cndoc = This.Serie + This.numero
+	cguia = ""
+	If fe_gene.nruc = '20439488736' Then
+		cguia = This.idanticipo2
+	Endif
 	If This.IniciaTransaccion() < 1  Then
 		Return 0
 	Endif
 	If goApp.vtascondetraccion = 'S' Then
-		If ActualizaResumenDctovtascondetraccion(This.Tdoc, Left(This.formaPago, 1), cndoc, This.Fecha, This.Fecha, This.Detalle, This.valor, This.igv, This.Monto, "", Left(This.Moneda, 1), ;
+		If ActualizaResumenDctovtascondetraccion(This.Tdoc, Left(This.formaPago, 1), cndoc, This.Fecha, This.Fecha, This.Detalle, This.valor, This.igv, This.Monto, cguia, Left(This.Moneda, 1), ;
 				This.ndolar, This.vigv, 'S', This.Codigo, This.idanticipo, goApp.nidusua, This.Vendedor, This.codt, This.cta1, This.cta2, This.cta3, This.exonerado, 0, This.detraccion, This.Idauto, This.coddetraccion) < 1 Then
 			This.DEshacerCambios()
 			Return 0
@@ -2000,40 +2073,198 @@ Define Class Ventas As Odata Of 'd:\capass\database\data.prg'
 	Return 1
 	Endfunc
 	Function resumenvtasxformapago(Ccursor)
-	f1=cfechas(This.fechai)
-	f2=cfechas(This.fechaf)
+	f1 = cfechas(This.fechai)
+	f2 = cfechas(This.fechaf)
 	Set Textmerge On
 	Set Textmerge To Memvar lC Noshow Textmerge
-	\select	fech,sum(cantidad) as cantidad,sum(efectivo) as efectivo,sum(visa) as visa,
-	\		sum(master) as master,sum(deposito) as deposito,
-	\		sum(credito) as credito,sum(efectivo)+sum(visa)+sum(master)+sum(deposito)+sum(credito)+SUM(yape)+SUM(plin) as importe,SUM(yape) as yape,SUM(plin) As plin from(
-	\		SELECT a.fech,k.cantidad,a.form,
-	\		case a.form when'E' then impo else 0 end as efectivo,
-	\		case a.form when 'V' then impo else 0 end  as  visa,
-	\		case a.form when 'M' then impo else 0 end as master,
-	\		case a.form when 'D' then impo else 0 end as deposito,
-	\		case a.form when 'C' then impo else 0 end as credito,
-	\		case a.form when 'Y' then impo else 0 end as yape,
-	\		case a.form when 'P' then impo else 0 end as plin
-	\		fROM fe_rcom as a JOIN fe_clie as b ON (a.idcliente=b.idclie ) 
-	\       inner join
-	\		(select k.idauto,SUM(cant) as cantidad from fe_kar as k
-	\		inner join fe_rcom as r on r.idauto=k.idauto
-	\		where k.acti='A' and tipo='V' and kar_icbper=0 and r.acti='A' and idcliente>0
-	\		and r.fech between '<<f1>>' and '<<f2>>'   group by idauto) as k on k.idauto=a.idauto
-	\		where  a.acti<>'I' and rcom_ccaj='P' and a.fech between '<<f1>>' and '<<f2>>'
-	If This.codt>0 Then
-	\ and a.codt=<<this.codt>>
+	\Select	fech,Sum(cantidad) As cantidad,Sum(efectivo) As efectivo,Sum(visa) As visa,
+	\		Sum(Master) As Master,Sum(deposito) As deposito,
+	\		Sum(credito) As credito,Sum(efectivo)+Sum(visa)+Sum(Master)+Sum(deposito)+Sum(credito)+Sum(yape)+Sum(plin) As Importe,Sum(yape) As yape,Sum(plin) As plin From(
+	\		Select a.fech,k.cantidad,a.Form,
+	\		Case a.Form When'E' Then Impo Else 0 End As efectivo,
+	\		Case a.Form When 'V' Then Impo Else 0 End  As  visa,
+	\		Case a.Form When 'M' Then Impo Else 0 End As Master,
+	\		Case a.Form When 'D' Then Impo Else 0 End As deposito,
+	\		Case a.Form When 'C' Then Impo Else 0 End As credito,
+	\		Case a.Form When 'Y' Then Impo Else 0 End As yape,
+	\		Case a.Form When 'P' Then Impo Else 0 End As plin
+	\		From fe_rcom As a Join fe_clie As b On (a.idcliente=b.idclie )
+	\       inner Join
+	\		(Select k.Idauto,Sum(cant) As cantidad From fe_kar As k
+	\		inner Join fe_rcom As r On r.Idauto=k.Idauto
+	\		Where k.Acti='A' And tipo='V' And kar_icbper=0 And r.Acti='A' And idcliente>0
+	\		And r.fech Between '<<f1>>' And '<<f2>>'   Group By Idauto) As k On k.Idauto=a.Idauto
+	\		Where  a.Acti<>'I' And rcom_ccaj='P' And a.fech Between '<<f1>>' And '<<f2>>'
+	If This.codt > 0 Then
+	\ And a.codt=<<This.codt>>
 	Endif
-	\order by fech) as x group by fech
+	\Order By fech) As x Group By fech
 	Set Textmerge Off
 	Set Textmerge To
-	If This.EjecutaConsulta(lC,Ccursor)<1 Then
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function Rentabilidad(Ccursor)
+	dfi = cfechas(This.fechai)
+	dff = cfechas(This.fechaf)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+		\Select z.coda,z.Descri,z.Unid,z.cant As cantidad,z.costopr As costo,
+		\z.prVtas As PrecioPromedioVtas,z.prVtas*z.cant As ImporteVentas,z.cant*z.costopr As ImporteCompras,
+		\((z.prVtas*z.cant)-(z.cant*z.costopr))/z.cant As Utilidad,
+	    \(z.prVtas*z.cant)-(z.cant*z.costopr) As margen,
+	    \((((z.prVtas*z.cant)-(z.cant*z.costopr))/z.cant)*100)/If(z.costopr>0,z.costopr,1)  As porcentaje From
+		\(Select a.idart As coda,b.Descri,b.Unid,Sum(a.cant) As cant,Sum(cant*a.Prec)/Sum(cant) As prVtas,
+		\Sum(a.cant*If(a.kar_cost=0,If(tmon='S',b.Prec*c.vigv,b.Prec*c.dolar*c.vigv),a.kar_cost*c.vigv))/Sum(a.cant) As costopr,
+		\cc.Razo As cliente,v.nomv As Vendedor,
+		\From fe_rcom As c
+		\inner Join fe_kar As a On a.Idauto=c.Idauto
+		\inner Join fe_art As b On b.idart=a.idart
+	    \inner Join  (Select Idauto From fe_kar As a Where alma>0 And Acti='A' And tipo='V' Group By a.Idauto Order By a.Idauto ) As k On k.Idauto=a.Idauto
+	    \Where c.idcliente>0 And a.Acti='A' And c.Acti='A' And c.fech Between  '<<dfi>>' And '<<dff>>'  And c.tcom<>'T'
+	If This.nmarca > 0 Then
+	    \ And b.idmar=<<This.nmarca>>
+	Endif
+	If This.nlinea > 0 Then
+	      \ And b.idcat=<<This.nlinea>>
+	Endif
+	If This.codt > 0 Then
+	        \ And c.codt=<<This.codt>>
+	Endif
+	     \Group By b.idart,b.Descri,b.Unid) As z Order By z.Descri
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function listardetalleventas(Ccursor)
+	dfechai = cfechas(This.fechai)
+	dfechaf = cfechas(This.fechaf)
+	Set Textmerge On
+	Set Textmerge To Memvar lC  Noshow Textmerge
+    \Select a.Tdoc,a.Ndoc,a.fech,c.Razo,d.Descri,d.Unid,e.cant,e.Prec,a.Mone,F.nomb As Usuario,e.cant*e.Prec  As Impo,a.Form,valor,igv,Impo As Importe
+	\From
+	\fe_rcom As a inner Join fe_clie As c On c.idclie=a.idcliente
+	\inner Join fe_kar As e On e.Idauto=a.Idauto
+	\inner Join fe_art As d On d.idart=e.idart
+	\inner Join fe_usua As F On F.idusua=a.idusua
+	\Where a.fech Between '<<dfechai>>' And '<<dfechaf>>' And a.Acti='A' And e.Acti='A'
+	If 	This.codt > 0 Then
+	  \ And a.codt=<<This.codt>>
+	Endif
+	If Len(Alltrim(This.Tdoc)) > 0 Then
+	   \ And a.Tdoc='<<this.tdoc>>'
+	Endif
+	\Order By a.fech,a.Ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function Rentabilidad10(Ccursor)
+	dfi = cfechas(This.fechai)
+	dff = cfechas(This.fechaf)
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow Textmerge
+	If This.AgrupadaGanancia = 'S' Then
+	    \Select Ndoc,fech,cliente,Vendedor,Importe,(Sum(costounitario)*100)/Importe As porcentaje,Sum(Utilidad) As Utilidad,Idauto From
+        \(Select k.idart As coda,b.Descri,b.Unid,cant,Cast(kar_cost  As Decimal(12,4)) As costounitario,
+	    \Cast(If(c.Mone='S',k.Prec,k.Prec*c.dolar)  As Decimal(12,4))As PrecioVenta,
+	    \Cast(cant*kar_cost As Decimal(12,2)) As costototal,
+	    \Cast(cant*If(c.Mone='S',k.Prec,k.Prec*c.dolar)  As Decimal(12,2)) As ventatotal,
+	    \Cast((cant*If(c.Mone='S',k.Prec,k.Prec*c.dolar))-(cant*k.kar_cost) As Decimal(12,2)) As Utilidad,
+	    \cc.Razo As cliente,v.`nomv` As Vendedor,c.Idauto,Ndoc,fech,If(c.Mone='S',Impo,Impo*c.dolar) As Importe
+	    \From fe_rcom As c
+		\inner Join fe_kar As k On k.Idauto=c.Idauto
+		\inner Join fe_art As b On b.idart=k.idart
+		\inner Join fe_clie As cc On cc.idclie=c.idcliente
+		\inner Join fe_vend As v On v.idven=k.codv
+	    \Where k.Acti='A' And c.Acti='A' And c.fech Between  '<<dfi>>' And '<<dff>>'   And c.tcom<>'T'
+		If This.nmarca > 0 Then
+	    \ And b.idmar=<<This.nmarca>>
+		Endif
+		If This.nlinea > 0 Then
+	      \ And b.idcat=<<This.nlinea>>
+		Endif
+		If This.codt > 0 Then
+	        \ And c.codt=<<This.codt>>
+		Endif
+		If This.Vendedor > 0 Then
+		   \  And k.codv=<<This.Vendedor>>
+		Endif
+		\) As xx Group By Idauto Order By fech,Ndoc
+	Else
+		\Select k.idart As coda,b.Descri,b.Unid,cant,Cast(kar_cost  As Decimal(12,4)) As costounitario,
+	    \Cast(If(c.Mone='S',k.Prec,k.Prec*c.dolar)  As Decimal(12,4))As PrecioVenta,
+	    \Cast(cant*kar_cost As Decimal(12,2)) As costototal,
+	    \Cast(cant*If(c.Mone='S',k.Prec,k.Prec*c.dolar)  As Decimal(12,2)) As ventatotal,
+	    \Cast((cant*If(c.Mone='S',k.Prec,k.Prec*c.dolar))-(cant*k.kar_cost) As Decimal(12,2)) As Utilidad,
+	    \Cast((((cant*If(c.Mone='S',k.Prec,k.Prec*c.dolar))-(cant*k.kar_cost))*100)/(cant*If(c.Mone='S',k.Prec,k.Prec*c.dolar)) As Decimal(6,2)) As porcentaje,
+	    \cc.Razo As cliente,v.`nomv` As Vendedor,Ndoc,fech,c.Idauto
+	    \ From fe_rcom As c
+		\inner Join fe_kar As k On k.Idauto=c.Idauto
+		\inner Join fe_art As b On b.idart=k.idart
+		\inner Join fe_clie As cc On cc.idclie=c.idcliente
+		\inner Join fe_vend As v On v.idven=k.codv
+	    \Where k.Acti='A' And c.Acti='A' And c.fech Between  '<<dfi>>' And '<<dff>>'   And c.tcom<>'T'
+		If This.nmarca > 0 Then
+	    \ And b.idmar=<<This.nmarca>>
+		Endif
+		If This.nlinea > 0 Then
+	      \ And b.idcat=<<This.nlinea>>
+		Endif
+		If This.codt > 0 Then
+	        \ And c.codt=<<This.codt>>
+		Endif
+		If This.Vendedor > 0 Then
+		   \  And k.codv=<<This.Vendedor>>
+		Endif
+	     \ Order By Descri
+	Endif
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function resumenvtas(Ccursor)
+	f1=cfechas(This.fechai)
+	f2=cfechas(This.fechaf)
+	If This.Idsesion>0 Then
+		Set DataSession To This.Idsesion
+	Endif
+	Set Textmerge On
+	Set Textmerge To Memvar lC Noshow
+		\Select a.ndoc as dcto,a.fech,b.nruc,b.razo,a.valor,a.rcom_exon,CAST(0 as decimal(12,2)) as inafecto,
+		\    a.igv,a.impo,rcom_hash,rcom_mens,mone,a.tdoc,a.ndoc,idauto,rcom_arch,b.clie_corr,tcom,fusua,u.nomb,b.fono
+		\    FROM fe_rcom as a 
+		\    JOIN fe_clie as b ON (a.idcliente=b.idclie)
+		\    join fe_usua as u on u.idusua=a.idusua
+		\    where a.fech between '<<f1>>' and '<<f2>>'  and a.acti<>'I'  
+	If This.codt > 0 Then
+		   \ And a.codt=<<This.codt>>
+	Endif
+	If Len(Alltrim(This.Tdoc))>0 Then
+	\ and a.tdoc='<<this.Tdoc>>'
+	Endif
+	\Order By fech,Ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC,Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return 1
 	Endfunc
 Enddefine
+
+
 
 
 

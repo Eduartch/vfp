@@ -114,9 +114,8 @@ Define Class productonorplast As Producto Of 'd:\capass\modelos\productos'
 	Endtext
 	If This.EJECUTARP(lC, lp, cur) < 1 Then
 		Return 0
-	Else
-		Return 1
-	Endif
+	ENDIF 
+	Return 1
 	Endfunc
 	Function MuestraProductosDescCod10(np1, np2, np3, np4, np5, Ccursor)
 	lC = 'PROMUESTRAPRODUCTOS1'

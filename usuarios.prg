@@ -1,10 +1,11 @@
 #Define URLP "http://companiasysven.com"
 Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
+	idusuario = 0
 	Function mostrarusuarios(Ccursor)
 	Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo,idalma FROM fe_usua WHERE activo="S"  ORDER BY nomb
-	ENDTEXT
- 	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return 1
@@ -17,7 +18,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
+	Endfunc
 	Function mostrarusuariospsystrlyg(Ccursor)
 	Text To lC Noshow Textmerge
       SELECT idusua,nomb,clave,activo,tipo,idalma,usua_idven,usua_serp FROM fe_usua WHERE activo="S"  ORDER BY nomb
@@ -305,7 +306,7 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 		Endtext
 	Case ctipo = "p"
 		Text To lC Noshow
-      SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_prec=1 ORDER BY nomb
+        SELECT idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_prec=1 ORDER BY nomb
 		Endtext
 	Case ctipo = "g"
 		Text To lC Noshow
@@ -413,7 +414,11 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 		Endtext
 	Case ctipo = "I"
 		Text To lC Noshow Textmerge
-     select idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_reim=1 ORDER BY nomb
+        select idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_reim=1 ORDER BY nomb
+		Endtext
+	Case ctipo = "1"
+		Text To lC Noshow Textmerge
+        select idusua,nomb,clave,activo,tipo FROM fe_usua WHERE activo="S" AND usua_comi=1 ORDER BY nomb
 		Endtext
 	Endcase
 	If This.EjecutaConsulta(lC, Ccursor) < 1
@@ -461,7 +466,17 @@ Define Class usuarios As Odata Of 'd:\capass\database\data.prg'
 	Endif
 	Return 1
 	Endfunc
+	Function DesAutorizaprecios()
+	Text To lC NOSHOW TEXTMERGE 
+        UPDATE fe_usua SET usua_prec=0 WHERE idusua=<<this.idusuario>>
+	Endtext
+	If This.Ejecutarsql(lC) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine
+
 
 
 

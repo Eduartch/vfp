@@ -250,7 +250,7 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 
 
 	Select fech, Tdoc, serie, numero, tipodoc, ndni, valor, rcom_exon As Exon, ;
-		000000.00 As inafectas, igv, Impo, 0.00 As gratificaciones, trefe, serieref, numerorefe, Idauto From Rboletas Into Cursor crb
+		000000.00 As inafectas, igv, Impo, 0.00 As gratificaciones, trefe, serieref, numerorefe, Idauto From rmvtos Into Cursor crb
 
 
 	Select crb
@@ -830,8 +830,8 @@ Define Class Rboletas As Odata Of 'd:\capass\database\data.prg'
 	Endcase
 	Set Textmerge On
 	Set Textmerge To Memvar lC Noshow Textmerge
-	\ Select  resu_feen,resu_fech,resu_tdoc,resu_serie,resu_desd,resu_hast,resu_valo,resu_exon,resu_inaf,resu_igv,
-	\ resu_impo,resu_arch,resu_hash,resu_tick,resu_mens,resu_idre From fe_resboletas F
+	\ Select  resu_feen,resu_fech,resu_tdoc,resu_serie,resu_desd,resu_hast,resu_valo,resu_exon,resu_inaf,resu_igv,resu_grat,
+	\ resu_impo,resu_arch,resu_tick,resu_mens,resu_hash,resu_idre From fe_resboletas F
 	If Tipo = 1 Then
 	 \ Where resu_feen Between '<<fi>>' And '<<ff>>'
 	Else

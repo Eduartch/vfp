@@ -160,13 +160,17 @@ Define Class guiaremisionxvtas As GuiaRemision Of 'd:\capass\modelos\guiasremisi
 	Function ActualizaDetalleGuiasVtasR(Ccursor)
 	Sw = 1
 	Select (m.Ccursor)
-	Set Filter To coda <> 0
+	If Vartype(coda)='N' Then
+		Set Filter To coda <> 0
+	Else
+		Set Filter To Len(Alltrim(coda)) > 0
+	Endif
 	Set Deleted Off
 	Go Top
 	Do While !Eof()
 		cdesc = Alltrim(tmpvg.Descri)
 		If Deleted()
-			If Nreg > 0 Then
+			If tmpvg.Nreg > 0 Then
 				If This.ActualizaDetalleGuiaCons1(tmpvg.coda, tmpvg.cant, tmpvg.idem, tmpvg.nidkar, This.Idautog, 0, '') = 0 Then
 					Sw			  = 0
 					This.Cmensaje = "Al Desactivar Ingreso (Guia)  de Item  - " + Alltrim(cdesc)

@@ -141,14 +141,6 @@ Define Class lecturas As Odata Of 'd:\capass\database\data.prg'
 		 fecreg_inicio AS inicio,fecreg_fin AS fin,price as precio,3 As codigo  FROM venta WHERE pump=6 AND idgrade=5 AND nozzle=1 ORDER BY fecreg_inicio DESC LIMIT 1)
 		ENDTEXT
 	Endcase
-*!*		This.conconexion = 1
-*!*		MESSAGEBOX(lc)
-*!*		If This.EjecutaConsulta(lc, Calias) < 1 Then
-*!*			This.conconexion = 0
-*!*			Return 0
-*!*		Endif
-*!*		This.conconexion = 0
-
 	lc = 'ProListarlecturasrealesxisla'
 	goApp.npara1=nisla
 	TEXT To lp Noshow

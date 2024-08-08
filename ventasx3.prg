@@ -1,6 +1,6 @@
 Define Class ventasx3 As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Function listardctonotascredtitod(nid, Ccursor)
-	Text To lc Noshow Textmerge
+	TEXT To lc Noshow Textmerge
 	    SELECT a.idart,a.descri,a.unid,k.cant,k.prec,rOUND(k.cant*k.prec,2) as importe,
 	    k.idauto,r.mone,r.valor,r.igv,r.impo,kar_comi as comi,k.alma,
 		r.fech,r.ndoc,r.tdoc,r.dolar as dola,r.vigv,r.rcom_exon,'K' as tcom,k.idkar,if(k.prec=0,kar_cost,0) as costoref,
@@ -8,14 +8,14 @@ Define Class ventasx3 As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		inner join fe_kar k on k.idauto=r.idauto
 		inner join fe_art a on a.idart=k.idart
 		where k.acti='A' and r.acti='A' and r.idauto=<<nid>>  order by idkar
-	Endtext
+	ENDTEXT
 	If This.EjecutaConsulta(lc, Ccursor) < 1 Then
 		Return 0
 	Endif
 	Return  1
 	Endfunc
 	Function listardctonotascredtito(nid, Ccursor)
-	Text To lc Noshow Textmerge
+	TEXT To lc Noshow Textmerge
 	    SELECT a.idart,a.descri,a.unid,k.cant,k.prec,rOUND(k.cant*k.prec,2) as importe,
 	    k.idauto,r.mone,r.valor,r.igv,r.impo,kar_comi as comi,k.alma,
 		r.fech,r.ndoc,r.tdoc,r.dolar as dola,r.vigv,r.rcom_exon,tcom,k.idkar,if(k.prec=0,kar_cost,0) as costoref,
@@ -23,7 +23,7 @@ Define Class ventasx3 As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		inner join fe_kar k on k.idauto=r.idauto
 		inner join fe_art a on a.idart=k.idart
 		where k.acti='A' and r.acti='A' and r.idauto=<<nid>>  order by idkar
-	Endtext
+	ENDTEXT
 	If This.EjecutaConsulta(lc, Ccursor) < 1 Then
 		Return 0
 	Endif
@@ -55,8 +55,33 @@ Define Class ventasx3 As Ventas  Of 'd:\capass\modelos\ventas.prg'
 		Return 0
 	Endif
 	Return 1
-	ENDFUNC
-	
+	Endfunc
+	Function listaresumen(Ccursor)
+	f1=cfechas(This.fechai)
+	f2=cfechas(This.fechaf)
+	If This.Idsesion>0 Then
+		Set DataSession To This.Idsesion
+	Endif
+	Set Textmerge On
+	Set Textmerge To Memvar lc Noshow
+	\select  ndoc as dcto,a.fech,b.nruc,b.razo,if(a.mone='S','Soles','Dólares') as moneda,a.valor,a.rcom_exon,a.rcom_inaf,rcom_otro,
+	\	    a.igv,a.impo,rcom_hash,rcom_mens,mone,a.tdoc,a.ndoc,idauto,rcom_arch,b.clie_corr,tcom
+	\	    FROM fe_rcom as a JOIN fe_clie as b ON (a.idcliente=b.idclie)
+	\	    where a.fech between '<<f1>>' and '<<f2>>'  and  a.acti<>'I'  and LEFT(ndoc,1) in("F","B")
+	If This.codt > 0 Then
+		   \ And a.codt=<<This.codt>>
+	Endif
+	If Len(Alltrim(This.Tdoc))>0 Then
+	\ and a.tdoc='<<this.Tdoc>>'
+	Endif
+	\order by fech,ndoc
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lc,Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine
 
 

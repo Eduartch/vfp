@@ -16,6 +16,8 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 	cmoneda=""
 	cTdoc = ""
 	cforma=""
+	dfi=DATE()
+	dff=DATE()
 	Function ReporteCajaEfectivo(dfi, dff, Calias)
 	Local lC
 	fi = cfechas(dfi)
@@ -45,10 +47,10 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 		Set DataSession To This.Idsesion
 	Endif
 	Text To lC Noshow Textmerge
-	   Select a.lcaj_ndoc,a.lcaj_fech,a.lcaj_deta,
-	   c.ncta,c.nomb,If(lcaj_mone='S',a.lcaj_deud,Round(a.lcaj_deud*a.lcaj_dola,2)) As debe,
-	   If(a.lcaj_mone='S',a.lcaj_acre,Round(a.lcaj_acre*a.lcaj_dola,2)) As haber,
-		a.lcaj_idct As idcta,lcaj_tran,If(lcaj_deud>0,'I','S') As tipomvto,lcaj_idca,lcaj_dcto
+	    Select a.lcaj_ndoc,a.lcaj_fech,a.lcaj_deta,
+	    c.ncta,c.nomb,If(lcaj_mone='S',a.lcaj_deud,Round(a.lcaj_deud*a.lcaj_dola,2)) As debe,
+	    If(a.lcaj_mone='S',a.lcaj_acre,Round(a.lcaj_acre*a.lcaj_dola,2)) As haber,
+	    a.lcaj_idct As idcta,lcaj_tran,If(lcaj_deud>0,'I','S') As tipomvto,lcaj_idca,lcaj_dcto
 		From fe_lcaja As a
 		inner Join fe_plan As c On c.idcta=a.lcaj_idct
 		Where a.lcaj_acti='A' And a.lcaj_fech Between '<<fi>>' And '<<ff>>'  And lcaj_form='E' Order By a.lcaj_fech
@@ -136,6 +138,16 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 	lC = "ProIngresaDatosLcajaEefectivo"
 	Text To lp NOSHOW TEXTMERGE 
      ('<<cfechas(this.dfecha)>>','','<<this.cdetalle>>',<<this.nidcta>>,<<this.ndebe>>,<<this.nhaber>>,'<<this.cmoneda>>',<<this.ndolar>>,<<goapp.nidusua>>,<<this.nidclpr>>,<<this.NAuto>>,'<<this.cforma>>','<<this.ndoc>>','<<this.cTdoc>>')
+	Endtext
+	If This.EJECUTARP(lC, lp, "") < 1 Then
+		Return 0
+	Endif
+	Return 1
+	Endfunc
+	Function IngresaDatosLCajaEFectivo11()
+	lC = "ProIngresaDatosLcajaEefectivo11"
+	Text To lp NOSHOW TEXTMERGE 
+     ('<<cfechas(this.dfecha)>>','','<<this.cdetalle>>',<<this.nidcta>>,<<this.ndebe>>,<<this.nhaber>>,'<<this.cmoneda>>',<<this.ndolar>>,<<goapp.nidusua>>,<<this.nidclpr>>,<<this.NAuto>>,'<<this.cforma>>','<<this.ndoc>>','<<this.cTdoc>>',<<this.codt>>)
 	Endtext
 	If This.EJECUTARP(lC, lp, "") < 1 Then
 		Return 0
@@ -267,7 +279,22 @@ Define Class cajae As Odata Of  'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	Return 1
-	Endfunc
+	ENDFUNC
+	FUNCTION resumenporcajero(ccursor)
+	fi=cfechas(this.dfi)
+	ff=cfechas(this.dff)
+	TEXT TO lc NOSHOW TEXTMERGE 
+	  select nomb,saldo,lcaj_idus FROM (
+	  SELECT SUM(if(a.lcaj_deud<>0,lcaj_deud,-lcaj_acre)) as saldo,lcaj_idus
+      FROM fe_lcaja  as a 
+      WHERE  a.lcaj_fech between '<<fi>>' and '<<ff>>' and a.lcaj_acti='A' and a.lcaj_form='E'  group by lcaj_idus) as c
+      inner join fe_usua as u on u.idusua=c.lcaj_idus 
+	ENDTEXT
+	If this.ejecutaconsulta(lc,"tc")<1
+		RETURN 0
+	ENDIF 
+	RETURN 1
+	ENDFUNC 
 Enddefine
 
 

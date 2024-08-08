@@ -13,6 +13,7 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 	TipoT = ""
 	npropio = 0
 	activofijo = ""
+	dni = ""
 	Function listarTransportistax(np1, np2, ccur)
 	Local lC, lp
 	m.lC		 = 'ProMuestraTransportista'
@@ -144,8 +145,33 @@ Define Class Transportista As Odata Of 'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	Return 1
+	ENDFUNC
+    Function buscaruc(cmodo, Cruc, nidtra)
+	If Len(Alltrim(Cruc)) <> 11 Or  !ValidaRuc(Cruc) Then
+		This.Cmensaje = 'RUC NO Válido'
+		Return 0
+	Endif
+	Set Textmerge On
+	Set Textmerge To Memvar lC  Noshow
+	\select ructr as nruc FROM fe_tra WHERE ructr='<<cruc>>'
+	If cmodo <> "N"
+	 \ And idtra<><<nidtra>>
+	Endif
+	Set Textmerge Off
+	Set Textmerge To
+	If This.EjecutaConsulta(lC, "ya") < 1
+		Return 0
+	Endif
+	If ya.nruc = Cruc
+		This.Cmensaje = "Nº de Ruc Ya Registrado"
+		Return 0
+	Endif
+	Return 1
 	Endfunc
 Enddefine
+
+
+
 
 
 

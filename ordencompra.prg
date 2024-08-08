@@ -178,7 +178,7 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 		SELECT idart,descri,unid,prod_cod1,case doco_tipo when 'I' then doco_cant else 0 end as Pedido,
 		case doco_tipo when 'S' then doco_cant else 0 end as Recibido,doco_idro,doco_prec as prec
 		FROM fe_docom f
-		inner join fe_art g on g.idart=f.doco_coda where doco_acti='A' and doco_tipo in ("I","S") and doco_idro=?nidoc) as q
+		inner join fe_art g on g.idart=f.doco_coda where doco_acti='A' and doco_tipo in ("I","S") and doco_idro=<<nidoc>>) as q
 		inner join fe_rocom r on r.ocom_idroc=q.doco_idro
 		inner join fe_prov p on p.idprov=r.ocom_idpr group by idart,descri,unid,prod_cod1,ocom_fech,razo,ocom_ndoc,ocomo_idroc having saldo>0
 	Endtext
@@ -369,7 +369,7 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	Text To lC Noshow Textmerge
    	   SELECT   doco_coda,Descri,unid,doco_cant,doco_prec,doco_idro,ocom_mone,
 	   ROUND(IF(tmon='S',(a.prec*v.igv)+f.prec,(a.prec*v.igv*IF(prod_dola>v.dola,prod_dola,v.dola))+f.prec),2) AS costo,
-	   ROUND(IF(tmon='S',(a.prec*v.igv),(f.prec*v.igv*v.dola)),2) AS costosf,f.prec AS flete
+	   ROUND(IF(tmon='S',(a.prec*v.igv),(f.prec*v.igv*v.dola)),2) AS costosf,f.prec AS flete,prod_cod1
 	   FROM fe_rocom AS r
 	   INNER JOIN fe_docom AS d ON d.doco_idro=r.ocom_idroc
 	   INNER JOIN fe_art AS a ON a.idart=d.doco_coda
@@ -421,6 +421,30 @@ Define Class OrdendeCompra As Odata Of 'd:\capass\database\data.prg'
 	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,	  `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  AS `ocom_aten`,
 	  `a`.`ocom_deta`  AS `ocom_deta`,	  `a`.`ocom_idus`  AS `ocom_idus`,	  `a`.`ocom_fope`  AS `ocom_fope`,	  `a`.`ocom_idpc`  AS `ocom_idpc`,
 	  `a`.`ocom_idac`  AS `ocom_idac`,	  `a`.`ocom_fact`  AS `ocom_fact`,	  `d`.`razo`       AS `razo`,	  `e`.`nomb`       AS `nomb`
+	 FROM `fe_rocom` `a`
+     JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
+     JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`
+     JOIN `fe_prov` `d`       ON `d`.`idprov` = `a`.`ocom_idpr`
+     JOIN `fe_usua` `e`     ON `e`.`idusua` = `a`.`ocom_idus`
+     WHERE `a`.`ocom_acti` <> 'I'   AND `b`.`doco_acti` <> 'I' and a.ocom_ndoc='<<cndoc>>'
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Return 1
+	ENDFUNC
+	Function mostrarocompranorplast(cndoc, Ccursor)
+	Text To lC Noshow Textmerge
+	  SELECT
+	  `b`.`doco_iddo`  AS `doco_iddo`,	  `b`.`doco_coda`  AS `doco_coda`,	  `b`.`doco_cant`  AS `doco_cant`,	  `b`.`doco_prec`  AS `doco_prec`,
+	  `c`.`descri`     AS `descri`,	  `c`.`prod_smin`  AS `prod_smin`,
+	  `c`.`unid`       AS `unid`,c.prod_cod1,	  `c`.`prod_smax`  AS `prod_smax`,	  `a`.`ocom_valor` AS `ocom_valor`,
+	  `a`.`ocom_igv`   AS `ocom_igv`,	  `a`.`ocom_impo`  AS `ocom_impo`,	  `a`.`ocom_idroc` AS `ocom_idroc`,	  `a`.`ocom_fech`  AS `ocom_fech`,
+	  `a`.`ocom_idpr`  AS `ocom_idpr`,	  `a`.`ocom_desp`  AS `ocom_desp`,	  `a`.`ocom_form`  AS `ocom_form`,	  `a`.`ocom_mone`  AS `ocom_mone`,
+	  `a`.`ocom_ndoc`  AS `ocom_ndoc`,	  `a`.`ocom_tigv`  AS `ocom_tigv`,	  `a`.`ocom_obse`  AS `ocom_obse`,	  `a`.`ocom_aten`  AS `ocom_aten`,
+	  `a`.`ocom_deta`  AS `ocom_deta`,	  `a`.`ocom_idus`  AS `ocom_idus`,	  `a`.`ocom_fope`  AS `ocom_fope`,	  `a`.`ocom_idpc`  AS `ocom_idpc`,
+	  `a`.`ocom_idac`  AS `ocom_idac`,	  `a`.`ocom_fact`  AS `ocom_fact`,	  `d`.`razo`       AS `razo`,	  `e`.`nomb`       AS `nomb`,doco_tipo,
+	  c.uno,c.dos,c.tre,c.cua
 	 FROM `fe_rocom` `a`
      JOIN `fe_docom` `b`    ON `b`.`doco_idro` = `a`.`ocom_idroc`
      JOIN `fe_art` `c`       ON `b`.`doco_coda` = `c`.`idart`

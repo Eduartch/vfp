@@ -87,9 +87,8 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	nid = This.EJECUTARf(lC, lp, cur)
 	If nid < 1 Then
 		Return 0
-	Else
-		Return nid
-	Endif
+	ENDIF 
+	Return nid
 	Endfunc
 	Function estadodecuentaporcliente(nidclie, Cmoneda, Ccursor)
 	Text To lC Noshow Textmerge
@@ -512,7 +511,7 @@ Define Class ctasporcobrar As Odata Of 'd:\capass\database\data.prg'
 	If goApp.Cdatos = 'S' Then
 	   \And b.rcre_codt=<<goApp.Tienda>>
 	Endif
-	\Group By Ncontrol,rcre_idrc) As xx
+	\Group By Ncontrol,rcre_idrc HAVING saldo<>0) As xx
 	\   INNER Join fe_rcred As b On b.rcre_idrc=xx.rcre_idrc
 	\   INNER Join fe_cred As e On e.idcred=xx.Ncontrol
 	\   INNER Join fe_vend As d On(d.idven=b.rcre_codv)

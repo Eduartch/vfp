@@ -36,6 +36,7 @@ Define Class Correlativo As Odata Of 'd:\capass\database\data.prg'
 	Endfunc
 	Function ValidarSerie(Cserie, nidtda, cTdoc)
 	Local lC, Vdvto
+
 	Vdvto = 1
 	For x = 1 To Len(Cserie)
 		cvalor = Substr(Cserie, x, 1)
@@ -43,7 +44,7 @@ Define Class Correlativo As Odata Of 'd:\capass\database\data.prg'
 			Vdvto = 0
 			Exit
 		Endif
-	Next
+	NEXT
 	If Vdvto = 0 Then
 		This.Cmensaje = 'Formato de Serie no Válido'
 		Return 0
@@ -64,10 +65,11 @@ Define Class Correlativo As Odata Of 'd:\capass\database\data.prg'
 		Return 0
 	Endif
 	Select (Ccursor)
-	If Serie > 0 Then
+	numserie=IIF(VARTYPE(Serie)='C',VAL(Serie),serie)
+	If numserie > 0 Then
 		Return 1
 	Else
-		This.Cmensaje = 'La Serie '+ALLTRIM(STR(lista.nserie))+ 'No Pertenece a esta Punto de Venta '+ALLTRIM(STR(m.nidtda))
+		This.Cmensaje = 'La Serie '+ALLTRIM(STR(lista.nserie))+ 'NO Pertenece a esta Punto de Venta '+ALLTRIM(STR(m.nidtda))
 		Return 0
 	Endif
 	Endfunc

@@ -5,9 +5,9 @@ Define Class bajas As Odata Of 'd:\capass\database\data.prg'
 	Function consultarbaja(cticket, odcto)
 	Local lC, lcr
 	np3		= "0 La Comunicación de Baja  ha sido aceptado desde APISUNAT"
-	Text To lcr Noshow Textmerge
+	TEXT To lcr Noshow Textmerge
         UPDATE fe_bajas SET baja_mens='<<np3>>' WHERE baja_tick='<<cticket>>';
-	Endtext
+	ENDTEXT
 	Sw	 = 1
 	np1	  = odcto.Idauto
 	odvto = This.ConsultaApisunat(odcto.Tdoc, odcto.Serie, Alltrim(odcto.nume), odcto.fech, Alltrim(Str(odcto.Impo, 12, 2)))
@@ -32,9 +32,16 @@ Define Class bajas As Odata Of 'd:\capass\database\data.prg'
 				This.Cmensaje = mensajeError
 				Return 0
 			Endif
-		Case Lower(odcto.Proc) = 'rnrodi' 
+		Case Lower(odcto.Proc) = 'rnrodi'
 			Set Procedure To (goApp.Proc) Additive
 			If AnulaTransaccionRodi('', '', 'V', odcto.Idauto, odcto.Idusua, 'S', Ctod(odcto.fech), goApp.uauto, goApp.Tienda) = 0 Then
+				Messagebox("NO Se Anulo Correctamente de la Base de Datos", 16, MSGTITULO)
+				Sw = 0
+				Exit
+			Endif
+		Case Lower(odcto.Proc) = 'rnss'
+			Set Procedure To (goApp.Proc) Additive
+			If AnulaTransaccionN('', '','V', NAuto, odcto.Idauto, 'S', Ctod(odcto.fech), goApp.uauto) = 0 Then
 				Messagebox("NO Se Anulo Correctamente de la Base de Datos", 16, MSGTITULO)
 				Sw = 0
 				Exit
@@ -71,7 +78,7 @@ Define Class bajas As Odata Of 'd:\capass\database\data.prg'
 	Else
 		Cruc = Oempresa.nruc
 	Endif
-	Text To cdata Noshow Textmerge
+	TEXT To cdata Noshow Textmerge
 	{
 	"ruc":"<<cruc>>",
 	"tdoc":"<<ctdoc>>",
@@ -80,7 +87,7 @@ Define Class bajas As Odata Of 'd:\capass\database\data.prg'
 	"cfecha":"<<dfecha>>",
 	"cimporte":"<<nimpo>>"
 	}
-	Endtext
+	ENDTEXT
 	oHTTP = Createobject("MSXML2.XMLHTTP")
 	oHTTP.Open("post", pURL_WSDL, .F.)
 	oHTTP.setRequestHeader("Content-Type", "application/json")
@@ -109,9 +116,9 @@ Define Class bajas As Odata Of 'd:\capass\database\data.prg'
 	Endfunc
 	Function verificaSiestaAnulada(cndoc, cTdoc)
 	Local lC
-	Text To lC Noshow Textmerge
+	TEXT To lC Noshow Textmerge
      select  COUNT(*) as idauto from fe_rcom where ndoc='<<cndoc>>' and tdoc='<<ctdoc>>' and impo=0 and idcliente>0 and acti='A' group by ndoc limit 1
-	Endtext
+	ENDTEXT
 	If This.EjecutaConsulta(lC, 'anulada') < 1 Then
 		Return 0
 	Endif

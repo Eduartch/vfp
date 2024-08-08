@@ -17,13 +17,13 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Endif
 	Endif
 	NAuto = IngresaResumenTraspasos(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-		fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0)
+		  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0)
 	If NAuto < 1 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
 	nidg = This.IngresaGuiasXTraspaso(This.Fecha, This.ptop, This.ptoll, NAuto, This.fechat, ;
-		goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
+		  goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
 	If nidg < 1 Then
 		This.DEshacerCambios()
 		Return 0
@@ -70,7 +70,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Endif
 	Endif
 	If ActualizaResumenTraspasos(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-			fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P', This.Idauto) = 0 Then
+			  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P', This.Idauto) = 0 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
@@ -80,7 +80,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	Endif
 
 	nidg = This.IngresaGuiasXTraspaso(This.Fecha, This.ptop, This.ptoll, This.Idauto, This.fechat, ;
-		goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
+		  goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
 	If nidg = 0 Then
 		This.DEshacerCambios()
 		Return 0
@@ -122,9 +122,9 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	goApp.npara8  = np8
 	goApp.npara9  = np9
 	goApp.npara10 = np10
-	TEXT To lp Noshow
+	Text To lp Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?this.ubigeocliente)
-	ENDTEXT
+	Endtext
 	nidg = This.EJECUTARf(lC, lp, cur)
 	If nidg < 1 Then
 		Return 0
@@ -226,13 +226,13 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	NAuto = IngresaResumenTraspasos(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-		fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0)
+		  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0)
 	If NAuto <= 0 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
 	nidg = This.IngresaGuiasXTraspaso(This.Fecha, This.ptop, This.ptoll, NAuto, This.fechat, ;
-		goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
+		  goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
 	If nidg = 0 Then
 		This.DEshacerCambios()
 		Return 0
@@ -303,7 +303,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Endif
 	Endif
 	If This.ActualizaResumenTraspasos(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-			fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P', This.Idauto) < 1 Then
+			  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P', This.Idauto) < 1 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
@@ -313,7 +313,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	Endif
 
 	nidg = This.IngresaGuiasXTraspaso(This.Fecha, This.ptop, This.ptoll, This.Idauto, This.fechat, ;
-		goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
+		  goApp.nidusua, This.Detalle, This.Idtransportista, This.Ndoc, goApp.Tienda)
 	If nidg < 1 Then
 		This.DEshacerCambios()
 		Return 0
@@ -364,7 +364,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	Endfunc
 	Function listarguiatraspasorodi(nids, Calias)
 	Set DataSession To This.Idsesion
-	TEXT To lC Noshow Textmerge
+	Text To lC Noshow Textmerge
 	   select  guia_ndoc as ndoc,guia_fech as fech,guia_fect as fechat,
 	   a.descri,a.unid,k.cant,a.peso,g.guia_ptoll,g.guia_ptop as ptop,
 	   k.idart as coda,k.prec,k.idkar,g.guia_idtr,ifnull(placa,'') as placa,ifnull(t.razon,'') as razont,
@@ -379,7 +379,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	   inner join fe_kar as k on k.idauto=r.idauto
 	   inner join fe_art as a on a.idart=k.idart
 	   left join fe_tra as t on t.idtra=g.guia_idtr,fe_gene as v where guia_idgui=<<nids>> and tipo='V' and k.acti='A'
-	ENDTEXT
+	Endtext
 	If This.EjecutaConsulta(lC, Calias) < 1 Then
 		Return 0
 	Endif
@@ -413,10 +413,10 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	goApp.npara24 = np24
 	goApp.npara25 = np25
 	goApp.npara26 = np26
-	TEXT To lp Noshow
+	Text To lp Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12,?goapp.npara13,?goapp.npara14,?goapp.npara15,?goapp.npara16,?goapp.npara17,
       ?goapp.npara18,?goapp.npara19,?goapp.npara20,?goapp.npara21,?goapp.npara22,?goapp.npara23,?goapp.npara24,?goapp.npara25,?goapp.npara26)
-	ENDTEXT
+	Endtext
 	If This.EJECUTARP(lC, lp, "") < 1 Then
 		Return 0
 	Endif
@@ -443,25 +443,25 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		If goApp.Tiponegocio = 'D' Then
 			dfv = Ctod("01/01/0001")
 			nidkar = IngresaKardexFl(NAuto, tmpv.coda, 'V', tmpv.Prec, tmpv.cant, 'I', 'K', 0, This.sucursal1, 0, 0, tmpv.equi, ;
-				tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo, fe_gene.igv, Iif(Empty(tmpv.Fechavto), dfv, tmpv.Fechavto), tmpv.nlote)
+				  tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo, fe_gene.igv, Iif(Empty(tmpv.Fechavto), dfv, tmpv.Fechavto), tmpv.nlote)
 			If nidkar = 0
 				Sw = 0
 				Exit
 			Endif
 			If IngresaKardexFl(NAuto, tmpv.coda, 'C', tmpv.Prec, tmpv.cant, 'I', 'K', 0, This.sucursal2, 0, 0, tmpv.equi, ;
-					tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo, fe_gene.igv, Iif(Empty(tmpv.Fechavto), dfv, tmpv.Fechavto), tmpv.nlote) = 0
+					  tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo, fe_gene.igv, Iif(Empty(tmpv.Fechavto), dfv, tmpv.Fechavto), tmpv.nlote) = 0
 				Sw = 0
 				Exit
 			Endif
 		Else
 			nidkar = INGRESAKARDEXUAl(NAuto, tmpv.coda, 'V', tmpv.Prec, tmpv.cant, 'I', 'K', 0, This.sucursal1, 0, 0, tmpv.equi, ;
-				tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo / fe_gene.igv, fe_gene.igv)
+				  tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo / fe_gene.igv, fe_gene.igv)
 			If nidkar = 0 Then
 				Sw = 0
 				Exit
 			Endif
 			If INGRESAKARDEXUAl(NAuto, tmpv.coda, 'C', tmpv.Prec, tmpv.cant, 'I', 'K', 0, This.sucursal2, 0, 0, tmpv.equi, ;
-					tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo / fe_gene.igv, fe_gene.igv) = 0 Then
+					  tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo / fe_gene.igv, fe_gene.igv) = 0 Then
 				Sw = 0
 				Exit
 			Endif
@@ -503,7 +503,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	If ActualizaResumenDcto(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.sucursal2, 'S', ;
-			fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, This.Tienda, 0, 0, 0, 0, 0, This.Idauto) = 0 Then
+			  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, This.Tienda, 0, 0, 0, 0, 0, This.Idauto) = 0 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
@@ -555,7 +555,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 				Exit
 			Endif
 			If INGRESAKARDEXUAl(This.Idauto, tmpv.coda, 'C', tmpv.Prec, tmpv.cant, 'I', 'K', 0, This.sucursal2, 0, 0, ;
-					tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo / fe_gene.igv, fe_gene.igv) = 0 Then
+					  tmpv.Unid, tmpv.idepta, tmpv.pos, tmpv.costo / fe_gene.igv, fe_gene.igv) = 0 Then
 				Sw = 0
 				Exit
 			Endif
@@ -592,7 +592,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	Endif
 	If This.Encontrado = 'V' Then
 		If ActualizaResumenDcto(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.sucursal1, 'S', ;
-				fe_gene.dola, fe_gene.igv, 'T', 0, 'C', goApp.nidusua, 1, This.Tienda, 0, 0, 0, 0, 0, This.Idauto) = 0 Then
+				  fe_gene.dola, fe_gene.igv, 'T', 0, 'C', goApp.nidusua, 1, This.Tienda, 0, 0, 0, 0, 0, This.Idauto) = 0 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
@@ -642,7 +642,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	NAuto = IngresaTraspasoAlmacenEnviado(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-		fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
+		  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
 	If NAuto < 1 Then
 		This.DEshacerCambios()
 		Return 0
@@ -713,9 +713,9 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	goApp.npara10 = This.sucursal1
 	goApp.npara11 = This.sucursal2
 	goApp.npara12 = 0
-	TEXT To lp Noshow
+	Text To lp Noshow
      (?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,?goapp.npara10,?goapp.npara11,?goapp.npara12)
-	ENDTEXT
+	Endtext
 	nidkar = This.EJECUTARf(lC, lp, "trasp")
 	If nidkar < 1 Then
 		Return 0
@@ -731,6 +731,10 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	Endif
 	This.Cmensaje = ""
 	Do Case
+	Case This.sucursal2 = 0
+		This.Cmensaje = "Ingrese el Ingreso"
+	Case This.sucursal1 = 0
+		This.Cmensaje = "Ingrese la Salida"
 	Case This.Encontrado = "V"
 		This.Cmensaje = "No Es Posible Actualizar Este Documento"
 	Case This.sinstock = "S"
@@ -739,6 +743,10 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		This.Cmensaje = "Ingrese Los Productos"
 	Case This.sucursal1 = This.sucursal2
 		This.Cmensaje = "Seleccione Otro Almacen"
+	Case Len(Alltrim(This.ptop)) = 0
+		This.Cmensaje = "Ingrese el Punto de Partida"
+	Case Len(Alltrim(This.ptoll)) = 0
+		This.Cmensaje = "Ingrese el Punto de Llegada"
 	Case (Month(This.Fecha) <> goApp.mes Or Year(This.Fecha) <> Val(goApp.año)) And This.fechaautorizada = 0	And This.Fecha <= fe_gene.fech
 		This.Cmensaje = "Ingrese Una Fecha Permitida Por el Sistema"
 	Endcase
@@ -753,13 +761,14 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	Set Classlib To 'd:\librerias\clasesvisuales' Additive
-	Set Procedure To rnFTR Additive
+	cproc='rnftr'
+	Set Procedure To (cproc)  Additive
 	ovstock = Createobject("verificastockproducto")
 	If This.IniciaTransaccion() < 1
 		Return 0
 	Endif
 	NAuto = IngresaResumenTraspasosNorplast(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-		fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
+		  fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
 	If NAuto < 1 Then
 		This.DEshacerCambios()
 		Return 0
@@ -825,8 +834,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	If This.IniciaTransaccion() < 1 Then
 		Return 0
 	Endif
-	NAuto = IngresaResumenTraspasosNorplast(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', ;
-		fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
+	NAuto = IngresaResumenTraspasosNorplast(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, This.Ndo2, 'S', fe_gene.dola, fe_gene.igv, 'T', 0, 'V', goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0, 'P')
 	If NAuto < 1 Then
 		This.DEshacerCambios()
 		Return 0
@@ -842,7 +850,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 	Go Top
 	Do While !Eof()
 		cdescri = tmpv.Desc
-		If ovstock.Ejecutar(tmpv.coda, tmpv.cant, This.sucursal1) <= 0 Then
+		If ovstock.Ejecutar(tmpv.coda, tmpv.cant, This.sucursal1) < 1 Then
 			Cmensaje = "Stock no Disponible"
 			Sw = 0
 			Exit
@@ -896,12 +904,12 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 *!*			Endif
 *!*		Endif
 	NAuto = IngresaResumenTraspasos(This.Tdoc, 'E', This.Ndoc, This.Fecha, This.Fecha, This.Detalle, 0, 0, 0, "", 'S', ;
-		fe_gene.dola, fe_gene.igv, ctipo, 0, ctipo , goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0)
+		  fe_gene.dola, fe_gene.igv, ctipo, 0, ctipo, goApp.nidusua, 1, goApp.Tienda, 0, 0, 0, 0, 0)
 	If NAuto < 1 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
-	If This.GrabardetallesalidaTransormados(NAuto,ctipo) < 1 Then
+	If This.GrabardetallesalidaTransormados(NAuto, ctipo) < 1 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
@@ -915,12 +923,12 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Return 0
 	Endif
 	Endfunc
-	Function GrabardetallesalidaTransormados(NAuto,ctipox)
+	Function GrabardetallesalidaTransormados(NAuto, ctipox)
 	Select tmpv
 	Go Top
 	Sw = 1
 	Do While !Eof()
-		If ctipox='V' Then
+		If ctipox = 'V' Then
 			If DevuelveStocks1(tmpv.coda, This.sucursal1, "St") < 1 Then
 				Sw = 0
 				This.Cmensaje = 'Al Obtener Stock'
@@ -932,7 +940,7 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 				Exit
 			Endif
 		Endif
-		nidk = INGRESAKARDEX1(NAuto, tmpv.coda,ctipox, tmpv.Prec, tmpv.cant, 'I','K', 0, This.sucursal1,tmpv.costo,  0)
+		nidk = INGRESAKARDEX1(NAuto, tmpv.coda, ctipox, tmpv.Prec, tmpv.cant, 'I', 'K', 0, This.sucursal1, tmpv.costo,  0)
 		If nidk = 0 Then
 			Sw = 0
 			This.Cmensaje = 'Al Obtener ID del Kardex'
@@ -947,19 +955,36 @@ Define Class guiaremisionxtraspaso As GuiaRemision Of 'd:\capass\modelos\guiasre
 		Skip
 	Enddo
 	Return Sw
-	ENDFUNC
+	Endfunc
 	Function validarguia1()
 	Do Case
-	Case  !esfechavalida(this.fecha)
+	Case  !esfechaValida(This.Fecha)
 		This.Cmensaje = "Fecha No Válida"
 		Return 0
-	Case  LEN(ALLTRIM(this.detalle))=0
+	Case  Len(Alltrim(This.Detalle)) = 0
 		This.Cmensaje = "Ingrese una Referencia para esté Registro"
-		Return 0	
+		Return 0
 	Endcase
 	Return 1
 	Endfunc
+	Function verificarsitraspasoestarecibido(nid)
+	Ccursor = 'c_' + Sys(2015)
+	Text To lC Noshow Textmerge
+    SELECT idauto FROM fe_rcom WHERE idauto=<<nid>> AND rcom_reci='E' AND acti='A'
+	Endtext
+	If This.EjecutaConsulta(lC, Ccursor) < 1 Then
+		Return 0
+	Endif
+	Select (Ccursor)
+	If Idauto > 0 Then
+		This.Cmensaje = "Traspaso Ya Registrado!!!!"
+		Return 0
+	Endif
+	Return 1
+	Endfunc
 Enddefine
+
+
 
 
 

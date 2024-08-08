@@ -483,6 +483,15 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	goApp.datosg=""
 	dATOSGLOBALES()
 	NAuto=0
+	If This.Tdoc='01' Or This.Tdoc='03' Then
+		nidcta1=fe_gene.idctav
+		nidcta2=fe_gene.idctai
+		nidcta3=fe_gene.idctat
+	Else
+		nidcta1=0
+		nidcta2=0
+		nidcta3=0
+	Endif
 	If This.Etarjeta>0 Then
 		necaja=This.Monto-This.Etarjeta
 	Else
@@ -492,38 +501,39 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Set Filter To coda<>0
 	Go Top
 	calma=tmpv.Isla
+	ncodt=goApp.Isla
 	Set Procedure To CapaDatos,rngrifo,ple5 Additive
 	If This.IniciaTransaccion()<1 Then
 		Return 0
 	Endif
 	If goApp.ConectaControlador='Y' Then
-        Nauto=this.IngresaDocumentoElectronicoy()
+	
 	Else
-		NAuto=IngresaDocumentoElectronico(This.Tdoc,This.formaPago,This.Serie+This.numero,This.Fecha,This.Detalle,This.valor,This.igv,This.Monto,This.nroguia,This.Moneda,This.ndolar,fe_gene.igv,'k',This.Codigo,goApp.IDturno,goApp.nidusua,This.codt,this.cta1,this.cta2,this.cta3,This.gratuita,This.idlectura,This.exonerado,This.Tdscto)
+		NAuto=IngresaDocumentoElectronico(This.Tdoc,This.formaPago,This.Serie+This.numero,This.Fecha,This.Detalle,This.valor,This.igv,This.Monto,This.nroguia,This.Moneda,This.ndolar,fe_gene.igv,'k',this.Codigo,goApp.IDturno,goApp.nidusua,ncodt,nidcta1,nidcta2,nidcta3,This.gratuita,This.idlectura,This.exonerado,This.Tdscto)
 	Endif
-	If NAuto < 1 Then
+	If NAuto<=0 Then
 		This.DEshacerCambios()
 		Return 0
 	Endif
 	If This.Tdscto>0 Then
-		If IngresaDatosLCajaEFectivoCturnos30(This.Fecha,"",This.razon,This.cta3,necaja,0,'S',fe_gene.dola,goApp.nidusua,This.Codigo,NAuto,Left(This.formaPago,1),This.Serie+This.numero,This.Tdoc,This.codt,goApp.IDturno,This.Tdscto,This.Creferencia,This.Ctarjeta,This.CtarjetaBanco,This.idlectura)=0 Then
+		If IngresaDatosLCajaEFectivoCturnos30(This.Fecha,"",This.razon,nidcta3,necaja,0,'S',fe_gene.dola,goApp.nidusua,This.Codigo,NAuto,Left(This.formaPago,1),This.Serie+This.numero,This.Tdoc,ncodt,goApp.IDturno,This.Tdscto,This.Creferencia,This.Ctarjeta,This.CtarjetaBanco,This.idlectura)=0 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
 	Else
-		If IngresaDatosLCajaEFectivoCturnosTarjetas30(This.Fecha,"",This.razon,This.cta3,necaja,0,'S',fe_gene.dola,goApp.nidusua,This.Codigo,NAuto,Left(This.formaPago,1),This.Serie+This.numero,This.Tdoc,This.codt,goApp.IDturno,This.Creferencia,This.Ctarjeta,This.CtarjetaBanco,This.idlectura)=0 Then
+		If IngresaDatosLCajaEFectivoCturnosTarjetas30(This.Fecha,"",This.razon,nidcta3,necaja,0,'S',fe_gene.dola,goApp.nidusua,This.Codigo,NAuto,Left(This.formaPago,1),This.Serie+This.numero,This.Tdoc,ncodt,goApp.IDturno,This.Creferencia,This.Ctarjeta,This.CtarjetaBanco,This.idlectura)=0 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
 	Endif
 	If This.Etarjeta>0 Then
-		If IngresaDatosLCajaEFectivoCturnos31(This.Fecha,"",This.razon,This.cta3,This.Etarjeta,0,'S',fe_gene.dola,goApp.nidusua,This.Codigo,NAuto,'E',This.Serie+This.numero,This.Tdoc,This.codt,goApp.IDturno,This.idlectura)=0 Then
+		If IngresaDatosLCajaEFectivoCturnos31(This.Fecha,"",This.razon,nidcta3,This.Etarjeta,0,'S',fe_gene.dola,goApp.nidusua,This.Codigo,NAuto,'E',This.Serie+This.numero,This.Tdoc,ncodt,goApp.IDturno,This.idlectura)=0 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
 	Endif
 	If Left(This.formaPago,1)="C" Or Left(This.formaPago,1)="D" Or Left(This.formaPago,1)='A' Then
-		If This.grabacreditos(NAuto)<1 Then
+		If This.grabacreditos()=0 Then
 			This.DEshacerCambios()
 			Return 0
 		Endif
@@ -547,7 +557,8 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	Go Top
 	Do While !Eof()
 		cdesc=tmpv.Desc
-		If IngresaKardexGrifo(NAuto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',This.vendedor,goApp.Tienda,tmpv.nidcontometro,tmpv.costo/fe_gene.igv,tmpv.pre1)<1
+		calma=tmpv.Isla
+		If IngresaKardexGrifo(NAuto,tmpv.coda,'V',tmpv.Prec,tmpv.cant,'I','K',this.vendedor,goApp.Tienda,tmpv.nidcontometro,tmpv.costo/fe_gene.igv,tmpv.pre1)<1
 			swk=0
 			Cmensaje="El Item:"+Alltrim(cdesc)+" NO Tiene Stock Disponible Para Venta O no se ha fijado El valor del Contometro"
 			This.Cmensaje=Cmensaje
@@ -576,95 +587,46 @@ Define Class ventasgrifos As Ventas  Of 'd:\capass\modelos\ventas.prg'
 	If This.GRabarCambios()<1  Then
 		Return 0
 	Endif
-	Return NAuto
+	Return This.NAuto
 	Endfunc
 	Function IngresaDocumentoElectronicoy()
 	lC='FuningresaDocumentoElectronicoy'
 	cur="Xn"
-	goApp.npara1=This.Tdoc
-	goApp.npara2=This.formapago
-	goApp.npara3=This.Serie+This.numero
-	goApp.npara4=This.Fecha
-	goApp.npara5=This.Detalle
-	goApp.npara6=This.valor
-	goApp.npara7=This.igv
-	goApp.npara8=This.Monto
+	goApp.npara1=this.tdoc
+	goApp.npara2=this.formpago
+	goApp.npara3=this.serie+this.numero
+	goApp.npara4=this.fecha
+	goApp.npara5=this.detalle
+	goApp.npara6=this.valor
+	goApp.npara7=this.igv
+	goApp.npara8=this.monto
 	goApp.npara9=""
-	goApp.npara10=This.Moneda
-	goApp.npara11=This.ndolar
+	goApp.npara10=this.moneda
+	goApp.npara11=this.ndolar
 	goApp.npara12=fe_gene.igv
 	goApp.npara13='k'
-	goApp.npara14=This.Codigo
-	goApp.npara15=goApp.IDturno
-	goApp.npara16=goApp.nidusua
-	goApp.npara17=This.codt
-	goApp.npara18=This.cta1
-	goApp.npara19=This.cta2
-	goApp.npara20=This.cta3
-	goApp.npara21=This.gratuita
-	goApp.npara22=This.idlectura
-	goApp.npara23=This.exonerado
-	goApp.npara24=This.Tdscto
-	goApp.npara25=This.foperacion
-	TEXT to lp NOSHOW
+	goApp.npara14=this.codigo
+	goApp.npara15=goapp.idturno
+	goApp.npara16=goapp.nidusua
+	goApp.npara17=this.codt
+	goApp.npara18=this.cta1
+	goApp.npara19=this.cta2
+	goApp.npara20=this.cta3
+	goApp.npara21=this.tgratuita
+	goApp.npara22=this.idlectura
+	goApp.npara23=this.exonerada
+	goApp.npara24=this.tdscto
+	goApp.npara25=this.foperacion
+	TEXT to lp NOSHOW 
 	(?goapp.npara1,?goapp.npara2,?goapp.npara3,?goapp.npara4,?goapp.npara5,?goapp.npara6,?goapp.npara7,?goapp.npara8,?goapp.npara9,
 	?goapp.npara10,?goapp.npara11,?goapp.npara12,?goapp.npara13,?goapp.npara14,?goapp.npara15,?goapp.npara16,?goapp.npara17,
-	?goapp.npara18,?goapp.npara19,?goapp.npara20,?goapp.npara21,?goapp.npara22,?goapp.npara23,?goapp.npara24,?goapp.npara25)
+	?goapp.npara18,?goapp.npara19,?goapp.npara20,?goapp.npara21,?goapp.npara22,?goapp.npara23,?goapp.npara24,?,?goapp.npara25)
 	ENDTEXT
 	nid=This.EJECUTARF(lC,lp,cur)
 	If nid<1 Then
 		Return 0
-	ENDIF 
-	Return nid
-	Endfunc
-	Function grabacreditos(nauto)
-	Set Procedure To d:\capass\modelos\ctasxcobrar Additive
-    ocreditos= Createobject("ctasporcobrar")
-	nimpo=this.monto-this.nacta
-	idcredito=ocreditos.IngresaCreditosNormal(NAuto,this.Codigo,this.serie+this.numero,'C','S',"VENTA AL CREDITO",this.Fecha,this.Fechavto ,Left(this.tipodcto ,1),this.serie+this.numero,nimpo,0,this.vendedor,This.monto,goApp.nidusua,this.codt,Id())
-	If idcredito<1 Then
-		Return 0
-	Endif
-	If LEFT(This.Formapago,1)='A' Then
-		x=1
-		If ocreditos.consultaranticipos(This.Codigo,'lanti')<1 Then
-			Return 0
-		Endif
-		If regdvto('lanti')>0 Then
-			nidrc=DevuelveIdCtrlCredito(idcredito)
-			If nidrc<1 Then
-				Return 0
-			Endif
-			Select * From lanti Into Cursor lanti Readwrite
-			Select lanti
-			Go Top
-			Scan All
-				If nimpo<=lanti.acta Then
-					nacta=nimpo
-				Else
-					nacta=lanti.acta
-				Endif
-				If ocreditos.CancelaCreditosanticipos(this.serie+this.numero,nacta,'P','S','Aplicado con Anticipo '+Alltrim(Str(lanti.acta,12,2)),This.Fecha,This.Fecha,Left(this.tipodcto ,1),idcredito,'',nidrc,Id(),goApp.nidusua,lanti.rcre_idrc)<1
-					x=0
-					Exit
-				Endif
-				nid=lanti.idcred
-				TEXT TO lc noshow
-                     UPDATE fe_cred as f SET acta=f.acta-?nacta WHERE idcred=?nid
-				ENDTEXT
-				If this.ejecutarsql(lC)<1 Then
-					x=0
-					Exit
-				Endif
-				Update lanti Set acta=acta-nacta  Where idcred=nid
-			Endscan
-		Endif
-		If x=0 Then
-			Return 0
-		ENDIF 
-		Return 1
 	Else
-		Return 1
+		Return nid
 	Endif
 	Endfunc
 Enddefine
